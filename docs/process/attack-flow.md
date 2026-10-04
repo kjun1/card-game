@@ -1,34 +1,41 @@
 # Attack Flow
 
+> Formal BPMN 2.0 model: [bpmn/attack-flow.bpmn](bpmn/attack-flow.bpmn)
+
 ## Purpose
 
 Attack ActionのDeclarationからReaction、Block、Combat、Operation完了までを定義する。
 
-## Process
+## Review preview
 
 ~~~mermaid
 flowchart TD
     S[Select Attack Operation] --> D[Declare Attacker and Target]
-    D --> R{Defender uses Reaction?}
+    D --> R[Defender chooses Reaction or decline]
+    R --> G{Use Reaction?}
 
-    R -- Yes --> RR[Resolve Reaction]
+    G -- Yes --> RC[Pay Reaction Cost]
+    RC --> RR[Resolve Reaction]
     RR --> X[Cancel Attack]
-    X --> O[Return to Operation Selection]
+    X --> O([Operation Not Complete / Reselect])
 
-    R -- No --> B{Use Block Ability?}
-    B -- Yes --> BC[Select Blocking Unit and Pay Cost]
-    BC --> BT[Change Final Target to Blocking Unit]
+    G -- No --> B[Defender chooses Block or no Block]
+    B --> BG{Use Block Ability?}
+    BG -- Yes --> BC[Select Blocking Unit and Pay Cost]
+    BC --> BT[Change Final Target]
     BT --> C[Attack Commit]
 
-    B -- No --> C
+    BG -- No --> C
     C --> E[Exhaust Attacker]
     E --> T{Final Target}
     T -- Core --> CD[Deal ATK Damage to Core]
     T -- Unit --> UD[Deal simultaneous ATK Damage]
-    CD --> V[Check Victory]
     UD --> K[Destroy Units with Current HP <= 0]
+    CD --> V[Evaluate Game End]
     K --> V
-    V --> F([Operation Complete])
+    V --> F{Game Ended?}
+    F -- Yes --> GE([Game End])
+    F -- No --> OC([Operation Complete])
 ~~~
 
 ## Attack declaration

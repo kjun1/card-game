@@ -9,6 +9,11 @@ docs/
 │  ├─ interaction-requirements.md
 │  └─ play-experience-requirements.md
 ├─ process/
+│  ├─ bpmn/
+│  │  ├─ game-flow.bpmn
+│  │  ├─ turn-flow.bpmn
+│  │  ├─ action-reaction-flow.bpmn
+│  │  └─ attack-flow.bpmn
 │  ├─ game-flow.md
 │  ├─ turn-flow.md
 │  ├─ action-reaction-flow.md
@@ -49,6 +54,12 @@ Model
 Card / Balance Design
 ~~~
 
+## Process notation
+
+`docs/process/bpmn/*.bpmn` をBPMN 2.0の機械可読なProcess正本とする。
+
+各 `docs/process/*.md` のMermaid図はレビュー用プレビューであり、説明・ルール参照と併用する。
+
 ## Requirements
 - [Game requirements](requirements/game-requirements.md)
 - [Interaction requirements](requirements/interaction-requirements.md)
@@ -59,8 +70,7 @@ Card / Balance Design
 - [Turn flow](process/turn-flow.md)
 - [Action / Reaction flow](process/action-reaction-flow.md)
 - [Attack flow](process/attack-flow.md)
-
-Process文書ではBPMNの考え方に合わせてParticipant / Task / Gateway / Eventを明示し、図はGitHub上で読めるようMermaidで表現する。
+- [BPMN 2.0 models](process/bpmn/README.md)
 
 ## Rules
 - [Core rules](rules/core-rules.md)
@@ -80,7 +90,7 @@ Process文書ではBPMNの考え方に合わせてParticipant / Task / Gateway /
 ## Change policy
 
 - 要求変更はrequirementsから反映する。
-- 処理順変更はprocessとrulesを整合させる。
+- 処理順変更はBPMNとprocess Markdownを更新し、rulesとの整合性を確認する。
 - 用語、責任、状態構造変更はmodelを更新する。
 - 数値やCard Pool方式など実現方式の変更はdesignからrulesへの影響を確認する。
 - 検討経緯や未決事項はGitHub Issuesへ分離する。

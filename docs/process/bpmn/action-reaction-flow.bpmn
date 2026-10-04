@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  id="Definitions_ActionReaction"
+  targetNamespace="https://github.com/kjun1/card-game/bpmn">
+
+  <bpmn:collaboration id="Collaboration_ActionReaction">
+    <bpmn:participant id="Participant_ActionReaction" name="Action / Reaction" processRef="Process_ActionReaction"/>
+  </bpmn:collaboration>
+
+  <bpmn:process id="Process_ActionReaction" name="Action / Reaction Flow" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_ActionReaction">
+      <bpmn:lane id="Lane_AR_Active" name="Active Player">
+        <bpmn:flowNodeRef>Task_DeclareAction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_PayActionCost</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_AR_Opponent" name="Opponent">
+        <bpmn:flowNodeRef>Task_ChooseReaction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_PayReactionCost</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_AR_System" name="Game System">
+        <bpmn:flowNodeRef>Start_OperationSelected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_IsAction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ResolveImmediate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_UsesReaction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ResolveReaction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CancelAction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ResolveAction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_OperationComplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_OperationNotComplete</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="Start_OperationSelected" name="Operation Selected"/>
+    <bpmn:exclusiveGateway id="Gateway_IsAction" name="Is Action?"/>
+    <bpmn:task id="Task_ResolveImmediate" name="Resolve Non-Action Operation"/>
+    <bpmn:userTask id="Task_DeclareAction" name="Declare Action and Required Choices"/>
+    <bpmn:userTask id="Task_ChooseReaction" name="Choose Reaction or Decline"/>
+    <bpmn:exclusiveGateway id="Gateway_UsesReaction" name="Use Reaction?"/>
+    <bpmn:userTask id="Task_PayReactionCost" name="Pay Reaction Cost"/>
+    <bpmn:serviceTask id="Task_ResolveReaction" name="Resolve Reaction"/>
+    <bpmn:serviceTask id="Task_CancelAction" name="Cancel Declared Action"/>
+    <bpmn:userTask id="Task_PayActionCost" name="Pay Action Cost"/>
+    <bpmn:serviceTask id="Task_ResolveAction" name="Resolve Action"/>
+    <bpmn:endEvent id="End_OperationComplete" name="Operation Complete"/>
+    <bpmn:endEvent id="End_OperationNotComplete" name="Operation Not Complete / Reselect"/>
+
+    <bpmn:sequenceFlow id="AR_01" sourceRef="Start_OperationSelected" targetRef="Gateway_IsAction"/>
+    <bpmn:sequenceFlow id="AR_02" name="No" sourceRef="Gateway_IsAction" targetRef="Task_ResolveImmediate">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[not(isAction)]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AR_03" sourceRef="Task_ResolveImmediate" targetRef="End_OperationComplete"/>
+    <bpmn:sequenceFlow id="AR_04" name="Yes" sourceRef="Gateway_IsAction" targetRef="Task_DeclareAction">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[isAction]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AR_05" sourceRef="Task_DeclareAction" targetRef="Task_ChooseReaction"/>
+    <bpmn:sequenceFlow id="AR_06" sourceRef="Task_ChooseReaction" targetRef="Gateway_UsesReaction"/>
+    <bpmn:sequenceFlow id="AR_07" name="Yes" sourceRef="Gateway_UsesReaction" targetRef="Task_PayReactionCost">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[useReaction]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AR_08" sourceRef="Task_PayReactionCost" targetRef="Task_ResolveReaction"/>
+    <bpmn:sequenceFlow id="AR_09" sourceRef="Task_ResolveReaction" targetRef="Task_CancelAction"/>
+    <bpmn:sequenceFlow id="AR_10" sourceRef="Task_CancelAction" targetRef="End_OperationNotComplete"/>
+    <bpmn:sequenceFlow id="AR_11" name="No" sourceRef="Gateway_UsesReaction" targetRef="Task_PayActionCost">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[not(useReaction)]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AR_12" sourceRef="Task_PayActionCost" targetRef="Task_ResolveAction"/>
+    <bpmn:sequenceFlow id="AR_13" sourceRef="Task_ResolveAction" targetRef="End_OperationComplete"/>
+  </bpmn:process>
+</bpmn:definitions>

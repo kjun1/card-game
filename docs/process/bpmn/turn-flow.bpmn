@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  id="Definitions_TurnFlow"
+  targetNamespace="https://github.com/kjun1/card-game/bpmn">
+
+  <bpmn:collaboration id="Collaboration_TurnFlow">
+    <bpmn:participant id="Participant_Turn" name="Turn" processRef="Process_TurnFlow"/>
+  </bpmn:collaboration>
+
+  <bpmn:process id="Process_TurnFlow" name="Turn Flow" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_TurnFlow">
+      <bpmn:lane id="Lane_ActivePlayer" name="Active Player">
+        <bpmn:flowNodeRef>Task_SelectOperation</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_TurnSystem" name="Game System">
+        <bpmn:flowNodeRef>Start_Turn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ReadyUnits</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ClearAttackLock</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_IncreaseCapacity</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_RefreshEnergy</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_CanDraw</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Draw</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_HandLimit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_DiscardDrawn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ExecuteOperation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_OperationCompleted</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Turn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_LoseDeckOut</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="Start_Turn" name="Turn Start / Gain Control"/>
+    <bpmn:serviceTask id="Task_ReadyUnits" name="Ready Active Player Units"/>
+    <bpmn:serviceTask id="Task_ClearAttackLock" name="Clear Deploy Attack Lock"/>
+    <bpmn:serviceTask id="Task_IncreaseCapacity" name="Increase Energy Capacity by 1 (max 7)"/>
+    <bpmn:serviceTask id="Task_RefreshEnergy" name="Refresh Energy to Capacity"/>
+    <bpmn:exclusiveGateway id="Gateway_CanDraw" name="Deck Has Card?"/>
+    <bpmn:serviceTask id="Task_Draw" name="Draw 1 Card"/>
+    <bpmn:exclusiveGateway id="Gateway_HandLimit" name="Hand Exceeds Limit?"/>
+    <bpmn:serviceTask id="Task_DiscardDrawn" name="Discard Just-drawn Card"/>
+    <bpmn:userTask id="Task_SelectOperation" name="Select Operation"/>
+    <bpmn:task id="Task_ExecuteOperation" name="Execute Selected Operation">
+      <bpmn:documentation>Operation may be an Action. If cancelled by Reaction, it is not completed.</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_OperationCompleted" name="Operation Completed?"/>
+    <bpmn:endEvent id="End_Turn" name="Turn End / Transfer Control"/>
+    <bpmn:endEvent id="End_LoseDeckOut" name="Active Player Loses: Deck Out"/>
+
+    <bpmn:sequenceFlow id="TF_01" sourceRef="Start_Turn" targetRef="Task_ReadyUnits"/>
+    <bpmn:sequenceFlow id="TF_02" sourceRef="Task_ReadyUnits" targetRef="Task_ClearAttackLock"/>
+    <bpmn:sequenceFlow id="TF_03" sourceRef="Task_ClearAttackLock" targetRef="Task_IncreaseCapacity"/>
+    <bpmn:sequenceFlow id="TF_04" sourceRef="Task_IncreaseCapacity" targetRef="Task_RefreshEnergy"/>
+    <bpmn:sequenceFlow id="TF_05" sourceRef="Task_RefreshEnergy" targetRef="Gateway_CanDraw"/>
+    <bpmn:sequenceFlow id="TF_06" name="No" sourceRef="Gateway_CanDraw" targetRef="End_LoseDeckOut">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[deckEmpty]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="TF_07" name="Yes" sourceRef="Gateway_CanDraw" targetRef="Task_Draw">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[not(deckEmpty)]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="TF_08" sourceRef="Task_Draw" targetRef="Gateway_HandLimit"/>
+    <bpmn:sequenceFlow id="TF_09" name="Yes" sourceRef="Gateway_HandLimit" targetRef="Task_DiscardDrawn">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[handSize > handLimit]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="TF_10" name="No" sourceRef="Gateway_HandLimit" targetRef="Task_SelectOperation">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[handSize <= handLimit]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="TF_11" sourceRef="Task_DiscardDrawn" targetRef="Task_SelectOperation"/>
+    <bpmn:sequenceFlow id="TF_12" sourceRef="Task_SelectOperation" targetRef="Task_ExecuteOperation"/>
+    <bpmn:sequenceFlow id="TF_13" sourceRef="Task_ExecuteOperation" targetRef="Gateway_OperationCompleted"/>
+    <bpmn:sequenceFlow id="TF_14" name="No / Cancelled" sourceRef="Gateway_OperationCompleted" targetRef="Task_SelectOperation">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[not(operationCompleted)]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="TF_15" name="Yes" sourceRef="Gateway_OperationCompleted" targetRef="End_Turn">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[operationCompleted]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+</bpmn:definitions>

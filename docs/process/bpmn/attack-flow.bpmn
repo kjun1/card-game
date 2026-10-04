@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  id="Definitions_AttackFlow"
+  targetNamespace="https://github.com/kjun1/card-game/bpmn">
+
+  <bpmn:collaboration id="Collaboration_AttackFlow">
+    <bpmn:participant id="Participant_Attack" name="Attack" processRef="Process_AttackFlow"/>
+  </bpmn:collaboration>
+
+  <bpmn:process id="Process_AttackFlow" name="Attack Flow" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_AttackFlow">
+      <bpmn:lane id="Lane_Attacker" name="Attacking Player">
+        <bpmn:flowNodeRef>Start_AttackSelected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_DeclareAttack</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Defender" name="Defending Player">
+        <bpmn:flowNodeRef>Task_ChooseReactionAttack</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_PayAttackReactionCost</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ChooseBlock</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SelectBlockerPayCost</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_AttackSystem" name="Game System">
+        <bpmn:flowNodeRef>Gateway_AttackReaction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ResolveAttackReaction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CancelAttack</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Block</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ChangeFinalTarget</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_AttackCommit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ExhaustAttacker</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_TargetType</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_DamageCore</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_DamageUnits</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_DestroyCheck</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_EvaluateGameEnd</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_GameEndAttack</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_AttackCancelled</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_AttackComplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_GameEnded</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="Start_AttackSelected" name="Attack Operation Selected"/>
+    <bpmn:userTask id="Task_DeclareAttack" name="Declare Attacker and Target"/>
+    <bpmn:userTask id="Task_ChooseReactionAttack" name="Choose Reaction or Decline"/>
+    <bpmn:exclusiveGateway id="Gateway_AttackReaction" name="Use Reaction?"/>
+    <bpmn:userTask id="Task_PayAttackReactionCost" name="Pay Reaction Cost"/>
+    <bpmn:serviceTask id="Task_ResolveAttackReaction" name="Resolve Reaction"/>
+    <bpmn:serviceTask id="Task_CancelAttack" name="Cancel Attack"/>
+    <bpmn:endEvent id="End_AttackCancelled" name="Operation Not Complete / Reselect"/>
+
+    <bpmn:userTask id="Task_ChooseBlock" name="Choose Block or No Block"/>
+    <bpmn:exclusiveGateway id="Gateway_Block" name="Use Block Ability?"/>
+    <bpmn:userTask id="Task_SelectBlockerPayCost" name="Select Blocking Unit and Pay Cost"/>
+    <bpmn:serviceTask id="Task_ChangeFinalTarget" name="Change Final Target to Blocking Unit"/>
+    <bpmn:serviceTask id="Task_AttackCommit" name="Attack Commit"/>
+    <bpmn:serviceTask id="Task_ExhaustAttacker" name="Exhaust Attacker"/>
+    <bpmn:exclusiveGateway id="Gateway_TargetType" name="Final Target Type?"/>
+    <bpmn:serviceTask id="Task_DamageCore" name="Deal Attacker ATK Damage to Core"/>
+    <bpmn:serviceTask id="Task_DamageUnits" name="Deal Simultaneous ATK Damage"/>
+    <bpmn:serviceTask id="Task_DestroyCheck" name="Destroy Units with Current HP <= 0"/>
+    <bpmn:serviceTask id="Task_EvaluateGameEnd" name="Evaluate Win / Lose / Draw"/>
+    <bpmn:exclusiveGateway id="Gateway_GameEndAttack" name="Game Ended?"/>
+    <bpmn:endEvent id="End_AttackComplete" name="Operation Complete"/>
+    <bpmn:endEvent id="End_GameEnded" name="Game End"/>
+
+    <bpmn:sequenceFlow id="AT_01" sourceRef="Start_AttackSelected" targetRef="Task_DeclareAttack"/>
+    <bpmn:sequenceFlow id="AT_02" sourceRef="Task_DeclareAttack" targetRef="Task_ChooseReactionAttack"/>
+    <bpmn:sequenceFlow id="AT_03" sourceRef="Task_ChooseReactionAttack" targetRef="Gateway_AttackReaction"/>
+    <bpmn:sequenceFlow id="AT_04" name="Yes" sourceRef="Gateway_AttackReaction" targetRef="Task_PayAttackReactionCost">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[useReaction]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AT_05" sourceRef="Task_PayAttackReactionCost" targetRef="Task_ResolveAttackReaction"/>
+    <bpmn:sequenceFlow id="AT_06" sourceRef="Task_ResolveAttackReaction" targetRef="Task_CancelAttack"/>
+    <bpmn:sequenceFlow id="AT_07" sourceRef="Task_CancelAttack" targetRef="End_AttackCancelled"/>
+    <bpmn:sequenceFlow id="AT_08" name="No" sourceRef="Gateway_AttackReaction" targetRef="Task_ChooseBlock">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[not(useReaction)]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AT_09" sourceRef="Task_ChooseBlock" targetRef="Gateway_Block"/>
+    <bpmn:sequenceFlow id="AT_10" name="Yes" sourceRef="Gateway_Block" targetRef="Task_SelectBlockerPayCost">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[useBlock]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AT_11" sourceRef="Task_SelectBlockerPayCost" targetRef="Task_ChangeFinalTarget"/>
+    <bpmn:sequenceFlow id="AT_12" sourceRef="Task_ChangeFinalTarget" targetRef="Task_AttackCommit"/>
+    <bpmn:sequenceFlow id="AT_13" name="No" sourceRef="Gateway_Block" targetRef="Task_AttackCommit">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[not(useBlock)]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AT_14" sourceRef="Task_AttackCommit" targetRef="Task_ExhaustAttacker"/>
+    <bpmn:sequenceFlow id="AT_15" sourceRef="Task_ExhaustAttacker" targetRef="Gateway_TargetType"/>
+    <bpmn:sequenceFlow id="AT_16" name="Core" sourceRef="Gateway_TargetType" targetRef="Task_DamageCore">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[finalTargetType = "CORE"]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AT_17" name="Unit" sourceRef="Gateway_TargetType" targetRef="Task_DamageUnits">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[finalTargetType = "UNIT"]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AT_18" sourceRef="Task_DamageUnits" targetRef="Task_DestroyCheck"/>
+    <bpmn:sequenceFlow id="AT_19" sourceRef="Task_DestroyCheck" targetRef="Task_EvaluateGameEnd"/>
+    <bpmn:sequenceFlow id="AT_20" sourceRef="Task_DamageCore" targetRef="Task_EvaluateGameEnd"/>
+    <bpmn:sequenceFlow id="AT_21" sourceRef="Task_EvaluateGameEnd" targetRef="Gateway_GameEndAttack"/>
+    <bpmn:sequenceFlow id="AT_22" name="No" sourceRef="Gateway_GameEndAttack" targetRef="End_AttackComplete">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[not(gameEnded)]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AT_23" name="Yes" sourceRef="Gateway_GameEndAttack" targetRef="End_GameEnded">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[gameEnded]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+</bpmn:definitions>

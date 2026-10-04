@@ -1,5 +1,7 @@
 # Turn Flow
 
+> Formal BPMN 2.0 model: [bpmn/turn-flow.bpmn](bpmn/turn-flow.bpmn)
+
 ## Purpose
 
 Active Playerが制御権を取得してから、1つのOperationが完了しOpponentへ制御権を移すまでを定義する。
@@ -12,24 +14,7 @@ TurnはOperationそのものではない。Turn Start処理とOperation Selectio
 - Opponent
 - Game System
 
-## Process elements
-
-| Element | Type | Responsibility |
-| --- | --- | --- |
-| Turn Start | Start Event | Active Playerが制御権を取得する |
-| Ready Units | Task | Active PlayerのUnitをReadyにする |
-| Clear Deploy Attack Lock | Task | Deploy直後Attack制限を解除する |
-| Increase Capacity | Task | Energy Capacityを+1する。最大7 |
-| Refresh Energy | Task | EnergyをCapacityまで回復する |
-| Draw | Task | 1枚Drawする |
-| Deck Empty? | Exclusive Gateway | Draw可能か判定する |
-| Hand Limit Check | Rule Task | Draw後にHand Limitを超えたか判定する |
-| Select Operation | User Task | Active Playerが主操作を選択する |
-| Execute Operation | Sub-process | 選択したOperationを処理する |
-| Operation Complete? | Exclusive Gateway | 選択Operationが完了したか判定する |
-| Turn End | End Event | Opponentへ制御権を移す |
-
-## Process
+## Review preview
 
 ~~~mermaid
 flowchart TD
@@ -37,11 +22,11 @@ flowchart TD
     R --> L[Clear Deploy Attack Lock]
     L --> U[Increase Energy Capacity by 1 / max 7]
     U --> E[Refresh Energy to Capacity]
-    E --> D[Draw 1]
-    D --> Q{Card available?}
+    E --> Q{Deck has a Card?}
     Q -- No --> X([Active Player Loses])
-    Q -- Yes --> H{Hand exceeds limit?}
-    H -- Yes --> HD[Discard the just-drawn Card]
+    Q -- Yes --> D[Draw 1]
+    D --> H{Hand exceeds limit?}
+    H -- Yes --> HD[Discard just-drawn Card]
     H -- No --> O[Select Operation]
     HD --> O
     O --> P[[Execute Selected Operation]]
@@ -53,7 +38,8 @@ flowchart TD
 ## Semantics
 
 - Turn Start処理はTurnにつき1回だけ行う。
-- Energy CapacityはGame Setup時に2で初期化し、すべてのTurn Startで1増加する。したがって各Playerの最初の自分Turnでは3になる。
+- Energy CapacityはGame Setup時に2で初期化し、すべてのTurn Startで1増加する。
+- EnergyはCapacity増加後にCapacityまで回復する。
 - OperationはActive PlayerがTurn中に選択する主操作である。
 - ActionがReactionでCancelされた場合、そのOperationは完了していないためOperation Selectionへ戻る。
 - この再選択ではTurn Start処理を繰り返さない。

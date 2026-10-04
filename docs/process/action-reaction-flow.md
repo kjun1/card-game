@@ -1,5 +1,7 @@
 # Action / Reaction Flow
 
+> Formal BPMN 2.0 model: [bpmn/action-reaction-flow.bpmn](bpmn/action-reaction-flow.bpmn)
+
 ## Purpose
 
 Actionとして定義されたOperationに対するReaction処理とOperation完了条件を定義する。
@@ -10,23 +12,25 @@ Actionとして定義されたOperationに対するReaction処理とOperation完
 - ActionではないOperationはReactionを挟まず解決する。
 - Reactionを受けたActionは成立しない。
 - Reaction後も同じTurnを継続する。
+- Reactionに対するReactionは発生させない。
 
-## Process
+## Review preview
 
 ~~~mermaid
 flowchart TD
-    S[Select Operation] --> A{Is Action?}
+    S[Operation Selected] --> A{Is Action?}
     A -- No --> N[Resolve Operation]
     N --> C([Operation Complete])
 
     A -- Yes --> D[Declare Action]
-    D --> R{Opponent uses Reaction?}
-    R -- Yes --> RC[Pay Reaction Cost]
+    D --> R[Opponent chooses Reaction or decline]
+    R --> G{Use Reaction?}
+    G -- Yes --> RC[Pay Reaction Cost]
     RC --> RR[Resolve Reaction]
     RR --> X[Cancel Declared Action]
-    X --> S
+    X --> U([Operation Not Complete / Reselect])
 
-    R -- No --> AC[Pay Action Cost]
+    G -- No --> AC[Pay Action Cost]
     AC --> AR[Resolve Action]
     AR --> C
 ~~~
@@ -43,10 +47,4 @@ Reactionが使用された場合:
 - 元Actionの未払いEnergy Costは消費しない。
 - Reactionによる状態変更は巻き戻さない。
 
-## Repetition
-
-Reaction後に新しく宣言されたActionは、新しいReaction Windowを発生させる。
-
-Reaction回数に一律のシステム上限は設けない。
-
-Reactionに対するReactionは発生させない。
+再宣言されたActionは新しいReaction Windowを発生させる。Reaction回数に一律のシステム上限は設けない。
