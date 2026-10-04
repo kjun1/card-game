@@ -4,6 +4,7 @@
     <bpmn:participant id="Participant_Attack" name="Attack" processRef="Process_AttackFlow" />
   </bpmn:collaboration>
   <bpmn:process id="Process_AttackFlow" name="Attack Flow" isExecutable="false">
+    <bpmn:documentation>Common Resolution contract: see ../../model/effect-resolution-model.md. Resolve ordered EffectSteps, checking defeat conditions after each sequential application. Apply an explicit SimultaneousGroup atomically, then check once; do not split it into Player order. When an Effect sequentially applies to both Players, process Active Player first and Opponent only if the Game continues. Do not reorder separate EffectSteps, change targets, or process a Player not affected by that Effect. Draw remains one card at a time under Deck Rules. Fix the first terminal result, stop remaining EffectSteps, and preserve paid costs and applied effects.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_AttackFlow">
       <bpmn:lane id="Lane_Attacker" name="Attacking Player">
         <bpmn:flowNodeRef>Task_DeclareAttack</bpmn:flowNodeRef>
@@ -25,6 +26,8 @@
         <bpmn:flowNodeRef>End_AttackCancelled</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_TargetType</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_DamageCore</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_AttackGameEnded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_AttackGameEnded</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_DamageUnits</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_DestroyCheck</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_AttackComplete</bpmn:flowNodeRef>
@@ -70,7 +73,7 @@
     <bpmn:sequenceFlow id="AT_17" name="Unit" sourceRef="Gateway_TargetType" targetRef="Task_DamageUnits">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">finalTargetType = "UNIT"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="AT_20" sourceRef="Task_DamageCore" targetRef="Task_DestroyCheck" />
+    <bpmn:sequenceFlow id="AT_20" sourceRef="Task_DamageCore" targetRef="Gateway_AttackGameEnded" />
     <bpmn:startEvent id="Start_AttackSelected" name="Attack Operation Selected">
       <bpmn:outgoing>AT_01</bpmn:outgoing>
     </bpmn:startEvent>
@@ -114,15 +117,17 @@
       <bpmn:outgoing>AT_05</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_ResolveAttackReaction" name="Resolve Reaction">
+      <bpmn:documentation>Execute the Reaction Resolution using the common Resolution contract in this Process and ../../model/effect-resolution-model.md. Active Player order for sequential multi-player effects does not depend on Reaction Source ownership. Return the state applied so far and any fixed terminal result.</bpmn:documentation>
       <bpmn:incoming>AT_05</bpmn:incoming>
       <bpmn:outgoing>AT_06</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_CancelAttack" name="Cancel Attack">
+      <bpmn:documentation>Record cancellation of the Attack even when the Reaction has already fixed the Game result. Preserve costs and effects already applied. This reporting adds no gameplay effects and never changes the fixed result; do not proceed to Block or Combat.</bpmn:documentation>
       <bpmn:incoming>AT_06</bpmn:incoming>
       <bpmn:outgoing>AT_07</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="End_AttackCancelled" name="Operation Incomplete">
-      <bpmn:documentation>Return operationCompleted = false and the updated state to turn-flow.bpmn. The declared action was cancelled. Turn Flow decides game end or reselection.</bpmn:documentation>
+      <bpmn:documentation>Return operationCompleted = false and the state applied so far to turn-flow.bpmn. If the Reaction ended the Game, also return gameEnded = true and the already-fixed result; otherwise return gameEnded = false. Turn Flow must not reevaluate the result or reselect after Game end.</bpmn:documentation>
       <bpmn:incoming>AT_07</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:userTask id="Task_ChooseBlock" name="Choose Block or No Block">
@@ -136,20 +141,23 @@
       <bpmn:outgoing>AT_17</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="Task_DamageCore" name="Deal Attacker ATK Damage to Core">
+      <bpmn:documentation>Apply attacker ATK damage to the Core as a sequential EffectStep under the common Resolution contract. If a defeat condition is reached, immediately fix gameEnded and the result. The Attack body has resolved; preserve its existing completion record without later processing or result reevaluation.</bpmn:documentation>
       <bpmn:incoming>AT_16</bpmn:incoming>
       <bpmn:outgoing>AT_20</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_DamageUnits" name="Deal Simultaneous ATK Damage">
+      <bpmn:documentation>Apply both Units' ATK damage as one explicit SimultaneousGroup under ../../model/effect-resolution-model.md, then perform the Destroy Check. Active Player order never divides this simultaneous damage into sequential Player effects.</bpmn:documentation>
       <bpmn:incoming>AT_17</bpmn:incoming>
       <bpmn:outgoing>AT_18</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_DestroyCheck" name="Destroy Units with Current HP &#60;= 0">
-      <bpmn:incoming>AT_20</bpmn:incoming>
+      <bpmn:documentation>Destroy Units whose Current HP is zero or below and move them to their owners' Discards. Current visibility follows ../../model/information-model.md: owners may inspect their Discard contents, opponents may inspect only the count. Past observations of a Public Unit belong to Player knowledge and are not erased by this visibility change.</bpmn:documentation>
+      <bpmn:incoming>AT_34</bpmn:incoming>
       <bpmn:incoming>AT_18</bpmn:incoming>
       <bpmn:outgoing>AT_19</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="End_AttackComplete" name="Attack Resolution End">
-      <bpmn:documentation>Return operationCompleted = true and the updated combat state to turn-flow.bpmn. Do not evaluate game end or transfer control here.</bpmn:documentation>
+      <bpmn:documentation>Return operationCompleted = true, gameEnded = false, and the updated combat state to turn-flow.bpmn. Do not transfer control here.</bpmn:documentation>
       <bpmn:incoming>AT_19</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="AT_18" sourceRef="Task_DamageUnits" targetRef="Task_DestroyCheck" />
@@ -211,6 +219,22 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(blockValid)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="AT_33" sourceRef="Task_PayBlockCost" targetRef="Task_ChangeFinalTarget" />
+    <bpmn:exclusiveGateway id="Gateway_AttackGameEnded" name="Game Ended?">
+      <bpmn:documentation>Use the result fixed at Core damage. Continue only if the Game has not ended.</bpmn:documentation>
+      <bpmn:incoming>AT_20</bpmn:incoming>
+      <bpmn:outgoing>AT_34</bpmn:outgoing>
+      <bpmn:outgoing>AT_35</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_AttackGameEnded" name="Game End Reported">
+      <bpmn:documentation>Return gameEnded = true and the already-fixed result with the state applied so far. The Core attack body is resolved, so retain its existing operationCompleted = true report without applying any later gameplay effect.</bpmn:documentation>
+      <bpmn:incoming>AT_35</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="AT_34" name="No" sourceRef="Gateway_AttackGameEnded" targetRef="Task_DestroyCheck">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(gameEnded)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AT_35" name="Yes" sourceRef="Gateway_AttackGameEnded" targetRef="End_AttackGameEnded">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">gameEnded</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration_AttackFlow">
     <bpmndi:BPMNPlane id="BPMNPlane_Collaboration_AttackFlow" bpmnElement="Collaboration_AttackFlow">
@@ -419,9 +443,8 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AT_20_di" bpmnElement="AT_20">
-        <di:waypoint x="2900" y="810" />
-        <di:waypoint x="3025" y="810" />
-        <di:waypoint x="3025" y="700" />
+        <di:waypoint x="2900" y="810"/>
+        <di:waypoint x="2960" y="810"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AT_06_di" bpmnElement="AT_06">
         <di:waypoint x="1520" y="880" />
@@ -502,6 +525,22 @@
       <bpmndi:BPMNEdge id="AT_33_di" bpmnElement="AT_33">
         <di:waypoint x="2030" y="510" />
         <di:waypoint x="2090" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Gateway_AttackGameEnded_di" bpmnElement="Gateway_AttackGameEnded" isMarkerVisible="true">
+        <dc:Bounds x="2960" y="785" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="2920" y="843" width="130" height="20"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_AttackGameEnded_di" bpmnElement="End_AttackGameEnded">
+        <dc:Bounds x="3170" y="792" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="3110" y="838" width="160" height="40"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="AT_34_di" bpmnElement="AT_34">
+        <di:waypoint x="2985" y="785"/><di:waypoint x="2985" y="700"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="3000" y="740" width="30" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AT_35_di" bpmnElement="AT_35">
+        <di:waypoint x="3010" y="810"/><di:waypoint x="3170" y="810"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="3070" y="788" width="30" height="14"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

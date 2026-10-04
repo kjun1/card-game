@@ -19,7 +19,7 @@ Game開始からGame終了までの最上位Processを定義する。
 | Game Start | Start Event | Game Processを開始する |
 | Prepare Decks | Parallel Tasks | 両PlayerのDeckを確定する |
 | Coin Toss | Service Task | First Playerを決定する |
-| Opening Draw | Service Task | 各PlayerへOpening Handを配る |
+| Shuffle / Opening Draw | Service Task | 各PlayerのDeckをShuffleしてからOpening Handを配る |
 | Mulligan Selection | Parallel User Tasks | 両Playerが独立に交換対象を選ぶ |
 | Mulligan Exchange | Parallel Service Tasks | 選択Cardを退避して同数Drawし、両Player分の交換完了を待つ |
 | Return / Shuffle | Parallel Service Tasks | 両Playerの交換完了後、退避CardをDeckへ戻してShuffleする |
@@ -27,7 +27,7 @@ Game開始からGame終了までの最上位Processを定義する。
 | Execute Turn | Sub-process | Active PlayerのTurnを処理する |
 | Game End Reported? | Exclusive Gateway | Turn Flowから受け取った終了結果で分岐する |
 | Switch Active Player | Service Task | Active Playerを相手へ切り替える |
-| Finalize Game Result | Service Task | Turn Flowが評価したWin / Lose / DrawをGameの結果として確定する |
+| Finalize Game Result | Service Task | 勝敗条件の成立時に固定され、Turn Flowから返されたWin / Lose / Drawを記録する |
 | Game End | End Event | Game全体を終了する |
 
 ## Review preview
@@ -36,7 +36,7 @@ Game開始からGame終了までの最上位Processを定義する。
 flowchart TD
     S([Game Start]) --> P{{Prepare Decks in parallel}}
     P --> F[Coin Toss]
-    F --> O[Opening Draw]
+    F --> O[Shuffle Decks / Opening Draw]
     O --> M{{Mulligan in parallel}}
     M --> MA[Player A selects Mulligan Cards]
     M --> MB[Player B selects Mulligan Cards]
@@ -56,8 +56,12 @@ flowchart TD
 
 First Playerはコイントスで決定し、先攻・後攻補正は設けない。
 
-Mulliganで退避したCardをDeckへ戻すのは、両Playerの交換処理が完了した後である。
+Opening HandをDrawする前に、各PlayerのDeckを必ずShuffleする。このShuffleはMulligan後のShuffleとは別に行う。
 
-同一処理によって両Playerの敗北条件が同時に成立した場合はDrawとする。
+MulliganでOpponentへ知らせるのは交換枚数だけであり、選択したCard・退避中のCardの内容は公開しない。退避したCardをDeckへ戻すのは、両Playerの交換処理が完了した後である。
 
-勝敗条件の評価はTurn Flowが行う。Game Flowは返された`gameEnded`と結果を使用し、盤面から勝敗を再判定しない。終了が報告された場合は結果を確定し、継続の場合だけActive Playerを切り替える。
+通常Setupでは各PlayerのUnit ZoneとSupport Zoneは空であり、Reaction Sourceを事前配置しない。
+
+対戦中のEffectの同時適用・逐次処理・Player順は[Effect Resolution Model](../model/effect-resolution-model.md)に従う。この共通規則は、Setupの両Playerによる独立したMulligan選択・並行交換を逐次Effectへ変更するものではない。
+
+勝敗は条件が成立した処理の時点で固定する。Game FlowはTurn Flowから返された`gameEnded`と固定済みの結果を使用し、盤面から勝敗を再判定しない。終了が報告された場合は結果を記録し、継続の場合だけActive Playerを切り替える。

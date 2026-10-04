@@ -129,7 +129,7 @@ Feature: Turnごとの更新とOperation完了による制御権移転
     And BのTurnは開始しない
 
   @GR-002 @GR-004 @AC-TURN-011
-  Scenario: 同一Effectの解決で双方のCore HPが0になればDrawになる
+  Scenario: 同じEffectで両Coreへ同時にDamageを与えて双方のHPが0になればDrawになる
     Given AのTurn Startが完了している
     And 両PlayerのCore HPは2である
     And AのEnergyは3である
@@ -150,3 +150,32 @@ Feature: Turnごとの更新とOperation完了による制御権移転
     Then 「砲撃」のOperationは完了しAのEnergyは2になる
     And BのCore HPは0になりAの勝利とBの敗北でGameが終了する
     And BのTurnは開始しない
+
+  @GR-002 @GR-007 @GR-018 @AC-TURN-013
+  Scenario: Coreへの致死Damageで勝利を確定したら後続Drawを行わない
+    Given AのTurn Startが完了している
+    And BのCore HPは2である
+    And AのEnergyは3でDeckは0枚でHandは3枚である
+    And AのBoardのAbility「追撃補給」にはAction指定がなくCostはEnergy 1である
+    And 「追撃補給」はBのCoreへ2 Damageを与え、その後Aに1枚Drawさせる
+    When Aが「追撃補給」を使用する
+    Then BのCore HPが0になった時点でAの勝利とBの敗北が確定しGameが終了する
+    And 後続のAのDrawは要求されずHandは元の3枚のままである
+    And Aの敗北やGameのDrawへ結果は変わらない
+    And 支払済みのCostを戻さずAのEnergyは2である
+    And AにOperation再選択を求めずBのTurnも開始しない
+
+  @GR-002 @GR-003 @GR-007 @GR-018 @AC-TURN-014
+  Scenario: Effectの途中で敗北しても適用済みのDamageとCostを戻さない
+    Given AのTurn Startが完了している
+    And BのCore HPは2である
+    And AのEnergyは3でDeckは0枚でHandは3枚である
+    And AのBoardのAbility「連続補給射撃」にはAction指定がなくCostはEnergy 1である
+    And 「連続補給射撃」はBのCoreへ1 Damage、Aの1枚Draw、BのCoreへ1 Damageを順に行う
+    When Aが「連続補給射撃」を使用する
+    Then 最初のDamageでBのCore HPは1になる
+    And 続くAのDraw失敗でAの敗北とBの勝利が直ちに確定しGameが終了する
+    And 最後のDamageは発生せずBのCore HPは1を保つ
+    And 支払済みのCostを戻さずAのEnergyは2である
+    And AのHandは元の3枚のままでGameの結果はDrawにならない
+    And AにOperation再選択を求めずBのTurnも開始しない

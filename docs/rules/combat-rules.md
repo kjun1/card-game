@@ -66,8 +66,12 @@ ReactionがなくBlock Stepが完了したらAttackをCommitし、AttackerをExh
 ### Unit vs Core
 Attacker ATK分のDamageをCoreへ与える。
 
+Core HPが0以下になった時点で勝敗を確定する。残りのEffectは解決せず、確定済みの結果を変更しない。
+
 ### Unit vs Unit
 AttackerとDefenderは互いのATK分のDamageを同時に与える。
+
+この相互Damageは[Effect Resolution Model](../model/effect-resolution-model.md#resolution-steps)のSimultaneousGroupとして扱い、Active Playerからの逐次適用には分割しない。
 
 ## Damage and Destroy
 

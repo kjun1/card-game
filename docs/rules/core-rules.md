@@ -13,6 +13,18 @@
 
 同一のEffect、Combat Resolution、State Check等によって両Playerの敗北条件が同時に成立した場合、GameはDrawとして終了する。
 
+勝敗条件が成立した時点で結果を確定し、残りのEffectを打ち切る。既に支払ったCostと適用済みのEffectは保持する。確定した結果を後続処理で変更しない。
+
+同時に適用することが定義された処理では、その同時適用の結果を判定する。一方、同じEffect内でも順番に処理する部分は別であり、先の処理で勝敗が確定したら後の処理を実行してDrawへ変えることはない。
+
+## Effect resolution
+
+Resolutionは順序付きのEffectStepで表す。逐次的なEffectは適用ごとに、明示された同時適用はSimultaneousGroup全体の適用後に、勝敗条件を確認する。Gameが継続する場合だけ次のStepへ進む。共通の概念と境界は[Effect Resolution Model](../model/effect-resolution-model.md)を参照する。
+
+同じEffectを複数Playerへ逐次適用する場合は、対象のActive Playerから処理し、Gameが継続する場合にOpponentへ進む。Draw・Discard・Card移動・Damage等で共通のPlayer orderとし、ReactionでもSource所有者を先にしない。対象外のPlayerを追加したり、別々のEffectStepに明示された順序を並べ替えたりする規則ではない。
+
+明示された同時適用はこのPlayer orderで分割しない。両Playerが対象であること自体は同時適用を意味しない。
+
 ## Board
 
 各Playerは以下のZoneを持つ。
@@ -27,7 +39,7 @@ Unit ZoneとSupport Zoneは単一盤面上に存在する。
 
 Zone Capacityを超えるDeploy / Setは実行できない。
 
-Playerは基本ルールによって自分のUnit / Supportを任意にDiscardして空きを作ることはできない。Card Effect等による移動・Destroyはこの制約の対象外である。
+Playerは基本ルールによって自分のBoard Card（Unit / Face-up Support / Set Card）を任意にDiscardして空きを作ることはできない。Card Effect等による移動・Destroyはこの制約の対象外である。
 
 ## Card types
 
@@ -77,6 +89,8 @@ Operation例:
 - 何もしない
 
 Operationは、解決または「何もしない」の選択によって完了する。
+
+Operation / Reactionの解決中に勝敗条件が成立した場合も、その時点で結果を確定して残りのEffectを打ち切る。解決済みOperationの完了記録やReactionによる元Actionの取消記録は、追加Effectの実行やGameの継続を意味しない。
 
 Actionかどうかにかかわらず、Game SystemはSource・Target・Zone Capacity等の合法性とCost支払い可能性を支払い前に検証する。非ActionのOperationは、合法な場合にCostを支払って解決し、Operation Completeとする。不正な非ActionはCost消費・Card移動・Effect解決等の副作用なしでOperation未完了として返し、Gameが継続する場合はOperation Selectionへ戻る。
 
@@ -128,7 +142,11 @@ Reaction Sourceは原則Board上に存在する。
 
 Handから直接Reactionすることは基本ルールでは認めない。
 
+通常のGame SetupではBoardにCardを配置せず、最初の自Turn前に使用できるReaction Sourceはない。Setup Energy 2を持っていても、この時点ではReactionできない。
+
 ## Information visibility
+
+この節は現在の情報閲覧権限を定める。Playerが過去の観測から得た知識とは区別する。概念の責務は[Information Model](../model/information-model.md)を参照する。
 
 ### Public
 - Core HP
@@ -140,17 +158,26 @@ Handから直接Reactionすることは基本ルールでは認めない。
 - Accumulated Damage
 - Zone使用数
 - Set Cardの存在
+- Mulliganの交換枚数
+- Discard枚数
 
 ### Hidden
 - Deck内容
 - Hand
 - Set Cardの内容
+- Mulliganの交換・退避Cardの内容（Opponentには非公開）
+- Discard内容（Opponentには非公開。所有Playerはすべて確認できる）
+
+Discardへ移動したことによってCard内容をOpponentへ公開しない。未RevealのSet CardやHand超過でDraw直後にDiscardするCardにも同じ公開範囲を適用する。
+
+以前PublicだったUnit等がDiscardへ移動しても、Opponentが公開時に観測した情報や観測した移動の事実は失われない。ただし、その知識によってDiscard Zoneの現在の内容を自由に閲覧したり、未観測Cardの内容を取得したりすることはできない。
 
 ## Core invariants
 
 - TurnはActive Playerが制御権を持つ区間である。
 - Turn Start処理は各Turnにつき1回だけ行う。
 - Game終了をOperation完了判定より優先し、終了時は再選択・制御権移転を行わない。
+- 勝敗条件成立時に結果を固定し、残りのEffectを解決しない。適用済みのCost・Effectは保持する。
 - Gameが継続する場合、completed Operationが1つ発生するとTurnが終了し、Opponentへ制御権が移る。
 - Game終了時にはcompleted Operationが0のTurnもあり得る。
 - CancelされたActionはOperation Completeを発生させない。

@@ -4,6 +4,7 @@
     <bpmn:participant id="Participant_Game" name="Card Game" processRef="Process_GameFlow"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_GameFlow" name="Game Flow" isExecutable="false">
+    <bpmn:documentation>Set up the Game, including independent Mulligan selections and parallel exchanges. These Setup activities are distinct from sequential multi-player Effects governed by ../../model/effect-resolution-model.md. Receive and report fixed terminal results without reevaluating them.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_GameFlow">
       <bpmn:lane id="Lane_PlayerA" name="Player A">
         <bpmn:flowNodeRef>Task_PrepareDeckA</bpmn:flowNodeRef>
@@ -57,7 +58,8 @@
       <bpmn:incoming>GF_06</bpmn:incoming>
       <bpmn:outgoing>GF_07</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Task_OpeningDraw" name="Deal Opening Hands">
+    <bpmn:serviceTask id="Task_OpeningDraw" name="Shuffle Decks / Deal Opening Hands">
+      <bpmn:documentation>Shuffle each player's deck before drawing that player's opening hand of five cards. This mandatory opening shuffle is separate from the shuffle after mulligan.</bpmn:documentation>
       <bpmn:incoming>GF_07</bpmn:incoming>
       <bpmn:outgoing>GF_08</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -67,12 +69,12 @@
       <bpmn:outgoing>GF_10</bpmn:outgoing>
     </bpmn:parallelGateway>
     <bpmn:userTask id="Task_MulliganA" name="Select Mulligan Cards A">
-      <bpmn:documentation>Select 0-5 cards from the opening hand. The Game System performs the exchange.</bpmn:documentation>
+      <bpmn:documentation>Select 0-5 cards from the opening hand. The Game System performs the exchange. Only the exchange count is Public to the opponent; selected and set-aside card contents remain Hidden.</bpmn:documentation>
       <bpmn:incoming>GF_09</bpmn:incoming>
       <bpmn:outgoing>GF_25</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:userTask id="Task_MulliganB" name="Select Mulligan Cards B">
-      <bpmn:documentation>Select 0-5 cards from the opening hand. The Game System performs the exchange.</bpmn:documentation>
+      <bpmn:documentation>Select 0-5 cards from the opening hand. The Game System performs the exchange. Only the exchange count is Public to the opponent; selected and set-aside card contents remain Hidden.</bpmn:documentation>
       <bpmn:incoming>GF_10</bpmn:incoming>
       <bpmn:outgoing>GF_26</bpmn:outgoing>
     </bpmn:userTask>
@@ -102,11 +104,12 @@
       <bpmn:outgoing>GF_18</bpmn:outgoing>
     </bpmn:parallelGateway>
     <bpmn:serviceTask id="Task_Initialize" name="Initialize Core / Energy / Momentum">
+      <bpmn:documentation>Initialize Core, Energy Capacity and Energy, and Momentum according to the setup rules. In normal setup, both players' Unit Zones and Support Zones are empty; no Reaction Source is placed in advance.</bpmn:documentation>
       <bpmn:incoming>GF_18</bpmn:incoming>
       <bpmn:outgoing>GF_19</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:task id="Task_ExecuteTurn" name="Execute Active Player Turn">
-      <bpmn:documentation>Detailed in turn-flow.bpmn. Receive gameEnded and the evaluated result from Turn Flow. Switch players only when gameEnded is false.</bpmn:documentation>
+      <bpmn:documentation>Detailed in turn-flow.bpmn. Receive gameEnded and the result fixed when a defeat condition first occurred. Do not reevaluate that result. Switch players only when gameEnded is false.</bpmn:documentation>
       <bpmn:incoming>GF_19</bpmn:incoming>
       <bpmn:incoming>GF_22</bpmn:incoming>
       <bpmn:outgoing>GF_20</bpmn:outgoing>
@@ -156,7 +159,7 @@
       <bpmn:outgoing>GF_22</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_FinalizeGameResult" name="Finalize Game Result">
-      <bpmn:documentation>Finalize the win/lose/draw result returned by Turn Flow without reevaluating the state.</bpmn:documentation>
+      <bpmn:documentation>Record the already-fixed win/lose/draw result returned by Turn Flow. Do not reevaluate defeat conditions or apply further effects.</bpmn:documentation>
       <bpmn:incoming>GF_23</bpmn:incoming>
       <bpmn:outgoing>GF_24</bpmn:outgoing>
     </bpmn:serviceTask>
