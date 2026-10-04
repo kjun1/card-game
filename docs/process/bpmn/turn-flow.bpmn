@@ -1,13 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-  id="Definitions_TurnFlow"
-  targetNamespace="https://github.com/kjun1/card-game/bpmn">
-
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_TurnFlow" targetNamespace="https://github.com/kjun1/card-game/bpmn">
   <bpmn:collaboration id="Collaboration_TurnFlow">
     <bpmn:participant id="Participant_Turn" name="Turn" processRef="Process_TurnFlow"/>
   </bpmn:collaboration>
-
   <bpmn:process id="Process_TurnFlow" name="Turn Flow" isExecutable="false">
     <bpmn:laneSet id="LaneSet_TurnFlow">
       <bpmn:lane id="Lane_ActivePlayer" name="Active Player">
@@ -22,57 +17,318 @@
         <bpmn:flowNodeRef>Gateway_CanDraw</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_Draw</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_HandLimit</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_DiscardDrawn</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_ExecuteOperation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_GameEndedTurn</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_OperationCompleted</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_DiscardDrawn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_GameEndedTurn</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_Turn</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>End_LoseDeckOut</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_EvaluateGameEndTurn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_RecordFailedDraw</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-
-    <bpmn:startEvent id="Start_Turn" name="Turn Start / Gain Control"/>
-    <bpmn:serviceTask id="Task_ReadyUnits" name="Ready Active Player Units"/>
-    <bpmn:serviceTask id="Task_ClearAttackLock" name="Clear Deploy Attack Lock"/>
-    <bpmn:serviceTask id="Task_IncreaseCapacity" name="Increase Energy Capacity by 1 (max 7)"/>
-    <bpmn:serviceTask id="Task_RefreshEnergy" name="Refresh Energy to Capacity"/>
-    <bpmn:exclusiveGateway id="Gateway_CanDraw" name="Deck Has Card?"/>
-    <bpmn:serviceTask id="Task_Draw" name="Draw 1 Card"/>
-    <bpmn:exclusiveGateway id="Gateway_HandLimit" name="Hand Exceeds Limit?"/>
-    <bpmn:serviceTask id="Task_DiscardDrawn" name="Discard Just-drawn Card"/>
-    <bpmn:userTask id="Task_SelectOperation" name="Select Operation"/>
-    <bpmn:task id="Task_ExecuteOperation" name="Execute Selected Operation">
-      <bpmn:documentation>Operation may be an Action. If cancelled by Reaction, it is not completed.</bpmn:documentation>
-    </bpmn:task>
-    <bpmn:exclusiveGateway id="Gateway_OperationCompleted" name="Operation Completed?"/>
-    <bpmn:endEvent id="End_Turn" name="Turn End / Transfer Control"/>
-    <bpmn:endEvent id="End_LoseDeckOut" name="Active Player Loses: Deck Out"/>
-
-    <bpmn:sequenceFlow id="TF_01" sourceRef="Start_Turn" targetRef="Task_ReadyUnits"/>
-    <bpmn:sequenceFlow id="TF_02" sourceRef="Task_ReadyUnits" targetRef="Task_ClearAttackLock"/>
-    <bpmn:sequenceFlow id="TF_03" sourceRef="Task_ClearAttackLock" targetRef="Task_IncreaseCapacity"/>
-    <bpmn:sequenceFlow id="TF_04" sourceRef="Task_IncreaseCapacity" targetRef="Task_RefreshEnergy"/>
-    <bpmn:sequenceFlow id="TF_05" sourceRef="Task_RefreshEnergy" targetRef="Gateway_CanDraw"/>
-    <bpmn:sequenceFlow id="TF_06" name="No" sourceRef="Gateway_CanDraw" targetRef="End_LoseDeckOut">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[deckEmpty]]></bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="TF_15" name="Yes" sourceRef="Gateway_OperationCompleted" targetRef="End_Turn">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">operationCompleted</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="TF_07" name="Yes" sourceRef="Gateway_CanDraw" targetRef="Task_Draw">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[not(deckEmpty)]]></bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="TF_17" name="Yes" sourceRef="Gateway_GameEndedTurn" targetRef="End_GameEndedTurn">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">gameEnded</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="TF_08" sourceRef="Task_Draw" targetRef="Gateway_HandLimit"/>
-    <bpmn:sequenceFlow id="TF_09" name="Yes" sourceRef="Gateway_HandLimit" targetRef="Task_DiscardDrawn">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[handSize > handLimit]]></bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="TF_16" name="No" sourceRef="Gateway_GameEndedTurn" targetRef="Gateway_OperationCompleted">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(gameEnded)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="TF_10" name="No" sourceRef="Gateway_HandLimit" targetRef="Task_SelectOperation">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[handSize <= handLimit]]></bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="TF_13" sourceRef="Task_ExecuteOperation" targetRef="Task_EvaluateGameEndTurn"/>
+    <bpmn:sequenceFlow id="TF_12" sourceRef="Task_SelectOperation" targetRef="Task_ExecuteOperation"/>
+    <bpmn:sequenceFlow id="TF_14" name="No / Cancelled" sourceRef="Gateway_OperationCompleted" targetRef="Task_SelectOperation">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(operationCompleted)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="TF_11" sourceRef="Task_DiscardDrawn" targetRef="Task_SelectOperation"/>
-    <bpmn:sequenceFlow id="TF_12" sourceRef="Task_SelectOperation" targetRef="Task_ExecuteOperation"/>
-    <bpmn:sequenceFlow id="TF_13" sourceRef="Task_ExecuteOperation" targetRef="Gateway_OperationCompleted"/>
-    <bpmn:sequenceFlow id="TF_14" name="No / Cancelled" sourceRef="Gateway_OperationCompleted" targetRef="Task_SelectOperation">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[not(operationCompleted)]]></bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="TF_10" name="No" sourceRef="Gateway_HandLimit" targetRef="Task_SelectOperation">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">handSize &lt;= handLimit</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="TF_15" name="Yes" sourceRef="Gateway_OperationCompleted" targetRef="End_Turn">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[operationCompleted]]></bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="TF_09" name="Yes" sourceRef="Gateway_HandLimit" targetRef="Task_DiscardDrawn">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">handSize &gt; handLimit</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="TF_08" sourceRef="Task_Draw" targetRef="Gateway_HandLimit"/>
+    <bpmn:sequenceFlow id="TF_07" name="Yes" sourceRef="Gateway_CanDraw" targetRef="Task_Draw">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(deckEmpty)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="TF_06" name="No" sourceRef="Gateway_CanDraw" targetRef="Task_RecordFailedDraw">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">deckEmpty</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="TF_05" sourceRef="Task_RefreshEnergy" targetRef="Gateway_CanDraw"/>
+    <bpmn:sequenceFlow id="TF_04" sourceRef="Task_IncreaseCapacity" targetRef="Task_RefreshEnergy"/>
+    <bpmn:sequenceFlow id="TF_03" sourceRef="Task_ClearAttackLock" targetRef="Task_IncreaseCapacity"/>
+    <bpmn:sequenceFlow id="TF_02" sourceRef="Task_ReadyUnits" targetRef="Task_ClearAttackLock"/>
+    <bpmn:sequenceFlow id="TF_01" sourceRef="Start_Turn" targetRef="Task_ReadyUnits"/>
+    <bpmn:exclusiveGateway id="Gateway_OperationCompleted" name="Operation Completed?">
+      <bpmn:incoming>TF_16</bpmn:incoming>
+      <bpmn:outgoing>TF_15</bpmn:outgoing>
+      <bpmn:outgoing>TF_14</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Gateway_GameEndedTurn" name="Game Ended?">
+      <bpmn:incoming>TF_19</bpmn:incoming>
+      <bpmn:outgoing>TF_17</bpmn:outgoing>
+      <bpmn:outgoing>TF_16</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_ExecuteOperation" name="Execute Selected Operation">
+      <bpmn:documentation>Detailed in action-reaction-flow.bpmn and attack-flow.bpmn. Receive operationCompleted and the updated state after all effects belonging to the resolution. A cancelled action returns an incomplete operation; evaluate game end before deciding the next step.</bpmn:documentation>
+      <bpmn:incoming>TF_12</bpmn:incoming>
+      <bpmn:outgoing>TF_13</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="Task_SelectOperation" name="Select Operation">
+      <bpmn:incoming>TF_14</bpmn:incoming>
+      <bpmn:incoming>TF_11</bpmn:incoming>
+      <bpmn:incoming>TF_10</bpmn:incoming>
+      <bpmn:outgoing>TF_12</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_HandLimit" name="Hand Exceeds Limit?">
+      <bpmn:incoming>TF_08</bpmn:incoming>
+      <bpmn:outgoing>TF_10</bpmn:outgoing>
+      <bpmn:outgoing>TF_09</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_Draw" name="Draw 1 Card">
+      <bpmn:incoming>TF_07</bpmn:incoming>
+      <bpmn:outgoing>TF_08</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_CanDraw" name="Deck Has Card?">
+      <bpmn:incoming>TF_05</bpmn:incoming>
+      <bpmn:outgoing>TF_07</bpmn:outgoing>
+      <bpmn:outgoing>TF_06</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_RefreshEnergy" name="Refresh Energy to Capacity">
+      <bpmn:incoming>TF_04</bpmn:incoming>
+      <bpmn:outgoing>TF_05</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_IncreaseCapacity" name="Increase Energy Capacity by 1 (max 7)">
+      <bpmn:incoming>TF_03</bpmn:incoming>
+      <bpmn:outgoing>TF_04</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_ClearAttackLock" name="Clear Deploy Attack Lock">
+      <bpmn:incoming>TF_02</bpmn:incoming>
+      <bpmn:outgoing>TF_03</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_ReadyUnits" name="Ready Active Player Units">
+      <bpmn:incoming>TF_01</bpmn:incoming>
+      <bpmn:outgoing>TF_02</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:startEvent id="Start_Turn" name="Turn Start / Gain Control">
+      <bpmn:outgoing>TF_01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Task_DiscardDrawn" name="Discard Just-drawn Card">
+      <bpmn:incoming>TF_09</bpmn:incoming>
+      <bpmn:outgoing>TF_11</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="End_GameEndedTurn" name="Game End Reported">
+      <bpmn:documentation>Return gameEnded = true and the evaluated result to game-flow.bpmn. Game Flow finalizes the game; do not reselect or transfer control.</bpmn:documentation>
+      <bpmn:incoming>TF_17</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="End_Turn" name="Turn Complete">
+      <bpmn:documentation>Return gameEnded = false after a completed operation. Game Flow switches the active player.</bpmn:documentation>
+      <bpmn:incoming>TF_15</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_EvaluateGameEndTurn" name="Evaluate Win / Lose / Draw">
+      <bpmn:documentation>Evaluate defeat conditions from the updated state, including Core HP and failed required draws. Set gameEnded and the win/lose/draw result. Defeats caused simultaneously by the same resolution produce a draw. Run before operation-completion handling, including after a cancelled action.</bpmn:documentation>
+      <bpmn:incoming>TF_13</bpmn:incoming>
+      <bpmn:incoming>TF_18</bpmn:incoming>
+      <bpmn:outgoing>TF_19</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_RecordFailedDraw" name="Record Failed Required Draw">
+      <bpmn:documentation>Record the active player failing a required draw. Send that state to the common game-end evaluation without selecting an operation.</bpmn:documentation>
+      <bpmn:incoming>TF_06</bpmn:incoming>
+      <bpmn:outgoing>TF_18</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="TF_18" sourceRef="Task_RecordFailedDraw" targetRef="Task_EvaluateGameEndTurn"/>
+    <bpmn:sequenceFlow id="TF_19" sourceRef="Task_EvaluateGameEndTurn" targetRef="Gateway_GameEndedTurn"/>
   </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration_TurnFlow">
+    <bpmndi:BPMNPlane id="BPMNPlane_Collaboration_TurnFlow" bpmnElement="Collaboration_TurnFlow">
+      <bpmndi:BPMNShape id="Participant_Turn_di" bpmnElement="Participant_Turn" isHorizontal="true">
+        <dc:Bounds x="60" y="60" width="2280" height="600"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_TurnSystem_di" bpmnElement="Lane_TurnSystem" isHorizontal="true">
+        <dc:Bounds x="90" y="270" width="2250" height="390"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_ActivePlayer_di" bpmnElement="Lane_ActivePlayer" isHorizontal="true">
+        <dc:Bounds x="90" y="60" width="2250" height="210"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_Turn_di" bpmnElement="Start_Turn">
+        <dc:Bounds x="150.0" y="352.0" width="36.0" height="36.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="118.0" y="398.0" width="100.0" height="27.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ReadyUnits_di" bpmnElement="Task_ReadyUnits">
+        <dc:Bounds x="240.0" y="330.0" width="130.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ClearAttackLock_di" bpmnElement="Task_ClearAttackLock">
+        <dc:Bounds x="410.0" y="330.0" width="130.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_IncreaseCapacity_di" bpmnElement="Task_IncreaseCapacity">
+        <dc:Bounds x="580.0" y="330.0" width="130.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_RefreshEnergy_di" bpmnElement="Task_RefreshEnergy">
+        <dc:Bounds x="750.0" y="330.0" width="130.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_CanDraw_di" bpmnElement="Gateway_CanDraw" isMarkerVisible="true">
+        <dc:Bounds x="920.0" y="345.0" width="50.0" height="50.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="890.0" y="303.0" width="110.0" height="14.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Draw_di" bpmnElement="Task_Draw">
+        <dc:Bounds x="1010.0" y="330.0" width="130.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_HandLimit_di" bpmnElement="Gateway_HandLimit" isMarkerVisible="true">
+        <dc:Bounds x="1180.0" y="345.0" width="50.0" height="50.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1145.0" y="405.0" width="120.0" height="27.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SelectOperation_di" bpmnElement="Task_SelectOperation">
+        <dc:Bounds x="1300.0" y="140.0" width="130.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ExecuteOperation_di" bpmnElement="Task_ExecuteOperation">
+        <dc:Bounds x="1510.0" y="330.0" width="130.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_GameEndedTurn_di" bpmnElement="Gateway_GameEndedTurn" isMarkerVisible="true">
+        <dc:Bounds x="1900" y="345" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1870" y="303" width="110" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_OperationCompleted_di" bpmnElement="Gateway_OperationCompleted" isMarkerVisible="true">
+        <dc:Bounds x="2040" y="345" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2010" y="405" width="110" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_DiscardDrawn_di" bpmnElement="Task_DiscardDrawn">
+        <dc:Bounds x="1300.0" y="330.0" width="130.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_GameEndedTurn_di" bpmnElement="End_GameEndedTurn">
+        <dc:Bounds x="1907" y="472" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1855" y="516" width="140" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Turn_di" bpmnElement="End_Turn">
+        <dc:Bounds x="2200" y="352" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2160" y="400" width="116" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_RecordFailedDraw_di" bpmnElement="Task_RecordFailedDraw">
+        <dc:Bounds x="880" y="470" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_EvaluateGameEndTurn_di" bpmnElement="Task_EvaluateGameEndTurn">
+        <dc:Bounds x="1690" y="330" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="TF_01_di" bpmnElement="TF_01">
+        <di:waypoint x="186.0" y="370.0"/>
+        <di:waypoint x="240.0" y="370.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_02_di" bpmnElement="TF_02">
+        <di:waypoint x="370.0" y="370.0"/>
+        <di:waypoint x="410.0" y="370.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_03_di" bpmnElement="TF_03">
+        <di:waypoint x="540.0" y="370.0"/>
+        <di:waypoint x="580.0" y="370.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_04_di" bpmnElement="TF_04">
+        <di:waypoint x="710.0" y="370.0"/>
+        <di:waypoint x="750.0" y="370.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_05_di" bpmnElement="TF_05">
+        <di:waypoint x="880.0" y="370.0"/>
+        <di:waypoint x="920.0" y="370.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_06_di" bpmnElement="TF_06">
+        <di:waypoint x="945" y="395"/>
+        <di:waypoint x="945" y="470"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="955.0" y="427.0" width="18.0" height="14.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_07_di" bpmnElement="TF_07">
+        <di:waypoint x="970.0" y="370.0"/>
+        <di:waypoint x="1010.0" y="370.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="981.0" y="348.0" width="18.0" height="14.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_08_di" bpmnElement="TF_08">
+        <di:waypoint x="1140.0" y="370.0"/>
+        <di:waypoint x="1180.0" y="370.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_09_di" bpmnElement="TF_09">
+        <di:waypoint x="1230.0" y="370.0"/>
+        <di:waypoint x="1300.0" y="370.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1255.0" y="348.0" width="18.0" height="14.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_10_di" bpmnElement="TF_10">
+        <di:waypoint x="1205.0" y="345.0"/>
+        <di:waypoint x="1205.0" y="180.0"/>
+        <di:waypoint x="1300.0" y="180.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1215.0" y="290.0" width="18.0" height="14.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_11_di" bpmnElement="TF_11">
+        <di:waypoint x="1365.0" y="330.0"/>
+        <di:waypoint x="1365.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_12_di" bpmnElement="TF_12">
+        <di:waypoint x="1430.0" y="180.0"/>
+        <di:waypoint x="1575.0" y="180.0"/>
+        <di:waypoint x="1575.0" y="330.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_13_di" bpmnElement="TF_13">
+        <di:waypoint x="1640" y="370"/>
+        <di:waypoint x="1690" y="370"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_14_di" bpmnElement="TF_14">
+        <di:waypoint x="2065" y="345"/>
+        <di:waypoint x="2065" y="100"/>
+        <di:waypoint x="1365" y="100"/>
+        <di:waypoint x="1365" y="140"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1655" y="78" width="120" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_15_di" bpmnElement="TF_15">
+        <di:waypoint x="2090" y="370"/>
+        <di:waypoint x="2200" y="370"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2125" y="348" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_16_di" bpmnElement="TF_16">
+        <di:waypoint x="1950" y="370"/>
+        <di:waypoint x="2040" y="370"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1980" y="348" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_17_di" bpmnElement="TF_17">
+        <di:waypoint x="1925" y="395"/>
+        <di:waypoint x="1925" y="472"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1935" y="427" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_18_di" bpmnElement="TF_18">
+        <di:waypoint x="945" y="550"/>
+        <di:waypoint x="945" y="620"/>
+        <di:waypoint x="1755" y="620"/>
+        <di:waypoint x="1755" y="410"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_19_di" bpmnElement="TF_19">
+        <di:waypoint x="1820" y="370"/>
+        <di:waypoint x="1900" y="370"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </bpmn:definitions>

@@ -1,27 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-  id="Definitions_GameFlow"
-  targetNamespace="https://github.com/kjun1/card-game/bpmn">
-
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_GameFlow" targetNamespace="https://github.com/kjun1/card-game/bpmn">
   <bpmn:collaboration id="Collaboration_GameFlow">
     <bpmn:participant id="Participant_Game" name="Card Game" processRef="Process_GameFlow"/>
   </bpmn:collaboration>
-
   <bpmn:process id="Process_GameFlow" name="Game Flow" isExecutable="false">
     <bpmn:laneSet id="LaneSet_GameFlow">
       <bpmn:lane id="Lane_PlayerA" name="Player A">
         <bpmn:flowNodeRef>Task_PrepareDeckA</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_MulliganA</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_ReturnShuffleA</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_PlayerB" name="Player B">
         <bpmn:flowNodeRef>Task_PrepareDeckB</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_MulliganB</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_ReturnShuffleB</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_GameSystem" name="Game System">
-        <bpmn:flowNodeRef>Start_Game</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_PrepareSplit</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_PrepareJoin</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_CoinToss</bpmn:flowNodeRef>
@@ -33,40 +25,101 @@
         <bpmn:flowNodeRef>Task_Initialize</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_ExecuteTurn</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_GameEnded</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_SwitchActivePlayer</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_DetermineResult</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_Game</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Start_Game</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SwitchActivePlayer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_FinalizeGameResult</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ResolveMulliganA</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ReturnShuffleA</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ResolveMulliganB</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ReturnShuffleB</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-
-    <bpmn:startEvent id="Start_Game" name="Game Start"/>
-    <bpmn:parallelGateway id="Gateway_PrepareSplit" name="Prepare Decks"/>
-    <bpmn:userTask id="Task_PrepareDeckA" name="Prepare Deck A"/>
-    <bpmn:userTask id="Task_PrepareDeckB" name="Prepare Deck B"/>
-    <bpmn:parallelGateway id="Gateway_PrepareJoin"/>
-    <bpmn:serviceTask id="Task_CoinToss" name="Coin Toss / Determine First Player"/>
-    <bpmn:serviceTask id="Task_OpeningDraw" name="Deal Opening Hands"/>
-    <bpmn:parallelGateway id="Gateway_MulliganSplit" name="Mulligan"/>
+    <bpmn:parallelGateway id="Gateway_PrepareSplit" name="Prepare Decks">
+      <bpmn:incoming>GF_01</bpmn:incoming>
+      <bpmn:outgoing>GF_02</bpmn:outgoing>
+      <bpmn:outgoing>GF_03</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="Task_PrepareDeckA" name="Prepare Deck A">
+      <bpmn:incoming>GF_02</bpmn:incoming>
+      <bpmn:outgoing>GF_04</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_PrepareDeckB" name="Prepare Deck B">
+      <bpmn:incoming>GF_03</bpmn:incoming>
+      <bpmn:outgoing>GF_05</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="Gateway_PrepareJoin">
+      <bpmn:incoming>GF_04</bpmn:incoming>
+      <bpmn:incoming>GF_05</bpmn:incoming>
+      <bpmn:outgoing>GF_06</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Task_CoinToss" name="Coin Toss / Determine First Player">
+      <bpmn:incoming>GF_06</bpmn:incoming>
+      <bpmn:outgoing>GF_07</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_OpeningDraw" name="Deal Opening Hands">
+      <bpmn:incoming>GF_07</bpmn:incoming>
+      <bpmn:outgoing>GF_08</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Gateway_MulliganSplit" name="Mulligan">
+      <bpmn:incoming>GF_08</bpmn:incoming>
+      <bpmn:outgoing>GF_09</bpmn:outgoing>
+      <bpmn:outgoing>GF_10</bpmn:outgoing>
+    </bpmn:parallelGateway>
     <bpmn:userTask id="Task_MulliganA" name="Select Mulligan Cards A">
-      <bpmn:documentation>Select 0-5 cards, set them aside, and draw the same number.</bpmn:documentation>
+      <bpmn:documentation>Select 0-5 cards from the opening hand. The Game System performs the exchange.</bpmn:documentation>
+      <bpmn:incoming>GF_09</bpmn:incoming>
+      <bpmn:outgoing>GF_25</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:userTask id="Task_MulliganB" name="Select Mulligan Cards B">
-      <bpmn:documentation>Select 0-5 cards, set them aside, and draw the same number.</bpmn:documentation>
+      <bpmn:documentation>Select 0-5 cards from the opening hand. The Game System performs the exchange.</bpmn:documentation>
+      <bpmn:incoming>GF_10</bpmn:incoming>
+      <bpmn:outgoing>GF_26</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:parallelGateway id="Gateway_MulliganJoin"/>
-    <bpmn:parallelGateway id="Gateway_ReturnSplit"/>
-    <bpmn:userTask id="Task_ReturnShuffleA" name="Return Set-aside Cards and Shuffle A"/>
-    <bpmn:userTask id="Task_ReturnShuffleB" name="Return Set-aside Cards and Shuffle B"/>
-    <bpmn:parallelGateway id="Gateway_ReturnJoin"/>
-    <bpmn:serviceTask id="Task_Initialize" name="Initialize Core / Energy / Momentum"/>
+    <bpmn:parallelGateway id="Gateway_MulliganJoin">
+      <bpmn:incoming>GF_11</bpmn:incoming>
+      <bpmn:incoming>GF_12</bpmn:incoming>
+      <bpmn:outgoing>GF_13</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:parallelGateway id="Gateway_ReturnSplit">
+      <bpmn:incoming>GF_13</bpmn:incoming>
+      <bpmn:outgoing>GF_14</bpmn:outgoing>
+      <bpmn:outgoing>GF_15</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Task_ReturnShuffleA" name="Return Set-aside Cards and Shuffle A">
+      <bpmn:documentation>After both mulligan exchanges are complete, return Player A's set-aside cards to the deck and shuffle it.</bpmn:documentation>
+      <bpmn:incoming>GF_14</bpmn:incoming>
+      <bpmn:outgoing>GF_16</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_ReturnShuffleB" name="Return Set-aside Cards and Shuffle B">
+      <bpmn:documentation>After both mulligan exchanges are complete, return Player B's set-aside cards to the deck and shuffle it.</bpmn:documentation>
+      <bpmn:incoming>GF_15</bpmn:incoming>
+      <bpmn:outgoing>GF_17</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Gateway_ReturnJoin">
+      <bpmn:incoming>GF_16</bpmn:incoming>
+      <bpmn:incoming>GF_17</bpmn:incoming>
+      <bpmn:outgoing>GF_18</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Task_Initialize" name="Initialize Core / Energy / Momentum">
+      <bpmn:incoming>GF_18</bpmn:incoming>
+      <bpmn:outgoing>GF_19</bpmn:outgoing>
+    </bpmn:serviceTask>
     <bpmn:task id="Task_ExecuteTurn" name="Execute Active Player Turn">
-      <bpmn:documentation>Detailed in turn-flow.bpmn.</bpmn:documentation>
+      <bpmn:documentation>Detailed in turn-flow.bpmn. Receive gameEnded and the evaluated result from Turn Flow. Switch players only when gameEnded is false.</bpmn:documentation>
+      <bpmn:incoming>GF_19</bpmn:incoming>
+      <bpmn:incoming>GF_22</bpmn:incoming>
+      <bpmn:outgoing>GF_20</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:exclusiveGateway id="Gateway_GameEnded" name="Game End Condition Met?"/>
-    <bpmn:serviceTask id="Task_SwitchActivePlayer" name="Switch Active Player"/>
-    <bpmn:serviceTask id="Task_DetermineResult" name="Determine Win / Lose / Draw"/>
-    <bpmn:endEvent id="End_Game" name="Game End"/>
-
+    <bpmn:exclusiveGateway id="Gateway_GameEnded" name="Game End Reported?">
+      <bpmn:documentation>Route using gameEnded returned by Turn Flow. Do not reevaluate defeat conditions here.</bpmn:documentation>
+      <bpmn:incoming>GF_20</bpmn:incoming>
+      <bpmn:outgoing>GF_21</bpmn:outgoing>
+      <bpmn:outgoing>GF_23</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_Game" name="Game End">
+      <bpmn:incoming>GF_24</bpmn:incoming>
+    </bpmn:endEvent>
     <bpmn:sequenceFlow id="GF_01" sourceRef="Start_Game" targetRef="Gateway_PrepareSplit"/>
     <bpmn:sequenceFlow id="GF_02" sourceRef="Gateway_PrepareSplit" targetRef="Task_PrepareDeckA"/>
     <bpmn:sequenceFlow id="GF_03" sourceRef="Gateway_PrepareSplit" targetRef="Task_PrepareDeckB"/>
@@ -77,8 +130,8 @@
     <bpmn:sequenceFlow id="GF_08" sourceRef="Task_OpeningDraw" targetRef="Gateway_MulliganSplit"/>
     <bpmn:sequenceFlow id="GF_09" sourceRef="Gateway_MulliganSplit" targetRef="Task_MulliganA"/>
     <bpmn:sequenceFlow id="GF_10" sourceRef="Gateway_MulliganSplit" targetRef="Task_MulliganB"/>
-    <bpmn:sequenceFlow id="GF_11" sourceRef="Task_MulliganA" targetRef="Gateway_MulliganJoin"/>
-    <bpmn:sequenceFlow id="GF_12" sourceRef="Task_MulliganB" targetRef="Gateway_MulliganJoin"/>
+    <bpmn:sequenceFlow id="GF_11" sourceRef="Task_ResolveMulliganA" targetRef="Gateway_MulliganJoin"/>
+    <bpmn:sequenceFlow id="GF_12" sourceRef="Task_ResolveMulliganB" targetRef="Gateway_MulliganJoin"/>
     <bpmn:sequenceFlow id="GF_13" sourceRef="Gateway_MulliganJoin" targetRef="Gateway_ReturnSplit"/>
     <bpmn:sequenceFlow id="GF_14" sourceRef="Gateway_ReturnSplit" targetRef="Task_ReturnShuffleA"/>
     <bpmn:sequenceFlow id="GF_15" sourceRef="Gateway_ReturnSplit" targetRef="Task_ReturnShuffleB"/>
@@ -88,12 +141,269 @@
     <bpmn:sequenceFlow id="GF_19" sourceRef="Task_Initialize" targetRef="Task_ExecuteTurn"/>
     <bpmn:sequenceFlow id="GF_20" sourceRef="Task_ExecuteTurn" targetRef="Gateway_GameEnded"/>
     <bpmn:sequenceFlow id="GF_21" name="No" sourceRef="Gateway_GameEnded" targetRef="Task_SwitchActivePlayer">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[not(gameEnded)]]></bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(gameEnded)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="GF_22" sourceRef="Task_SwitchActivePlayer" targetRef="Task_ExecuteTurn"/>
-    <bpmn:sequenceFlow id="GF_23" name="Yes" sourceRef="Gateway_GameEnded" targetRef="Task_DetermineResult">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[gameEnded]]></bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="GF_23" name="Yes" sourceRef="Gateway_GameEnded" targetRef="Task_FinalizeGameResult">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">gameEnded</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="GF_24" sourceRef="Task_DetermineResult" targetRef="End_Game"/>
+    <bpmn:sequenceFlow id="GF_24" sourceRef="Task_FinalizeGameResult" targetRef="End_Game"/>
+    <bpmn:startEvent id="Start_Game" name="Game Start">
+      <bpmn:outgoing>GF_01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Task_SwitchActivePlayer" name="Switch Active Player">
+      <bpmn:incoming>GF_21</bpmn:incoming>
+      <bpmn:outgoing>GF_22</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_FinalizeGameResult" name="Finalize Game Result">
+      <bpmn:documentation>Finalize the win/lose/draw result returned by Turn Flow without reevaluating the state.</bpmn:documentation>
+      <bpmn:incoming>GF_23</bpmn:incoming>
+      <bpmn:outgoing>GF_24</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_ResolveMulliganA" name="Set Aside and Draw A">
+      <bpmn:documentation>Set the selected cards aside outside the deck, then draw the same number for Player A. Keep the set-aside cards out until both players have completed their exchanges.</bpmn:documentation>
+      <bpmn:incoming>GF_25</bpmn:incoming>
+      <bpmn:outgoing>GF_11</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="GF_25" sourceRef="Task_MulliganA" targetRef="Task_ResolveMulliganA"/>
+    <bpmn:serviceTask id="Task_ResolveMulliganB" name="Set Aside and Draw B">
+      <bpmn:documentation>Set the selected cards aside outside the deck, then draw the same number for Player B. Keep the set-aside cards out until both players have completed their exchanges.</bpmn:documentation>
+      <bpmn:incoming>GF_26</bpmn:incoming>
+      <bpmn:outgoing>GF_12</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="GF_26" sourceRef="Task_MulliganB" targetRef="Task_ResolveMulliganB"/>
   </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration_GameFlow">
+    <bpmndi:BPMNPlane id="BPMNPlane_Collaboration_GameFlow" bpmnElement="Collaboration_GameFlow">
+      <bpmndi:BPMNShape id="Participant_Game_di" bpmnElement="Participant_Game" isHorizontal="true">
+        <dc:Bounds x="60" y="60" width="2700" height="880"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_PlayerA_di" bpmnElement="Lane_PlayerA" isHorizontal="true">
+        <dc:Bounds x="90" y="60" width="2670" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_PlayerB_di" bpmnElement="Lane_PlayerB" isHorizontal="true">
+        <dc:Bounds x="90" y="220" width="2670" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_GameSystem_di" bpmnElement="Lane_GameSystem" isHorizontal="true">
+        <dc:Bounds x="90" y="380" width="2670" height="560"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_Game_di" bpmnElement="Start_Game">
+        <dc:Bounds x="150" y="682" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="98.0" y="726" width="140" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PrepareSplit_di" bpmnElement="Gateway_PrepareSplit">
+        <dc:Bounds x="250" y="675" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="205.0" y="733" width="140" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_PrepareDeckA_di" bpmnElement="Task_PrepareDeckA">
+        <dc:Bounds x="350" y="100" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_PrepareDeckB_di" bpmnElement="Task_PrepareDeckB">
+        <dc:Bounds x="350" y="260" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PrepareJoin_di" bpmnElement="Gateway_PrepareJoin">
+        <dc:Bounds x="550" y="675" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CoinToss_di" bpmnElement="Task_CoinToss">
+        <dc:Bounds x="640" y="660" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_OpeningDraw_di" bpmnElement="Task_OpeningDraw">
+        <dc:Bounds x="810" y="660" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_MulliganSplit_di" bpmnElement="Gateway_MulliganSplit">
+        <dc:Bounds x="980" y="675" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="935.0" y="733" width="140" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_MulliganA_di" bpmnElement="Task_MulliganA">
+        <dc:Bounds x="1080" y="100" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_MulliganB_di" bpmnElement="Task_MulliganB">
+        <dc:Bounds x="1080" y="260" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ResolveMulliganA_di" bpmnElement="Task_ResolveMulliganA">
+        <dc:Bounds x="1280" y="430" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ResolveMulliganB_di" bpmnElement="Task_ResolveMulliganB">
+        <dc:Bounds x="1280" y="550" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_MulliganJoin_di" bpmnElement="Gateway_MulliganJoin">
+        <dc:Bounds x="1480" y="675" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ReturnSplit_di" bpmnElement="Gateway_ReturnSplit">
+        <dc:Bounds x="1570" y="675" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ReturnShuffleA_di" bpmnElement="Task_ReturnShuffleA">
+        <dc:Bounds x="1670" y="430" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ReturnShuffleB_di" bpmnElement="Task_ReturnShuffleB">
+        <dc:Bounds x="1670" y="550" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ReturnJoin_di" bpmnElement="Gateway_ReturnJoin">
+        <dc:Bounds x="1870" y="675" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Initialize_di" bpmnElement="Task_Initialize">
+        <dc:Bounds x="1960" y="660" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ExecuteTurn_di" bpmnElement="Task_ExecuteTurn">
+        <dc:Bounds x="2130" y="660" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_GameEnded_di" bpmnElement="Gateway_GameEnded" isMarkerVisible="true">
+        <dc:Bounds x="2300" y="675" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2255" y="630" width="140" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SwitchActivePlayer_di" bpmnElement="Task_SwitchActivePlayer">
+        <dc:Bounds x="2260" y="810" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_FinalizeGameResult_di" bpmnElement="Task_FinalizeGameResult">
+        <dc:Bounds x="2390" y="660" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Game_di" bpmnElement="End_Game">
+        <dc:Bounds x="2560" y="682" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2508.0" y="726" width="140" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="GF_01_di" bpmnElement="GF_01">
+        <di:waypoint x="186" y="700"/>
+        <di:waypoint x="250" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_02_di" bpmnElement="GF_02">
+        <di:waypoint x="275" y="675"/>
+        <di:waypoint x="275" y="140"/>
+        <di:waypoint x="350" y="140"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_03_di" bpmnElement="GF_03">
+        <di:waypoint x="300" y="700"/>
+        <di:waypoint x="325" y="700"/>
+        <di:waypoint x="325" y="300"/>
+        <di:waypoint x="350" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_04_di" bpmnElement="GF_04">
+        <di:waypoint x="480" y="140"/>
+        <di:waypoint x="575" y="140"/>
+        <di:waypoint x="575" y="675"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_05_di" bpmnElement="GF_05">
+        <di:waypoint x="480" y="300"/>
+        <di:waypoint x="525" y="300"/>
+        <di:waypoint x="525" y="700"/>
+        <di:waypoint x="550" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_06_di" bpmnElement="GF_06">
+        <di:waypoint x="600" y="700"/>
+        <di:waypoint x="640" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_07_di" bpmnElement="GF_07">
+        <di:waypoint x="770" y="700"/>
+        <di:waypoint x="810" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_08_di" bpmnElement="GF_08">
+        <di:waypoint x="940" y="700"/>
+        <di:waypoint x="980" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_09_di" bpmnElement="GF_09">
+        <di:waypoint x="1005" y="675"/>
+        <di:waypoint x="1005" y="140"/>
+        <di:waypoint x="1080" y="140"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_10_di" bpmnElement="GF_10">
+        <di:waypoint x="1030" y="700"/>
+        <di:waypoint x="1055" y="700"/>
+        <di:waypoint x="1055" y="300"/>
+        <di:waypoint x="1080" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_25_di" bpmnElement="GF_25">
+        <di:waypoint x="1210" y="140"/>
+        <di:waypoint x="1240" y="140"/>
+        <di:waypoint x="1240" y="470"/>
+        <di:waypoint x="1280" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_26_di" bpmnElement="GF_26">
+        <di:waypoint x="1210" y="300"/>
+        <di:waypoint x="1220" y="300"/>
+        <di:waypoint x="1220" y="590"/>
+        <di:waypoint x="1280" y="590"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_11_di" bpmnElement="GF_11">
+        <di:waypoint x="1410" y="470"/>
+        <di:waypoint x="1505" y="470"/>
+        <di:waypoint x="1505" y="675"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_12_di" bpmnElement="GF_12">
+        <di:waypoint x="1410" y="590"/>
+        <di:waypoint x="1455" y="590"/>
+        <di:waypoint x="1455" y="700"/>
+        <di:waypoint x="1480" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_13_di" bpmnElement="GF_13">
+        <di:waypoint x="1530" y="700"/>
+        <di:waypoint x="1570" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_14_di" bpmnElement="GF_14">
+        <di:waypoint x="1595" y="675"/>
+        <di:waypoint x="1595" y="470"/>
+        <di:waypoint x="1670" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_15_di" bpmnElement="GF_15">
+        <di:waypoint x="1620" y="700"/>
+        <di:waypoint x="1645" y="700"/>
+        <di:waypoint x="1645" y="590"/>
+        <di:waypoint x="1670" y="590"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_16_di" bpmnElement="GF_16">
+        <di:waypoint x="1800" y="470"/>
+        <di:waypoint x="1895" y="470"/>
+        <di:waypoint x="1895" y="675"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_17_di" bpmnElement="GF_17">
+        <di:waypoint x="1800" y="590"/>
+        <di:waypoint x="1845" y="590"/>
+        <di:waypoint x="1845" y="700"/>
+        <di:waypoint x="1870" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_18_di" bpmnElement="GF_18">
+        <di:waypoint x="1920" y="700"/>
+        <di:waypoint x="1960" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_19_di" bpmnElement="GF_19">
+        <di:waypoint x="2090" y="700"/>
+        <di:waypoint x="2130" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_20_di" bpmnElement="GF_20">
+        <di:waypoint x="2260" y="700"/>
+        <di:waypoint x="2300" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_21_di" bpmnElement="GF_21">
+        <di:waypoint x="2325" y="725"/>
+        <di:waypoint x="2325" y="810"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2335" y="760" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_22_di" bpmnElement="GF_22">
+        <di:waypoint x="2260" y="850"/>
+        <di:waypoint x="2195" y="850"/>
+        <di:waypoint x="2195" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_23_di" bpmnElement="GF_23">
+        <di:waypoint x="2350" y="700"/>
+        <di:waypoint x="2390" y="700"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2360" y="678" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_24_di" bpmnElement="GF_24">
+        <di:waypoint x="2520" y="700"/>
+        <di:waypoint x="2560" y="700"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </bpmn:definitions>
