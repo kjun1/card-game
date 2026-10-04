@@ -11,6 +11,8 @@
 - 相手Core HPを0以下にする。
 - 相手が必要なDrawを実行できない。
 
+同一のEffect、Combat Resolution、State Check等によって両Playerの敗北条件が同時に成立した場合、GameはDrawとして終了する。
+
 ## Board
 
 各Playerは以下のZoneを持つ。
@@ -22,6 +24,10 @@
 - Discard
 
 Unit ZoneとSupport Zoneは単一盤面上に存在する。
+
+Zone Capacityを超えるDeploy / Setは実行できない。
+
+Playerは基本ルールによって自分のUnit / Supportを任意にDiscardして空きを作ることはできない。Card Effect等による移動・Destroyはこの制約の対象外である。
 
 ## Card types
 
@@ -39,15 +45,16 @@ Turn Startから始まり、そのTurnで選択された1つのOperationが完�
 
 ActionがReactionによってCancelされた場合、そのActionを含むOperationは完了していない。そのためTurnは終了せず、同じActive PlayerがOperationを選択し直す。
 
-したがって、1 Turn中に複数回のOperation選択やAction Declarationが発生することはあるが、**Turnを終了させるcompleted Operationは1つだけ**である。
+したがって、1 Turn中に複数回のOperation選択やAction Declarationが発生することはあるが、Turnを終了させるcompleted Operationは1つだけである。
 
 ### Turn Start order
 
 1. 自分のUnitをReadyにする。
 2. Deploy直後によるAttack制限を解除する。
-3. 必要な場合Energy Capacityを増加する。
+3. Energy Capacityを1増加する。最大7。
 4. EnergyをCapacityまで回復する。
 5. 1枚Drawする。
+6. DrawによってHand Limitを超えた場合、そのDrawで得たCardを直ちにDiscardする。
 
 Draw不能なら即座に敗北する。
 
