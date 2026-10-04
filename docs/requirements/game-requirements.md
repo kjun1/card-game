@@ -41,6 +41,7 @@ Victory / Defeat
 | GR-015 | Public情報とHidden情報をルール上区別できなければならない。 |
 | GR-016 | Zone Capacityを超えるDeploy / Setを許可してはならない。 |
 | GR-017 | Playerは基本ルールによって自分のBoard Cardを任意にDiscardできてはならない。 |
+| GR-018 | 勝敗条件が成立した時点でGameの結果を確定し、残りのEffectを解決してはならない。適用済みのCost・Effectと確定した結果を保持し、同時に成立した双方の敗北条件だけをDrawとして扱わなければならない。 |
 
 ## Traceability
 
@@ -55,3 +56,4 @@ Victory / Defeat
 | GR-014 | ../rules/deck-rules.md |
 | GR-015 | ../rules/core-rules.md |
 | GR-016〜017 | ../rules/deck-rules.md |
+| GR-018 | ../rules/core-rules.md, ../process/turn-flow.md |

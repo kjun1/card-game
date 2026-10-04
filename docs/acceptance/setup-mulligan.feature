@@ -104,3 +104,31 @@ Feature: Opening HandとMulliganによるGameの準備
     And AのDeckは25枚で「Deck内のCard」を含む
     When Aが「手札1」「手札2」「手札3」「手札4」「Deck内のCard」をMulliganの交換対象に選ぼうとする
     Then Opening Handにない「Deck内のCard」を含めた交換は認められない
+
+  @GR-014 @GR-015 @AC-SETUP-007
+  Scenario Outline: Mulliganの交換枚数だけをOpponentへ公開する
+    Given 両PlayerのOpening Handはそれぞれ5枚でDeckはそれぞれ25枚である
+    And 両PlayerはこのGameでまだMulliganを行っていない
+    And AのOpening Handは「手札1」「手札2」「手札3」「手札4」「手札5」で内容はBに公開されていない
+    And BはまだMulliganの選択をしていない
+    When Aが<交換Card>を選んで<交換枚数>枚のMulliganを行う
+    Then Aの交換枚数が<交換枚数>枚であることはAとBの両方にPublicである
+    And Aが選択したCardの内容はBに公開されない
+    And 退避中のCardの内容もBに公開されない
+    And Aの交換後のHandの内容はBに公開されない
+
+    Examples:
+      | 交換Card                                | 交換枚数 |
+      | 交換なし                                | 0        |
+      | 「手札1」「手札2」                       | 2        |
+      | 「手札1」「手札2」「手札3」「手札4」「手札5」 | 5        |
+
+  @GR-014 @AC-SETUP-008
+  Scenario: Opening Drawより前に両PlayerのDeckを必ずShuffleする
+    Given 両Playerがそれぞれ合法な30枚のDeckを用意している
+    And 両Deckは提出時の順序でまだShuffleされていない
+    And 両PlayerのHandは0枚でコイントスによるFirst Playerの決定が完了している
+    When Game開始の準備を進めOpening Handを配る
+    Then 各PlayerのDeckはそのPlayerの最初のOpening Drawより前にShuffleされ順序がランダムになる
+    And 両PlayerのOpening HandはそれぞれShuffle後のDeckからDrawした5枚である
+    And Mulligan選択前の両PlayerのDeckはそれぞれ25枚である

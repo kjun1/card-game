@@ -10,10 +10,10 @@
 | [Turn](turn.feature) | Turn Start、Operation完了・再選択、Game終了優先 |
 | [Action / Reaction](action-reaction.feature) | 操作別Action指定、検証、Cost、取消と再宣言 |
 | [Attack](attack.feature) | 攻撃資格、Reaction、Block、Commit、Damage・Destroy |
-| [Setup / Mulligan](setup-mulligan.feature) | 先攻決定、Opening Hand、交換対象の退避、両者完了後の返却・Shuffle |
+| [Setup / Mulligan](setup-mulligan.feature) | 先攻決定、Opening前のShuffle、交換対象の退避、両者完了後の返却・Shuffle、交換枚数の公開 |
 | [Resource](resource.feature) | SetupとTurn StartのEnergy、Operation / Reactionの共通予算、Momentum移転とCost不足 |
-| [Board / Zone](board-zone.feature) | Zone Capacity、SupportとSetの共有、任意Discard禁止、公開範囲 |
-| [Deck / Draw / Hand](deck.feature) | Deck構築の枚数制限、逐次Draw、Hand超過、Deck切れ、Hidden情報 |
+| [Board / Zone](board-zone.feature) | Zone Capacity、SupportとSetの共有、任意Discard禁止、SetとDiscardの公開範囲 |
+| [Deck / Draw / Hand](deck.feature) | Deck構築の枚数制限、逐次Draw、Hand超過、Deck切れでの即時終了、両者Drawの先後、Hidden情報 |
 
 要求定義は[Game](../requirements/game-requirements.md)、[Interaction](../requirements/interaction-requirements.md)、[Play-experience](../requirements/play-experience-requirements.md)を参照する。Gherkinは規範文書を具体例で表すものであり、新しいルールやCard Poolを独立して定義しない。
 
@@ -38,6 +38,8 @@ Gherkinのキーワードは英語、説明・本文は日本語とする。`Giv
 ### Observation points
 
 観測時点は宣言後・選択待ち・解決直後の各段階で区切る。Operation解決後のCost・Unit状態・Damageは、**次のPlayerのTurn Start更新が入る前**の結果として確認する。Game終了判定・Operation完了・制御権移転もそれぞれの記述に従って確認し、次のTurn StartによるReady化・Attack制限解除・Energy回復・Drawへは、Scenarioでその開始を明示した場合に進む。これは例が観測する境界の約束であり、ゲームに新しい停止操作やPassを追加するものではない。
+
+複数部分からなるEffectでは中間結果も観測する。勝敗条件が成立した時点で結果を固定し、残りのEffectへ進まない。真に同時の処理によるDrawと、逐次処理の途中での勝敗確定を区別する。既存例の解決済みOperationの完了・Reactionによる取消の記録は、その後のEffect実行を意味しない。
 
 `Scenario Outline`の各行は独立した初期状態から実行する例として読む。例えばAction分類の表では、選んだCard Typeと操作に適合したSource・Zone・Targetを用意する。まだStep Definitionsはなく、文言は実装言語やゲームAPIを規定しない。
 

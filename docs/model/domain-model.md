@@ -62,7 +62,7 @@ classDiagram
 
 | Concept | Responsibility |
 | --- | --- |
-| Game | 対戦ライフサイクルと終了条件 |
+| Game | 対戦ライフサイクルと終了条件。勝敗条件成立時に結果を固定し、残りのEffectを停止する |
 | Player | 意思決定主体、ResourceとZoneの所有 |
 | Core | Playerに対応する勝敗対象 |
 | Card | Parameter / Tag / Abilityを持つObject |
@@ -73,6 +73,10 @@ classDiagram
 | Reaction | Actionに従属する応答。CancelはOperationを完了させず、Game継続時は同じTurnを継続する |
 | Ability | Cardが提供する利用可能な機能 |
 | Effect | Game Stateに実際に発生する変更 |
+
+Discardは各Playerが所有するZoneである。所有Playerは全Cardの内容を確認でき、Opponentへは枚数だけを公開する。
+
+Gameの終了結果はEffectの途中でも確定し、その後は変更しない。同時適用が定義された処理による双方敗北と、順番に解決する途中の敗北は区別する。後者では残りのEffectへ進まない。
 
 ## Turn / Operation cardinality
 

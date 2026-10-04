@@ -64,22 +64,6 @@ Feature: Energyの共有予算とMomentumの移転
     Then AのEnergy Capacityは4でEnergyは4になる
     And BのEnergy Capacityは4でEnergyは4のままである
 
-  @GR-010 @IR-003 @IR-005 @PER-004 @AC-RESOURCE-004
-  Scenario: 合法なBoard Sourceがあれば最初の自Turn前でもSetup Energyを使える
-    合法なBoard SourceはResource検証用の条件付きfixtureである。
-    通常のSetupからそのSourceを得る方法はこの例で定義しない。
-
-    Given AのTurn中でGameは継続中、両PlayerのCore HPは10である
-    And Bはまだ自分の最初のTurnを開始しておらずSetup時のEnergy Capacity 2とEnergy 2を保持している
-    And AはEnergy 3を持ちEnergy 2のAction Tactic「火矢」を宣言している
-    And BのBoardには合法なReaction SourceとしてFace-up Support「事前配置の備え」がある
-    And 「事前配置の備え」のReactionはEnergy 1でAのCoreに1 Damageを与える
-    When Bが「事前配置の備え」のReactionを使用する
-    Then BのEnergyは1でEnergy Capacityは2のままである
-    And AのEnergyは3のままでCore HPは9になる
-    And 「火矢」はCancelされAは同じTurnでOperationを選び直せる
-    And Bの最初のTurnはまだ開始していない
-
   @GR-010 @PER-004 @AC-RESOURCE-005
   Scenario: 残りEnergyと同じCostを支払っても相手へEnergyは移転しない
     Given AのTurn Startが完了しておりGameは継続中で両PlayerのCore HPは10である
@@ -167,3 +151,17 @@ Feature: Energyの共有予算とMomentumの移転
       | Player | Energy | Momentum |
       | A      | 2      | 1        |
       | B      | 4      | 5        |
+
+  @GR-010 @IR-003 @IR-004 @AC-RESOURCE-011
+  Scenario: 通常Setupでは最初の自Turn前に使えるReaction Sourceがない
+    Given コイントスで決まったFirst PlayerはAである
+    And 両Playerは通常のSetupでOpening Handをそれぞれ5枚受け取りまだMulliganを行っていない
+    And AのOpening HandにはEnergy 2でBのCoreに1 Damageを与えるAction Tactic「火矢」がある
+    When 両Playerが0枚交換のMulliganを完了してGame開始の準備が整う
+    Then 両PlayerのUnit ZoneとSupport ZoneにはCardがない
+    And 最初のTurn Start前の両PlayerのEnergy Capacityは2でEnergyは2である
+    When Aの最初のTurnを開始しAが「火矢」を宣言する
+    Then 「火矢」のReaction Windowは開く
+    And Bには使用できるReaction Sourceがない
+    And BはHandのCardをReaction Sourceとして直接使用できない
+    And Bの最初のTurnはまだ開始しておらずEnergy Capacityは2でEnergyは2のままである

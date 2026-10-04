@@ -10,7 +10,7 @@
 
 Game Setup時にEnergy Capacity / Energyを2で初期化し、自分の各Turn StartでCapacityを1増加してからEnergyをCapacityまで回復する。
 
-したがって各Playerの最初の自分TurnではEnergy 3となる一方、後攻Playerも先攻Playerの最初のTurn中にSetup Energy 2をReactionへ使用できる。
+したがって各Playerの最初の自分TurnではEnergy 3となる。後攻Playerも先攻Playerの最初のTurn中にSetup Energy 2を保持するが、通常SetupではReaction SourceがなくReactionできない。
 
 Energyは自分のTurn Startから次の自分Turn Startまで利用できる基本Cost Budgetである。
 
@@ -109,7 +109,7 @@ Block、Reaction、追加AbilityでMomentum用途が競合することも含め�
 ## Validation questions
 
 - 先攻補正なしでFirst Player Advantageが許容範囲か。
-- Setup Energy 2が後攻Playerの初回Reaction能力として適切か。
+- Setup Energy 2の保有と、最初の自TurnのEnergy 3およびReaction Sourceの必要性が理解しやすいか。
 - Energyを自分Operationと相手Turn中のReactionへどう配分するかが意味のある判断になるか。
 - 毎Turn全回復するEnergyのCost差が十分な意思決定になるか。
 - Momentumが一方へ固定されず往復するか。

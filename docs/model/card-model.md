@@ -97,6 +97,8 @@ EffectはGame Stateへ実際に発生させる変更である。
 
 AbilityはEffectを利用する機能であり、Effectそのものとは区別する。
 
+Effectを順番に解決する途中で勝敗条件が成立した場合は、その時点で結果を固定し、残りを解決しない。同時適用が定義された処理はその同時適用の結果を判定する。詳細は[Game objective](../rules/core-rules.md#game-objective)を参照する。
+
 ## Activation categories
 
 - Operationとして使用

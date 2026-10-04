@@ -41,13 +41,17 @@ flowchart TD
     T -- Core --> CD[Deal ATK Damage to Core]
     T -- Unit --> UD[Deal simultaneous ATK Damage]
     UD --> K[Destroy Units with Current HP <= 0]
-    CD --> K
+    CD --> GE{Game ended?}
+    GE -- Yes --> ER([Game End Reported])
+    GE -- No --> K
     K --> OC([Attack Resolution End])
 ~~~
 
-`Attack Resolution End`は`operationCompleted = true`、取消時の`Operation Incomplete`は`operationCompleted = false`を更新後のGame Stateとともに返す。
+Gameが継続する場合、`Attack Resolution End`は`operationCompleted = true`、取消時の`Operation Incomplete`は`operationCompleted = false`を更新後のGame Stateとともに返す。
 
-Game終了判定は[Turn Flow](turn-flow.md)が行う。Attack FlowはGame終了・Operation再選択・Player切替を決定しない。
+ReactionやCore Damageで勝敗条件が成立した場合は、その場で結果を固定し、後続の逐次Effectを行わない。`gameEnded = true`と固定済みの結果、その時点までのStateを[Turn Flow](turn-flow.md)へ返す。Turn Flowは勝敗を再評価せず、Operation再選択・Player切替へ進まない。
+
+致死ReactionでもAttackのCancel記録を保持し、`Operation Incomplete`から終了結果を返す。CoreへのAttack本体を解決して勝敗が確定した場合は、既存のAttack完了記録とともに`Game End Reported`へ進む。この報告は終了後の追加Effectを意味しない。
 
 ## Attack declaration
 
@@ -60,6 +64,8 @@ Declaration時点ではAttackerをExhaustしない。
 AttackerとTargetの選択はAttacking PlayerのUser Taskとし、Ready・Attack制限・Targetの合法性はGame Systemが検証する。不正な宣言は宣言へ戻り、Reaction Windowを開かない。
 
 ReactionもDefending Playerの選択後にGame SystemがSource・Timing・Target・Cost支払い可能性を検証する。辞退は有効な選択として扱い、不正なReactionはCostを消費せずReaction選択へ戻す。合法なReactionだけがSystemによるCost支払い・解決・Attack Cancelへ進む。
+
+Reaction内部の勝敗条件、逐次Effectの停止、Active Playerからの両Player Drawは[Effect resolution and Game end](action-reaction-flow.md#effect-resolution-and-game-end)に従う。
 
 ## Block step
 
@@ -92,6 +98,6 @@ Attack Commit時にAttackerをExhaustする。
 
 Unit Damageは蓄積し、Current HPが0以下ならDestroyする。
 
-Core / UnitのいずれへのDamageでも、その後にDestroy Checkを行ってAttack解決を完了する。勝敗は返却したStateを受けてTurn Flowが評価する。
+CoreへのDamageで勝敗条件が成立したら、その場で結果を固定して返し、後続処理へ進まない。Gameが継続する場合はDestroy Checkを行ってAttack解決を完了する。Unit同士のDamageは同時に適用してからDestroy Checkを行う。同時と定義された1つの処理で両Playerの敗北条件が成立した場合はDrawであり、逐次処理の後段を追加適用して勝敗を変えることはない。
 
 通常のOverkill Damageは他Targetへ移動しない。

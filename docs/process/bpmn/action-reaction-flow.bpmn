@@ -17,6 +17,8 @@
         <bpmn:flowNodeRef>Task_ResolveAction</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_CancelAction</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_OperationComplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_OperationGameEnded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_OperationGameEnded</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_OperationNotComplete</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_PayActionCost</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_PayReactionCost</bpmn:flowNodeRef>
@@ -64,6 +66,7 @@
       <bpmn:outgoing>AR_23</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_ResolveImmediate" name="Resolve Non-Action Operation">
+      <bpmn:documentation>Apply sequential effects only until a defeat condition is first reached. Immediately fix gameEnded and the win/lose/draw result, stop remaining sequential effects, and return the state applied so far. Apply an explicitly simultaneous effect as one unit; if both players meet defeat conditions in that unit, fix a draw. For draws requested from both players, the Active Player goes first; failed required draw stops later processing. Do not reevaluate or overwrite a fixed result.</bpmn:documentation>
       <bpmn:incoming>AR_23</bpmn:incoming>
       <bpmn:outgoing>AR_03</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -95,9 +98,9 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(useReaction)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="AR_12" sourceRef="Task_PayActionCost" targetRef="Task_ResolveAction"/>
-    <bpmn:sequenceFlow id="AR_13" sourceRef="Task_ResolveAction" targetRef="End_OperationComplete"/>
+    <bpmn:sequenceFlow id="AR_13" sourceRef="Task_ResolveAction" targetRef="Gateway_OperationGameEnded"/>
     <bpmn:sequenceFlow id="AR_05" sourceRef="Task_DeclareAction" targetRef="Task_ValidateAction"/>
-    <bpmn:sequenceFlow id="AR_03" sourceRef="Task_ResolveImmediate" targetRef="End_OperationComplete"/>
+    <bpmn:sequenceFlow id="AR_03" sourceRef="Task_ResolveImmediate" targetRef="Gateway_OperationGameEnded"/>
     <bpmn:sequenceFlow id="AR_10" sourceRef="Task_CancelAction" targetRef="End_OperationNotComplete"/>
     <bpmn:sequenceFlow id="AR_06" sourceRef="Task_ChooseReaction" targetRef="Task_ValidateReaction"/>
     <bpmn:serviceTask id="Task_PayReactionCost" name="Pay Reaction Cost">
@@ -106,26 +109,27 @@
       <bpmn:outgoing>AR_08</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_ResolveReaction" name="Resolve Reaction">
+      <bpmn:documentation>Apply sequential effects only until a defeat condition is first reached. Immediately fix gameEnded and the win/lose/draw result, stop remaining sequential effects, and return the state applied so far. Apply an explicitly simultaneous effect as one unit; if both players meet defeat conditions in that unit, fix a draw. For draws requested from both players, the Active Player goes first; failed required draw stops later processing. Do not reevaluate or overwrite a fixed result.</bpmn:documentation>
       <bpmn:incoming>AR_08</bpmn:incoming>
       <bpmn:outgoing>Flow_1itt36p</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1itt36p" sourceRef="Task_ResolveReaction" targetRef="Task_CancelAction"/>
     <bpmn:serviceTask id="Task_ResolveAction" name="Resolve Action">
+      <bpmn:documentation>Apply sequential effects only until a defeat condition is first reached. Immediately fix gameEnded and the win/lose/draw result, stop remaining sequential effects, and return the state applied so far. Apply an explicitly simultaneous effect as one unit; if both players meet defeat conditions in that unit, fix a draw. For draws requested from both players, the Active Player goes first; failed required draw stops later processing. Do not reevaluate or overwrite a fixed result.</bpmn:documentation>
       <bpmn:incoming>AR_12</bpmn:incoming>
       <bpmn:outgoing>AR_13</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_CancelAction" name="Cancel Declared Action">
-      <bpmn:documentation>Do not spend the original Action's unpaid Energy cost or move its Hand Card as a consequence of cancellation itself. Preserve all Reaction costs, effects, and Card movements. A legal redeclaration starts a new Reaction Window only if the Game continues.</bpmn:documentation>
+      <bpmn:documentation>Record cancellation of the declared Action, including when the Reaction has already fixed the Game result. This reporting applies no additional gameplay effect and does not change the fixed result. Do not spend the original unpaid Energy cost or move its Hand Card because of cancellation. Preserve Reaction costs and effects already applied. A legal redeclaration is possible only if the Game continues.</bpmn:documentation>
       <bpmn:incoming>Flow_1itt36p</bpmn:incoming>
       <bpmn:outgoing>AR_10</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="End_OperationComplete" name="Operation Complete">
-      <bpmn:documentation>Return operationCompleted = true and the updated state to turn-flow.bpmn. Game-end evaluation belongs to Turn Flow.</bpmn:documentation>
-      <bpmn:incoming>AR_13</bpmn:incoming>
-      <bpmn:incoming>AR_03</bpmn:incoming>
+      <bpmn:documentation>Return operationCompleted = true, gameEnded = false, and the updated state to turn-flow.bpmn.</bpmn:documentation>
+      <bpmn:incoming>AR_24</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:endEvent id="End_OperationNotComplete" name="Operation Incomplete">
-      <bpmn:documentation>Return operationCompleted = false and the updated state to turn-flow.bpmn. The declared Action was cancelled or Non-Action validation failed. Turn Flow evaluates Game end before deciding whether to allow reselection.</bpmn:documentation>
+      <bpmn:documentation>Return operationCompleted = false and the state applied so far to turn-flow.bpmn. For a terminal Reaction also return gameEnded = true and the result already fixed during resolution; otherwise return gameEnded = false. Turn Flow propagates a fixed result without reevaluation and allows reselection only while play continues.</bpmn:documentation>
       <bpmn:incoming>AR_10</bpmn:incoming>
       <bpmn:incoming>AR_22</bpmn:incoming>
     </bpmn:endEvent>
@@ -171,6 +175,23 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(nonActionValid)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="AR_23" sourceRef="Task_PayImmediateCost" targetRef="Task_ResolveImmediate"/>
+    <bpmn:exclusiveGateway id="Gateway_OperationGameEnded" name="Game Ended?">
+      <bpmn:documentation>Use the result already fixed inside resolution. Do not continue effects or reevaluate defeat conditions.</bpmn:documentation>
+      <bpmn:incoming>AR_13</bpmn:incoming>
+      <bpmn:incoming>AR_03</bpmn:incoming>
+      <bpmn:outgoing>AR_24</bpmn:outgoing>
+      <bpmn:outgoing>AR_25</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_OperationGameEnded" name="Game End Reported">
+      <bpmn:documentation>Return gameEnded = true, the already-fixed result, and the state applied so far. Preserve an existing completion record when all effects were resolved; do not require completion of remaining effects or a new completion decision before reporting Game end.</bpmn:documentation>
+      <bpmn:incoming>AR_25</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="AR_24" name="No" sourceRef="Gateway_OperationGameEnded" targetRef="End_OperationComplete">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(gameEnded)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AR_25" name="Yes" sourceRef="Gateway_OperationGameEnded" targetRef="End_OperationGameEnded">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">gameEnded</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration_ActionReaction">
     <bpmndi:BPMNPlane id="BPMNPlane_Collaboration_ActionReaction" bpmnElement="Collaboration_ActionReaction">
@@ -373,12 +394,13 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AR_13_di" bpmnElement="AR_13">
         <di:waypoint x="1520" y="510"/>
-        <di:waypoint x="2040" y="510"/>
+        <di:waypoint x="1860" y="510"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AR_03_di" bpmnElement="AR_03">
         <di:waypoint x="1030" y="870"/>
-        <di:waypoint x="2058" y="870"/>
-        <di:waypoint x="2058" y="528"/>
+        <di:waypoint x="1840" y="870"/>
+        <di:waypoint x="1840" y="510"/>
+        <di:waypoint x="1860" y="510"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AR_20_di" bpmnElement="AR_20">
         <di:waypoint x="480" y="870"/>
@@ -403,6 +425,22 @@
       <bpmndi:BPMNEdge id="AR_23_di" bpmnElement="AR_23">
         <di:waypoint x="830" y="870"/>
         <di:waypoint x="900" y="870"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Gateway_OperationGameEnded_di" bpmnElement="Gateway_OperationGameEnded" isMarkerVisible="true">
+        <dc:Bounds x="1860" y="485" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1820" y="443" width="130" height="20"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_OperationGameEnded_di" bpmnElement="End_OperationGameEnded">
+        <dc:Bounds x="2120" y="650" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="2050" y="696" width="170" height="40"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="AR_24_di" bpmnElement="AR_24">
+        <di:waypoint x="1910" y="510"/><di:waypoint x="2040" y="510"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1950" y="490" width="30" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_25_di" bpmnElement="AR_25">
+        <di:waypoint x="1885" y="535"/><di:waypoint x="1885" y="620"/><di:waypoint x="2138" y="620"/><di:waypoint x="2138" y="650"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1900" y="580" width="30" height="14"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

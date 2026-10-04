@@ -23,7 +23,7 @@
         <bpmn:flowNodeRef>Task_DiscardDrawn</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_GameEndedTurn</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_Turn</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_EvaluateGameEndTurn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ReceiveGameResultTurn</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_RecordFailedDraw</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
@@ -36,7 +36,7 @@
     <bpmn:sequenceFlow id="TF_16" name="No" sourceRef="Gateway_GameEndedTurn" targetRef="Gateway_OperationCompleted">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(gameEnded)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="TF_13" sourceRef="Task_ExecuteOperation" targetRef="Task_EvaluateGameEndTurn"/>
+    <bpmn:sequenceFlow id="TF_13" sourceRef="Task_ExecuteOperation" targetRef="Task_ReceiveGameResultTurn"/>
     <bpmn:sequenceFlow id="TF_12" sourceRef="Task_SelectOperation" targetRef="Task_ExecuteOperation"/>
     <bpmn:sequenceFlow id="TF_14" name="No / Invalid or Cancelled" sourceRef="Gateway_OperationCompleted" targetRef="Task_SelectOperation">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(operationCompleted)</bpmn:conditionExpression>
@@ -66,12 +66,13 @@
       <bpmn:outgoing>TF_14</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:exclusiveGateway id="Gateway_GameEndedTurn" name="Game Ended?">
+      <bpmn:documentation>Route using the returned gameEnded flag. A fixed result has priority over operationCompleted and must not be reevaluated.</bpmn:documentation>
       <bpmn:incoming>TF_19</bpmn:incoming>
       <bpmn:outgoing>TF_17</bpmn:outgoing>
       <bpmn:outgoing>TF_16</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:task id="Task_ExecuteOperation" name="Execute Selected Operation">
-      <bpmn:documentation>Detailed in action-reaction-flow.bpmn and attack-flow.bpmn. Receive operationCompleted and the updated state after all effects belonging to the resolution. A cancelled Action or invalid Non-Action returns an incomplete operation; evaluate Game end before deciding the next step. A Game may end with zero completed operations in this Turn.</bpmn:documentation>
+      <bpmn:documentation>Detailed in action-reaction-flow.bpmn and attack-flow.bpmn. Resolution fixes gameEnded and the result immediately when a defeat condition is first reached, and stops remaining sequential effects. Receive that fixed result and state applied so far; do not require all effects to finish or reevaluate the result. If play continues, use operationCompleted for completion or reselection. Preserve existing completed/cancelled reporting without further gameplay effects.</bpmn:documentation>
       <bpmn:incoming>TF_12</bpmn:incoming>
       <bpmn:outgoing>TF_13</bpmn:outgoing>
     </bpmn:task>
@@ -115,30 +116,31 @@
       <bpmn:outgoing>TF_01</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:serviceTask id="Task_DiscardDrawn" name="Discard Just-drawn Card">
+      <bpmn:documentation>Immediately move the just-drawn card to its owner's Discard. The owner can inspect all cards in that Discard; only its count is Public to the opponent. Moving the card does not newly reveal its contents to the opponent.</bpmn:documentation>
       <bpmn:incoming>TF_09</bpmn:incoming>
       <bpmn:outgoing>TF_11</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="End_GameEndedTurn" name="Game End Reported">
-      <bpmn:documentation>Return gameEnded = true and the evaluated result to game-flow.bpmn. Game Flow finalizes the game; do not reselect or transfer control.</bpmn:documentation>
+      <bpmn:documentation>Return gameEnded = true and the already-fixed result to game-flow.bpmn. Do not apply later effects, reselect an operation, or transfer control.</bpmn:documentation>
       <bpmn:incoming>TF_17</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:endEvent id="End_Turn" name="Turn Complete">
       <bpmn:documentation>Return gameEnded = false after a completed operation. Game Flow switches the active player.</bpmn:documentation>
       <bpmn:incoming>TF_15</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:serviceTask id="Task_EvaluateGameEndTurn" name="Evaluate Win / Lose / Draw">
-      <bpmn:documentation>Evaluate defeat conditions from the updated state, including Core HP and failed required draws. Set gameEnded and the win/lose/draw result. Defeats caused simultaneously by the same resolution produce a draw. Run before operation-completion handling, including after a cancelled action.</bpmn:documentation>
+    <bpmn:serviceTask id="Task_ReceiveGameResultTurn" name="Receive Fixed Result">
+      <bpmn:documentation>Receive gameEnded and the already-fixed result from the operation resolution or failed required draw. Do not reevaluate defeat conditions or change the result. Forward gameEnded before any operation-completion or reselection decision.</bpmn:documentation>
       <bpmn:incoming>TF_13</bpmn:incoming>
       <bpmn:incoming>TF_18</bpmn:incoming>
       <bpmn:outgoing>TF_19</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Task_RecordFailedDraw" name="Record Failed Required Draw">
-      <bpmn:documentation>Record the active player failing a required draw. Send that state to the common game-end evaluation without selecting an operation.</bpmn:documentation>
+    <bpmn:serviceTask id="Task_RecordFailedDraw" name="Record Failed Draw / Fix Defeat Result">
+      <bpmn:documentation>The active player cannot perform a required draw. Immediately fix that player's defeat and the opponent's victory with gameEnded = true, then report the fixed result. Do not select an operation or apply later effects.</bpmn:documentation>
       <bpmn:incoming>TF_06</bpmn:incoming>
       <bpmn:outgoing>TF_18</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="TF_18" sourceRef="Task_RecordFailedDraw" targetRef="Task_EvaluateGameEndTurn"/>
-    <bpmn:sequenceFlow id="TF_19" sourceRef="Task_EvaluateGameEndTurn" targetRef="Gateway_GameEndedTurn"/>
+    <bpmn:sequenceFlow id="TF_18" sourceRef="Task_RecordFailedDraw" targetRef="Task_ReceiveGameResultTurn"/>
+    <bpmn:sequenceFlow id="TF_19" sourceRef="Task_ReceiveGameResultTurn" targetRef="Gateway_GameEndedTurn"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration_TurnFlow">
     <bpmndi:BPMNPlane id="BPMNPlane_Collaboration_TurnFlow" bpmnElement="Collaboration_TurnFlow">
@@ -220,7 +222,7 @@
       <bpmndi:BPMNShape id="Task_RecordFailedDraw_di" bpmnElement="Task_RecordFailedDraw">
         <dc:Bounds x="880" y="470" width="130" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_EvaluateGameEndTurn_di" bpmnElement="Task_EvaluateGameEndTurn">
+      <bpmndi:BPMNShape id="Task_ReceiveGameResultTurn_di" bpmnElement="Task_ReceiveGameResultTurn">
         <dc:Bounds x="1690" y="330" width="130" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="TF_01_di" bpmnElement="TF_01">

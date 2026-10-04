@@ -137,3 +137,17 @@ Feature: BoardのZone Capacityと公開情報
     And AのSupport Zoneの使用数2とSet Cardが1枚存在することは両PlayerにPublicである
     And 「伏せ札」の内容はHiddenのままでBに公開されない
     And 「守備兵」とFace-up Support「砲台」は両PlayerにPublicのままである
+
+  @GR-015 @GR-017 @IR-018 @AC-BOARD-009
+  Scenario: 未RevealのSet CardをDiscardしてもOpponentへ内容を公開しない
+    Given AのSupport ZoneにはSet済みTactic「未公開の伏せ札」がある
+    And 「未公開の伏せ札」はRevealされておらず内容はBに公開されていない
+    And AのDiscardには「既存1」「既存2」の2枚がある
+    And AのBoardのUnit「回収係」のAbility「回収」にはAction指定がなくCostはEnergy 1である
+    And 「回収」はAのSet CardをRevealせずAのDiscardへ移動するEffectだけを持つ
+    When Aが「未公開の伏せ札」をTargetとして「回収」を使用する
+    Then 「未公開の伏せ札」はRevealされずAのSupport ZoneからDiscardへ移動する
+    And AのDiscardは3枚になりその枚数はAとBの両方にPublicである
+    And Aは自分のDiscardにある「既存1」「既存2」「未公開の伏せ札」の全内容を確認できる
+    And BはAのDiscardについて枚数だけを確認できCardの内容を閲覧できない
+    And 「未公開の伏せ札」の内容はBに公開されない

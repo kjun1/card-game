@@ -13,6 +13,10 @@
 
 同一のEffect、Combat Resolution、State Check等によって両Playerの敗北条件が同時に成立した場合、GameはDrawとして終了する。
 
+勝敗条件が成立した時点で結果を確定し、残りのEffectを打ち切る。既に支払ったCostと適用済みのEffectは保持する。確定した結果を後続処理で変更しない。
+
+同時に適用することが定義された処理では、その同時適用の結果を判定する。一方、同じEffect内でも順番に処理する部分は別であり、先の処理で勝敗が確定したら後の処理を実行してDrawへ変えることはない。
+
 ## Board
 
 各Playerは以下のZoneを持つ。
@@ -78,6 +82,8 @@ Operation例:
 
 Operationは、解決または「何もしない」の選択によって完了する。
 
+Operation / Reactionの解決中に勝敗条件が成立した場合も、その時点で結果を確定して残りのEffectを打ち切る。解決済みOperationの完了記録やReactionによる元Actionの取消記録は、追加Effectの実行やGameの継続を意味しない。
+
 Actionかどうかにかかわらず、Game SystemはSource・Target・Zone Capacity等の合法性とCost支払い可能性を支払い前に検証する。非ActionのOperationは、合法な場合にCostを支払って解決し、Operation Completeとする。不正な非ActionはCost消費・Card移動・Effect解決等の副作用なしでOperation未完了として返し、Gameが継続する場合はOperation Selectionへ戻る。
 
 Actionに分類されるOperationがReactionでCancelされた場合、そのOperationは完了せず、Gameが継続する場合は同じTurn内でOperation Selectionへ戻る。
@@ -128,6 +134,8 @@ Reaction Sourceは原則Board上に存在する。
 
 Handから直接Reactionすることは基本ルールでは認めない。
 
+通常のGame SetupではBoardにCardを配置せず、最初の自Turn前に使用できるReaction Sourceはない。Setup Energy 2を持っていても、この時点ではReactionできない。
+
 ## Information visibility
 
 ### Public
@@ -140,17 +148,24 @@ Handから直接Reactionすることは基本ルールでは認めない。
 - Accumulated Damage
 - Zone使用数
 - Set Cardの存在
+- Mulliganの交換枚数
+- Discard枚数
 
 ### Hidden
 - Deck内容
 - Hand
 - Set Cardの内容
+- Mulliganの交換・退避Cardの内容（Opponentには非公開）
+- Discard内容（Opponentには非公開。所有Playerはすべて確認できる）
+
+Discardへ移動したことによってCard内容をOpponentへ公開しない。未RevealのSet CardやHand超過でDraw直後にDiscardするCardにも同じ公開範囲を適用する。
 
 ## Core invariants
 
 - TurnはActive Playerが制御権を持つ区間である。
 - Turn Start処理は各Turnにつき1回だけ行う。
 - Game終了をOperation完了判定より優先し、終了時は再選択・制御権移転を行わない。
+- 勝敗条件成立時に結果を固定し、残りのEffectを解決しない。適用済みのCost・Effectは保持する。
 - Gameが継続する場合、completed Operationが1つ発生するとTurnが終了し、Opponentへ制御権が移る。
 - Game終了時にはcompleted Operationが0のTurnもあり得る。
 - CancelされたActionはOperation Completeを発生させない。

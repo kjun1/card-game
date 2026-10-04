@@ -29,7 +29,7 @@ Capacity増加はEnergy Refreshより先に行う。
 
 したがって各Playerの最初の自分TurnではCapacity 3 / Energy 3となる。
 
-自分の最初のTurnより前であっても、Game Setup時のEnergy 2はReaction Cost等に使用できる。
+Game Setup時のEnergy 2には、利用開始を最初の自Turnまで待つ制約はない。ただし、通常SetupではBoardにReaction Sourceがないため、最初の自Turn前には実際にReactionできない。Energyの保有と合法なSourceの存在は別の条件である。
 
 Energyは、**自分のTurn Startから次の自分Turn Startまで** Card / Abilityの基本Costに利用できる予算である。
 

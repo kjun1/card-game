@@ -31,12 +31,14 @@ First Playerはコイントスで決定する。
 
 1. 各PlayerがDeckを準備する。
 2. コイントスでFirst Playerを決定する。
-3. 各PlayerがOpening Handとして5枚Drawする。
+3. 各Playerが自分のDeckをShuffleしてCardの順序をランダムにし、そのDeckからOpening Handとして5枚Drawする。
 4. Mulliganを行う。
 5. Core HPを初期化する。
 6. Energy CapacityとEnergyを2に初期化する。
 7. Momentumを各Player 3に初期化する。
 8. Gameを開始する。
+
+通常Setupでは各PlayerのUnit ZoneとSupport Zoneは空であり、Reaction Sourceを事前配置しない。
 
 ## Mulligan
 
@@ -51,11 +53,15 @@ First Playerはコイントスで決定する。
 
 交換Cardを同じMulligan中に再び引くことはない。
 
+Opponentへ知らせるのは交換枚数のみとする。選択したCardと退避中のCardの内容は公開しない。
+
 ## Draw and Hand Limit
 
 Drawは1枚ずつ処理する。
 
-Drawを要求された時点でDeckにCardが存在しない場合、そのPlayerは敗北する。
+Drawを要求された時点でDeckにCardが存在しない場合、そのPlayerの敗北を直ちに確定する。同じEffectに残りのDrawや別の処理があっても実行しない。既に成功したDrawや適用済みのCost・Effectは保持する。
+
+同じEffectで両PlayerにDrawを要求する場合は、Active Playerから処理する。ReactionのEffectでもSourceの所有Playerを優先しない。両Deckが空の状態で両者に1枚Drawを要求した場合、Active PlayerのDraw失敗で敗北が確定し、OpponentのDrawには進まない。
 
 CardをDrawした結果Hand Limit 7を超えた場合、**そのDrawで得たCardを直ちにDiscardする**。
 
@@ -76,3 +82,7 @@ Card Effect等による移動・Destroyは可能である。
 Deck内容とHandはHidden情報である。
 
 Set Cardは存在がPublic、内容がHiddenである。
+
+Mulliganでは交換枚数だけをOpponentへ公開し、交換・退避Cardの内容は公開しない。
+
+DiscardはOpponentへ枚数だけを公開する。所有Playerは自分のDiscardにある全Cardの内容を確認できる。未RevealのSet CardやHand超過によって移動したCardも同じ扱いとする。
