@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_ActionReaction" targetNamespace="https://github.com/kjun1/card-game/bpmn">
   <bpmn:collaboration id="Collaboration_ActionReaction">
-    <bpmn:participant id="Participant_ActionReaction" name="Action / Reaction" processRef="Process_ActionReaction" />
+    <bpmn:participant id="Participant_ActionReaction" name="Action / Reaction" processRef="Process_ActionReaction"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_ActionReaction" name="Action / Reaction Flow" isExecutable="false">
     <bpmn:laneSet id="LaneSet_ActionReaction">
@@ -15,24 +15,53 @@
         <bpmn:flowNodeRef>Task_CancelAction</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_OperationComplete</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_OperationNotComplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_PayActionCost</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_PayReactionCost</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ValidateAction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ActionValid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ValidateReaction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ReactionValid</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_AR_Opponent" name="Opponent">
         <bpmn:flowNodeRef>Task_ChooseReaction</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_PayReactionCost</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_AR_Active" name="Active Player">
-        <bpmn:flowNodeRef>Task_PayActionCost</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_DeclareAction</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:exclusiveGateway id="Gateway_IsAction" name="Is Action?" />
-    <bpmn:userTask id="Task_PayActionCost" name="Pay Action Cost" />
-    <bpmn:userTask id="Task_DeclareAction" name="Declare Action and Required Choices" />
-    <bpmn:task id="Task_ResolveImmediate" name="Resolve Non-Action Operation" />
-    <bpmn:startEvent id="Start_OperationSelected" name="Operation Selected" />
-    <bpmn:exclusiveGateway id="Gateway_UsesReaction" name="Use Reaction?" />
-    <bpmn:userTask id="Task_ChooseReaction" name="Choose Reaction or Decline" />
-    <bpmn:sequenceFlow id="AR_01" sourceRef="Start_OperationSelected" targetRef="Gateway_IsAction" />
+    <bpmn:exclusiveGateway id="Gateway_IsAction" name="Is Action?">
+      <bpmn:incoming>AR_01</bpmn:incoming>
+      <bpmn:outgoing>AR_02</bpmn:outgoing>
+      <bpmn:outgoing>AR_04</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_PayActionCost" name="Pay Action Cost">
+      <bpmn:documentation>After validation, deduct the configured cost from the payer. Transfer any Momentum spent to the opponent. Invalid choices do not spend resources.</bpmn:documentation>
+      <bpmn:incoming>AR_11</bpmn:incoming>
+      <bpmn:outgoing>AR_12</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Task_DeclareAction" name="Declare Action and Required Choices">
+      <bpmn:incoming>AR_04</bpmn:incoming>
+      <bpmn:incoming>AR_16</bpmn:incoming>
+      <bpmn:outgoing>AR_05</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:task id="Task_ResolveImmediate" name="Resolve Non-Action Operation">
+      <bpmn:incoming>AR_02</bpmn:incoming>
+      <bpmn:outgoing>AR_03</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:startEvent id="Start_OperationSelected" name="Operation Selected">
+      <bpmn:outgoing>AR_01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="Gateway_UsesReaction" name="Use Reaction?">
+      <bpmn:incoming>AR_18</bpmn:incoming>
+      <bpmn:outgoing>AR_07</bpmn:outgoing>
+      <bpmn:outgoing>AR_11</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_ChooseReaction" name="Choose Reaction, Targets or Decline">
+      <bpmn:incoming>AR_15</bpmn:incoming>
+      <bpmn:incoming>AR_19</bpmn:incoming>
+      <bpmn:outgoing>AR_06</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="AR_01" sourceRef="Start_OperationSelected" targetRef="Gateway_IsAction"/>
     <bpmn:sequenceFlow id="AR_02" name="No" sourceRef="Gateway_IsAction" targetRef="Task_ResolveImmediate">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(isAction)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
@@ -42,176 +71,273 @@
     <bpmn:sequenceFlow id="AR_07" name="Yes" sourceRef="Gateway_UsesReaction" targetRef="Task_PayReactionCost">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">useReaction</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="AR_08" sourceRef="Task_PayReactionCost" targetRef="Task_ResolveReaction" />
+    <bpmn:sequenceFlow id="AR_08" sourceRef="Task_PayReactionCost" targetRef="Task_ResolveReaction"/>
     <bpmn:sequenceFlow id="AR_11" name="No" sourceRef="Gateway_UsesReaction" targetRef="Task_PayActionCost">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(useReaction)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="AR_12" sourceRef="Task_PayActionCost" targetRef="Task_ResolveAction" />
-    <bpmn:sequenceFlow id="AR_13" sourceRef="Task_ResolveAction" targetRef="End_OperationComplete" />
-    <bpmn:sequenceFlow id="AR_05" sourceRef="Task_DeclareAction" targetRef="Task_ChooseReaction" />
-    <bpmn:sequenceFlow id="AR_03" sourceRef="Task_ResolveImmediate" targetRef="End_OperationComplete" />
-    <bpmn:sequenceFlow id="AR_10" sourceRef="Task_CancelAction" targetRef="End_OperationNotComplete" />
-    <bpmn:sequenceFlow id="AR_06" sourceRef="Task_ChooseReaction" targetRef="Gateway_UsesReaction" />
-    <bpmn:userTask id="Task_PayReactionCost" name="Pay Reaction Cost" />
+    <bpmn:sequenceFlow id="AR_12" sourceRef="Task_PayActionCost" targetRef="Task_ResolveAction"/>
+    <bpmn:sequenceFlow id="AR_13" sourceRef="Task_ResolveAction" targetRef="End_OperationComplete"/>
+    <bpmn:sequenceFlow id="AR_05" sourceRef="Task_DeclareAction" targetRef="Task_ValidateAction"/>
+    <bpmn:sequenceFlow id="AR_03" sourceRef="Task_ResolveImmediate" targetRef="End_OperationComplete"/>
+    <bpmn:sequenceFlow id="AR_10" sourceRef="Task_CancelAction" targetRef="End_OperationNotComplete"/>
+    <bpmn:sequenceFlow id="AR_06" sourceRef="Task_ChooseReaction" targetRef="Task_ValidateReaction"/>
+    <bpmn:serviceTask id="Task_PayReactionCost" name="Pay Reaction Cost">
+      <bpmn:documentation>After validation, deduct the configured cost from the payer. Transfer any Momentum spent to the opponent. Invalid choices do not spend resources.</bpmn:documentation>
+      <bpmn:incoming>AR_07</bpmn:incoming>
+      <bpmn:outgoing>AR_08</bpmn:outgoing>
+    </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_ResolveReaction" name="Resolve Reaction">
       <bpmn:incoming>AR_08</bpmn:incoming>
       <bpmn:outgoing>Flow_1itt36p</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1itt36p" sourceRef="Task_ResolveReaction" targetRef="Task_CancelAction" />
-    <bpmn:serviceTask id="Task_ResolveAction" name="Resolve Action" />
+    <bpmn:sequenceFlow id="Flow_1itt36p" sourceRef="Task_ResolveReaction" targetRef="Task_CancelAction"/>
+    <bpmn:serviceTask id="Task_ResolveAction" name="Resolve Action">
+      <bpmn:incoming>AR_12</bpmn:incoming>
+      <bpmn:outgoing>AR_13</bpmn:outgoing>
+    </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_CancelAction" name="Cancel Declared Action">
       <bpmn:incoming>Flow_1itt36p</bpmn:incoming>
       <bpmn:outgoing>AR_10</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="End_OperationComplete" name="Operation Complete">
-      <bpmn:incoming>AR_03</bpmn:incoming>
+      <bpmn:documentation>Return operationCompleted = true and the updated state to turn-flow.bpmn. Game-end evaluation belongs to Turn Flow.</bpmn:documentation>
       <bpmn:incoming>AR_13</bpmn:incoming>
+      <bpmn:incoming>AR_03</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:endEvent id="End_OperationNotComplete" name="Operation Not Complete / Reselect">
-      <bpmn:documentation>Return to turn-flow.bpmn. Reselect only if the game has not ended.</bpmn:documentation>
+    <bpmn:endEvent id="End_OperationNotComplete" name="Operation Incomplete">
+      <bpmn:documentation>Return operationCompleted = false and the updated state to turn-flow.bpmn. The declared action was cancelled. Turn Flow decides game end or reselection.</bpmn:documentation>
       <bpmn:incoming>AR_10</bpmn:incoming>
     </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_ValidateAction" name="Validate Action">
+      <bpmn:documentation>Check the declared source, choices, targets, zone limits, and ability to pay the action cost without spending resources. Only valid declarations open a reaction window.</bpmn:documentation>
+      <bpmn:incoming>AR_05</bpmn:incoming>
+      <bpmn:outgoing>AR_14</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_ActionValid" name="Action Valid?">
+      <bpmn:incoming>AR_14</bpmn:incoming>
+      <bpmn:outgoing>AR_15</bpmn:outgoing>
+      <bpmn:outgoing>AR_16</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="AR_14" sourceRef="Task_ValidateAction" targetRef="Gateway_ActionValid"/>
+    <bpmn:sequenceFlow id="AR_15" sourceRef="Gateway_ActionValid" targetRef="Task_ChooseReaction" name="Yes">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">actionValid</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AR_16" sourceRef="Gateway_ActionValid" targetRef="Task_DeclareAction" name="No">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(actionValid)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Task_ValidateReaction" name="Validate Reaction">
+      <bpmn:documentation>Declining is a valid choice. For a selected reaction, check its source, timing, targets, and ability to pay. Invalid input returns to reaction selection without costs, effects, or cancellation.</bpmn:documentation>
+      <bpmn:incoming>AR_06</bpmn:incoming>
+      <bpmn:outgoing>AR_17</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_ReactionValid" name="Reaction Valid?">
+      <bpmn:incoming>AR_17</bpmn:incoming>
+      <bpmn:outgoing>AR_18</bpmn:outgoing>
+      <bpmn:outgoing>AR_19</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="AR_17" sourceRef="Task_ValidateReaction" targetRef="Gateway_ReactionValid"/>
+    <bpmn:sequenceFlow id="AR_18" sourceRef="Gateway_ReactionValid" targetRef="Gateway_UsesReaction" name="Yes">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">reactionValid</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AR_19" sourceRef="Gateway_ReactionValid" targetRef="Task_ChooseReaction" name="No">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(reactionValid)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration_ActionReaction">
     <bpmndi:BPMNPlane id="BPMNPlane_Collaboration_ActionReaction" bpmnElement="Collaboration_ActionReaction">
       <bpmndi:BPMNShape id="Participant_ActionReaction_di" bpmnElement="Participant_ActionReaction" isHorizontal="true">
-        <dc:Bounds x="-275" y="30" width="2080" height="900" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Lane_AR_System_di" bpmnElement="Lane_AR_System" isHorizontal="true">
-        <dc:Bounds x="-245" y="630" width="2050" height="300" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Lane_AR_Opponent_di" bpmnElement="Lane_AR_Opponent" isHorizontal="true">
-        <dc:Bounds x="-245" y="330" width="2050" height="300" />
+        <dc:Bounds x="60" y="60" width="2180" height="940"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_AR_Active_di" bpmnElement="Lane_AR_Active" isHorizontal="true">
-        <dc:Bounds x="-245" y="30" width="2050" height="300" />
+        <dc:Bounds x="90" y="60" width="2150" height="160"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_IsAction_di" bpmnElement="Gateway_IsAction" isMarkerVisible="true">
-        <dc:Bounds x="35" y="685" width="50" height="50" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="35.5" y="745" width="49" height="14" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNShape id="Lane_AR_Opponent_di" bpmnElement="Lane_AR_Opponent" isHorizontal="true">
+        <dc:Bounds x="90" y="220" width="2150" height="180"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_PayActionCost_di" bpmnElement="Task_PayActionCost">
-        <dc:Bounds x="795" y="85" width="130" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_DeclareAction_di" bpmnElement="Task_DeclareAction">
-        <dc:Bounds x="-5" y="85" width="130" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_ResolveImmediate_di" bpmnElement="Task_ResolveImmediate">
-        <dc:Bounds x="150" y="670" width="130" height="80" />
+      <bpmndi:BPMNShape id="Lane_AR_System_di" bpmnElement="Lane_AR_System" isHorizontal="true">
+        <dc:Bounds x="90" y="400" width="2150" height="600"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Start_OperationSelected_di" bpmnElement="Start_OperationSelected">
-        <dc:Bounds x="-143" y="692" width="36" height="36" />
+        <dc:Bounds x="150" y="492" width="36" height="36"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="-149" y="728" width="49" height="27" />
+          <dc:Bounds x="98.0" y="536" width="140" height="40"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_UsesReaction_di" bpmnElement="Gateway_UsesReaction" isMarkerVisible="true">
-        <dc:Bounds x="455" y="685" width="50" height="50" />
+      <bpmndi:BPMNShape id="Gateway_IsAction_di" bpmnElement="Gateway_IsAction" isMarkerVisible="true">
+        <dc:Bounds x="250" y="485" width="50" height="50"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="371.5" y="703" width="73" height="14" />
+          <dc:Bounds x="175" y="550" width="90" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_DeclareAction_di" bpmnElement="Task_DeclareAction">
+        <dc:Bounds x="350" y="130" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ValidateAction_di" bpmnElement="Task_ValidateAction">
+        <dc:Bounds x="350" y="470" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ActionValid_di" bpmnElement="Gateway_ActionValid" isMarkerVisible="true">
+        <dc:Bounds x="550" y="485" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="505.0" y="543" width="140" height="40"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_ChooseReaction_di" bpmnElement="Task_ChooseReaction">
-        <dc:Bounds x="415" y="420" width="130" height="80" />
+        <dc:Bounds x="700" y="260" width="130" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_PayReactionCost_di" bpmnElement="Task_PayReactionCost">
-        <dc:Bounds x="795" y="420" width="130" height="80" />
+      <bpmndi:BPMNShape id="Task_ValidateReaction_di" bpmnElement="Task_ValidateReaction">
+        <dc:Bounds x="700" y="470" width="130" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_ResolveReaction_di" bpmnElement="Task_ResolveReaction">
-        <dc:Bounds x="795" y="830" width="130" height="80" />
+      <bpmndi:BPMNShape id="Gateway_ReactionValid_di" bpmnElement="Gateway_ReactionValid" isMarkerVisible="true">
+        <dc:Bounds x="900" y="485" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="855.0" y="543" width="140" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_UsesReaction_di" bpmnElement="Gateway_UsesReaction" isMarkerVisible="true">
+        <dc:Bounds x="1050" y="485" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1010" y="440" width="130" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_PayActionCost_di" bpmnElement="Task_PayActionCost">
+        <dc:Bounds x="1200" y="470" width="130" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_ResolveAction_di" bpmnElement="Task_ResolveAction">
-        <dc:Bounds x="985" y="670" width="130" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_CancelAction_di" bpmnElement="Task_CancelAction">
-        <dc:Bounds x="1145" y="830" width="130" height="80" />
+        <dc:Bounds x="1390" y="470" width="130" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_OperationComplete_di" bpmnElement="End_OperationComplete">
-        <dc:Bounds x="1442" y="692" width="36" height="36" />
+        <dc:Bounds x="2040" y="492" width="36" height="36"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1415" y="654.5" width="90" height="27" />
+          <dc:Bounds x="1988" y="445" width="140" height="27"/>
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_PayReactionCost_di" bpmnElement="Task_PayReactionCost">
+        <dc:Bounds x="1200" y="650" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ResolveReaction_di" bpmnElement="Task_ResolveReaction">
+        <dc:Bounds x="1390" y="650" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CancelAction_di" bpmnElement="Task_CancelAction">
+        <dc:Bounds x="1580" y="650" width="130" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_OperationNotComplete_di" bpmnElement="End_OperationNotComplete">
-        <dc:Bounds x="1442" y="852" width="36" height="36" />
+        <dc:Bounds x="1790" y="672" width="36" height="36"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1426" y="890" width="69" height="40" />
+          <dc:Bounds x="1738.0" y="716" width="140" height="40"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ResolveImmediate_di" bpmnElement="Task_ResolveImmediate">
+        <dc:Bounds x="350" y="830" width="130" height="80"/>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="AR_01_di" bpmnElement="AR_01">
-        <di:waypoint x="-107" y="710" />
-        <di:waypoint x="35" y="710" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="AR_02_di" bpmnElement="AR_02">
-        <di:waypoint x="85" y="710" />
-        <di:waypoint x="150" y="710" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="103" y="690" width="15" height="14" />
-        </bpmndi:BPMNLabel>
+        <di:waypoint x="186" y="510"/>
+        <di:waypoint x="250" y="510"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AR_04_di" bpmnElement="AR_04">
-        <di:waypoint x="60" y="685" />
-        <di:waypoint x="60" y="165" />
+        <di:waypoint x="275" y="485"/>
+        <di:waypoint x="275" y="170"/>
+        <di:waypoint x="350" y="170"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="66" y="416" width="18" height="14" />
+          <dc:Bounds x="285" y="430" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_02_di" bpmnElement="AR_02">
+        <di:waypoint x="275" y="535"/>
+        <di:waypoint x="275" y="870"/>
+        <di:waypoint x="350" y="870"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="285" y="780" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_05_di" bpmnElement="AR_05">
+        <di:waypoint x="415" y="210"/>
+        <di:waypoint x="415" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_14_di" bpmnElement="AR_14">
+        <di:waypoint x="480" y="510"/>
+        <di:waypoint x="550" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_15_di" bpmnElement="AR_15">
+        <di:waypoint x="600" y="510"/>
+        <di:waypoint x="640" y="510"/>
+        <di:waypoint x="640" y="300"/>
+        <di:waypoint x="700" y="300"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="610" y="488" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_16_di" bpmnElement="AR_16">
+        <di:waypoint x="575" y="485"/>
+        <di:waypoint x="575" y="100"/>
+        <di:waypoint x="415" y="100"/>
+        <di:waypoint x="415" y="130"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="585" y="420" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_06_di" bpmnElement="AR_06">
+        <di:waypoint x="765" y="340"/>
+        <di:waypoint x="765" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_17_di" bpmnElement="AR_17">
+        <di:waypoint x="830" y="510"/>
+        <di:waypoint x="900" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_18_di" bpmnElement="AR_18">
+        <di:waypoint x="950" y="510"/>
+        <di:waypoint x="1050" y="510"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="985" y="488" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_19_di" bpmnElement="AR_19">
+        <di:waypoint x="925" y="485"/>
+        <di:waypoint x="925" y="210"/>
+        <di:waypoint x="765" y="210"/>
+        <di:waypoint x="765" y="260"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="935" y="420" width="20" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AR_07_di" bpmnElement="AR_07">
-        <di:waypoint x="480" y="735" />
-        <di:waypoint x="480" y="780" />
-        <di:waypoint x="725" y="780" />
-        <di:waypoint x="725" y="460" />
-        <di:waypoint x="795" y="460" />
+        <di:waypoint x="1075" y="535"/>
+        <di:waypoint x="1075" y="690"/>
+        <di:waypoint x="1200" y="690"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="731" y="610" width="18" height="14" />
+          <dc:Bounds x="1085" y="610" width="20" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AR_08_di" bpmnElement="AR_08">
-        <di:waypoint x="860" y="500" />
-        <di:waypoint x="860" y="830" />
+        <di:waypoint x="1330" y="690"/>
+        <di:waypoint x="1390" y="690"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1itt36p_di" bpmnElement="Flow_1itt36p">
+        <di:waypoint x="1520" y="690"/>
+        <di:waypoint x="1580" y="690"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_10_di" bpmnElement="AR_10">
+        <di:waypoint x="1710" y="690"/>
+        <di:waypoint x="1790" y="690"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AR_11_di" bpmnElement="AR_11">
-        <di:waypoint x="505" y="710" />
-        <di:waypoint x="605" y="710" />
-        <di:waypoint x="605" y="125" />
-        <di:waypoint x="795" y="125" />
+        <di:waypoint x="1100" y="510"/>
+        <di:waypoint x="1200" y="510"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="613" y="408" width="15" height="14" />
+          <dc:Bounds x="1140" y="488" width="20" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AR_12_di" bpmnElement="AR_12">
-        <di:waypoint x="925" y="125" />
-        <di:waypoint x="1050" y="125" />
-        <di:waypoint x="1050" y="670" />
+        <di:waypoint x="1330" y="510"/>
+        <di:waypoint x="1390" y="510"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AR_13_di" bpmnElement="AR_13">
-        <di:waypoint x="1115" y="710" />
-        <di:waypoint x="1442" y="710" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="AR_05_di" bpmnElement="AR_05">
-        <di:waypoint x="125" y="125" />
-        <di:waypoint x="480" y="125" />
-        <di:waypoint x="480" y="420" />
+        <di:waypoint x="1520" y="510"/>
+        <di:waypoint x="2040" y="510"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AR_03_di" bpmnElement="AR_03">
-        <di:waypoint x="215" y="750" />
-        <di:waypoint x="215" y="800" />
-        <di:waypoint x="1460" y="800" />
-        <di:waypoint x="1460" y="728" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="AR_10_di" bpmnElement="AR_10">
-        <di:waypoint x="1275" y="870" />
-        <di:waypoint x="1442" y="870" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="AR_06_di" bpmnElement="AR_06">
-        <di:waypoint x="480" y="500" />
-        <di:waypoint x="480" y="685" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1itt36p_di" bpmnElement="Flow_1itt36p">
-        <di:waypoint x="925" y="870" />
-        <di:waypoint x="1145" y="870" />
+        <di:waypoint x="480" y="870"/>
+        <di:waypoint x="2058" y="870"/>
+        <di:waypoint x="2058" y="528"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

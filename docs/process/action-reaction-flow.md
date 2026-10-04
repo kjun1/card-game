@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Actionとして定義されたOperationに対するReaction処理とOperation完了条件を定義する。
+Actionとして定義されたOperationに対するReaction処理とOperation完了条件を定義し、完了状態と更新後のGame StateをTurn Flowへ返す。
 
 ## Principle
 
@@ -23,23 +23,40 @@ flowchart TD
     N --> C([Operation Complete])
 
     A -- Yes --> D[Declare Action]
-    D --> R[Opponent chooses Reaction or decline]
-    R --> G{Use Reaction?}
+    D --> VA[Validate Action]
+    VA --> AV{Action valid?}
+    AV -- No --> D
+    AV -- Yes --> R[Opponent chooses Reaction, targets or decline]
+    R --> VR[Validate Reaction]
+    VR --> RV{Reaction valid?}
+    RV -- No --> R
+    RV -- Yes --> G{Use Reaction?}
     G -- Yes --> RC[Pay Reaction Cost]
     RC --> RR[Resolve Reaction]
     RR --> X[Cancel Declared Action]
-    X --> U([Operation Not Complete / Reselect])
+    X --> U([Operation Incomplete])
 
     G -- No --> AC[Pay Action Cost]
     AC --> AR[Resolve Action]
     AR --> C
 ~~~
 
-Operation解決後のGame終了判定は[Turn Flow](turn-flow.md)で行う。ReactionでGameが終了した場合も、Operation再選択よりGame終了を優先する。
+`Operation Complete`は`operationCompleted = true`、`Operation Incomplete`は`operationCompleted = false`を更新後のGame Stateとともに[Turn Flow](turn-flow.md)へ返す。
+
+Game終了判定とOperation再選択の判断はTurn Flowが行う。Reactionで致死状態になった場合も、まずGame終了判定を行う。
+
+## Selection and validation
+
+- Active PlayerはActionのSource・Target等を宣言し、OpponentはReactionのSource・Target等を選択するか辞退する。
+- Game SystemはAction宣言の合法性とCost支払い可能性を検証し、合法な宣言だけがReaction Windowを開く。
+- Reactionの辞退は有効な選択として扱う。Reactionを選択した場合は、Game SystemがSource・Timing・Target・Cost支払い可能性を検証する。
+- 不正なAction宣言は宣言へ、不正なReactionはReaction選択へ戻る。検証失敗ではCost消費・Effect解決・Action Cancelを行わない。
 
 ## Cost semantics
 
 Action本体のEnergy CostはDeclaration時点では消費しない。
+
+Cost支払いはGame SystemのService Taskとする。検証後に設定されたCostを引き、Momentumを使用した場合は同量をOpponentへ移転する。
 
 Reactionが使用された場合:
 

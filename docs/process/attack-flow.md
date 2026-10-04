@@ -4,24 +4,34 @@
 
 ## Purpose
 
-Attack ActionのDeclarationからReaction、Block、Combat、Operation完了までを定義する。
+Attack ActionのDeclarationからReaction、Block、Combat、Destroy Checkまでを定義し、解決結果と更新後のGame StateをTurn Flowへ返す。
 
 ## Review preview
 
 ~~~mermaid
 flowchart TD
     S[Select Attack Operation] --> D[Declare Attacker and Target]
-    D --> R[Defender chooses Reaction or decline]
-    R --> G{Use Reaction?}
+    D --> VA[Validate Attack]
+    VA --> AV{Attack valid?}
+    AV -- No --> D
+    AV -- Yes --> R[Defender chooses Reaction, targets or decline]
+    R --> VR[Validate Reaction]
+    VR --> RV{Reaction valid?}
+    RV -- No --> R
+    RV -- Yes --> G{Use Reaction?}
 
     G -- Yes --> RC[Pay Reaction Cost]
     RC --> RR[Resolve Reaction]
     RR --> X[Cancel Attack]
-    X --> O([Operation Not Complete / Reselect])
+    X --> O([Operation Incomplete])
 
     G -- No --> B[Defender chooses Block or no Block]
     B --> BG{Use Block Ability?}
-    BG -- Yes --> BC[Select Blocking Unit and Pay Cost]
+    BG -- Yes --> BS[Select Blocking Unit]
+    BS --> BV[Validate Block]
+    BV --> VBG{Block valid?}
+    VBG -- No --> B
+    VBG -- Yes --> BC[Pay Block Cost]
     BC --> BT[Change Final Target]
     BT --> C[Attack Commit]
 
@@ -31,14 +41,13 @@ flowchart TD
     T -- Core --> CD[Deal ATK Damage to Core]
     T -- Unit --> UD[Deal simultaneous ATK Damage]
     UD --> K[Destroy Units with Current HP <= 0]
-    CD --> V[Evaluate Game End]
-    K --> V
-    V --> F{Game Ended?}
-    F -- Yes --> GE([Game End])
-    F -- No --> OC([Operation Complete])
+    CD --> K
+    K --> OC([Attack Resolution End])
 ~~~
 
-ReactionでGameが終了した場合は、[Turn Flow](turn-flow.md)のGame終了判定により、Operationを再選択せず終了する。
+`Attack Resolution End`は`operationCompleted = true`、取消時の`Operation Incomplete`は`operationCompleted = false`を更新後のGame Stateとともに返す。
+
+Game終了判定は[Turn Flow](turn-flow.md)が行う。Attack FlowはGame終了・Operation再選択・Player切替を決定しない。
 
 ## Attack declaration
 
@@ -47,6 +56,10 @@ AttackerはReadyかつAttack可能でなければならない。
 Targetには常にEnemy CoreまたはEnemy Unitを指定できる。
 
 Declaration時点ではAttackerをExhaustしない。
+
+AttackerとTargetの選択はAttacking PlayerのUser Taskとし、Ready・Attack制限・Targetの合法性はGame Systemが検証する。不正な宣言は宣言へ戻り、Reaction Windowを開かない。
+
+ReactionもDefending Playerの選択後にGame SystemがSource・Timing・Target・Cost支払い可能性を検証する。辞退は有効な選択として扱い、不正なReactionはCostを消費せずReaction選択へ戻す。合法なReactionだけがSystemによるCost支払い・解決・Attack Cancelへ進む。
 
 ## Block step
 
@@ -66,6 +79,10 @@ Momentum 2: Block
 - Momentum Costを使用した場合は相手へ移転する
 - BlockはActionではないためReaction Windowを作らない
 
+Blocking Unitの選択はDefending PlayerのUser Taskとする。その後、Game SystemがBlock AbilityとCost支払い可能性を検証し、Costを支払い、Final Targetを変更する。Momentumの支払いでは同量をOpponentへ移転する。
+
+不正なBlockはBlockするかどうかの選択へ戻し、別のBlocking Unitの選択またはBlock辞退を受け付ける。この段階ではCost支払い・Target変更・AttackerのExhaustを行わない。
+
 ## Combat
 
 Attack Commit時にAttackerをExhaustする。
@@ -74,5 +91,7 @@ Attack Commit時にAttackerをExhaustする。
 - Final TargetがUnit: 両UnitがATK分を同時にDamage
 
 Unit Damageは蓄積し、Current HPが0以下ならDestroyする。
+
+Core / UnitのいずれへのDamageでも、その後にDestroy Checkを行ってAttack解決を完了する。勝敗は返却したStateを受けてTurn Flowが評価する。
 
 通常のOverkill Damageは他Targetへ移動しない。
