@@ -1,6 +1,6 @@
 # Acceptance specifications
 
-要求と規範的ルールを具体例へ落とし込み、実装前に仕様の矛盾と不足をレビューする層。現在はGherkinの構文・要求参照・Scenario IDを検証する。ゲーム動作を実行する受入テストはまだない。
+要求・変更案を具体例で検討し、実装前に仕様の疑問を解消するためのExample MappingとGherkinを管理する。現在はGherkinの構文・要求参照・Scenario IDを検証する。ゲーム動作を実行する受入テストはまだない。
 
 ## Files
 
@@ -15,16 +15,23 @@
 
 ## Authoring
 
-1. 要求とRulesを確認し、Example MappingにCapabilityとRule、根拠へのリンクを書く。処理順はProcessの説明とBPMNにも照合する。
-2. 正常例・境界例・拒否される例を、具体的なResource値・Zone・Unit状態と観測結果で記述する。
-3. 各Scenario / Scenario Outlineに要求タグと一意なScenario IDを直接付ける。根拠や前提に疑問があれば仕様を確定してから例へ反映する。
-4. FeatureとExample Mappingを一緒に更新し、仕様検証と人によるルール整合レビューを行う。
+1. 要求・変更案から対象のCapabilityを選び、既存のRules・Process・Modelを確認する。
+2. Example MappingにRule・Example・Questionを整理する。具体的なResource値・Zone・Unit状態を使い、正常例・境界例・拒否される例から疑問を見つける。
+3. Questionを解消し、合意した結論と根拠をExample Mappingへ反映する。議論・未決事項はGitHub Issuesで管理する。
+4. 合意した具体例をScenario / Scenario Outlineにし、要求タグと一意なScenario IDを直接付ける。
+5. 要求・BPMN・Rules・Modelなどの規範文書へ合意内容を反映し、Featureと照合して仕様検証を行う。
+
+全体の開発手順は[Change policy](../README.md#change-policy)を参照する。
+
+### Gherkin conventions
 
 Gherkinのキーワードは英語、説明・本文は日本語とする。`Given`は初期状態、`When`はPlayerの選択やゲームイベント、`Then`は外部から確かめられる結果を表す。BPMN内部のTask名やUIのクリック手順をStepにしない。宣言・応答・解決の途中を確認する例では、`When` / `Then`を複数回使う。
 
-各FeatureのBackgroundは共通の対戦状態だけを記述する。Scenarioの値はBackgroundの値を上書きする。Card名やAbilityは例のためのfixtureであり、製品Cardの追加やCard Schemaの決定ではない。各例で挙げたCost・Effect以外の追加能力・Triggerは持たず、省略した前提は合法で当該結果へ影響しないものとする。
+各FeatureのBackgroundは共通の対戦状態だけを記述する。この受入仕様では、ScenarioのGivenで指定した値をfixtureの最終値とする。Card名やAbilityは例のためのfixtureであり、製品Cardの追加やCard Schemaの決定ではない。各例で挙げたCost・Effect以外の追加能力・Triggerは持たず、省略した前提は合法で当該結果へ影響しないものとする。
 
 「Action Tactic」は**Play操作にAction指定があるTactic**の略称であり、Card全体をActionに分類する語ではない。Setなど他の操作への指定は含まない。「Action Ability」も当該AbilityにAction指定があることだけを表す。
+
+### Observation points
 
 観測時点は宣言後・選択待ち・解決直後の各段階で区切る。Operation解決後のCost・Unit状態・Damageは、**次のPlayerのTurn Start更新が入る前**の結果として確認する。Game終了判定・Operation完了・制御権移転もそれぞれの記述に従って確認し、次のTurn StartによるReady化・Attack制限解除・Energy回復・Drawへは、Scenarioでその開始を明示した場合に進む。これは例が観測する境界の約束であり、ゲームに新しい停止操作やPassを追加するものではない。
 
@@ -33,11 +40,16 @@ Gherkinのキーワードは英語、説明・本文は日本語とする。`Giv
 ## Tags and traceability
 
 ~~~gherkin
-@GR-008 @IR-008 @IR-020 @AC-AR-012
+@IR-005 @IR-006 @IR-007 @IR-008 @IR-020 @AC-AR-012
 Scenario: Cancel後の手札保持を確認する
-  Given 合法なActionを宣言している
-  When 相手が合法なReactionを使用する
-  Then 元ActionがCancelされOperationは未完了になる
+  Given AのTurnで両PlayerのCore HPは10、Energyは3である
+  And AがHandのEnergy 2のAction Tactic「火矢」を宣言している
+  And BのBoardのReaction「迎撃」はEnergy 1でAのCoreに1 Damageを与える
+  When Bが「迎撃」を使用する
+  Then 「火矢」はCancelされOperationは未完了になる
+  And 「火矢」はAのHandに残りAのEnergyは3のままである
+  And BのEnergyは2になりAのCore HPは9になる
+  And Gameは継続しAは同じTurnでOperationを選び直せる
 ~~~
 
 - 要求タグは`@GR-001`、`@IR-001`、`@PER-001`形式で、要求定義表に存在するIDを1つ以上付ける。
@@ -54,6 +66,7 @@ Scenario: Cancel後の手札保持を確認する
 リポジトリのルートでNode.js 24系とnpmを使用する。`.nvmrc`と`package.json`の`engines.node`がバージョン指定の根拠であり、GitHub Actionsも`.nvmrc`を参照する。
 
 ~~~sh
+nvm install
 nvm use
 npm ci
 npm test
