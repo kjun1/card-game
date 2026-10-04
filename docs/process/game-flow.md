@@ -62,6 +62,6 @@ MulliganでOpponentへ知らせるのは交換枚数だけであり、選択し�
 
 通常Setupでは各PlayerのUnit ZoneとSupport Zoneは空であり、Reaction Sourceを事前配置しない。
 
-同時と定義された1つの処理で両Playerの敗北条件が同時に成立した場合はDrawとする。逐次処理で先に成立した勝敗を後続処理によって変更しない。
+対戦中のEffectの同時適用・逐次処理・Player順は[Effect Resolution Model](../model/effect-resolution-model.md)に従う。この共通規則は、Setupの両Playerによる独立したMulligan選択・並行交換を逐次Effectへ変更するものではない。
 
 勝敗は条件が成立した処理の時点で固定する。Game FlowはTurn Flowから返された`gameEnded`と固定済みの結果を使用し、盤面から勝敗を再判定しない。終了が報告された場合は結果を記録し、継続の場合だけActive Playerを切り替える。

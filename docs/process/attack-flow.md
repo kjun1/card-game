@@ -65,7 +65,7 @@ AttackerとTargetの選択はAttacking PlayerのUser Taskとし、Ready・Attack
 
 ReactionもDefending Playerの選択後にGame SystemがSource・Timing・Target・Cost支払い可能性を検証する。辞退は有効な選択として扱い、不正なReactionはCostを消費せずReaction選択へ戻す。合法なReactionだけがSystemによるCost支払い・解決・Attack Cancelへ進む。
 
-Reaction内部の勝敗条件、逐次Effectの停止、Active Playerからの両Player Drawは[Effect resolution and Game end](action-reaction-flow.md#effect-resolution-and-game-end)に従う。
+Reaction内部のEffectStep・SimultaneousGroup・勝敗判定は[Effect Resolution Model](../model/effect-resolution-model.md)に従う。両Playerへ逐次適用するEffectはDrawに限らず[Player order](../model/effect-resolution-model.md#player-order)を使い、Reaction Sourceの所有PlayerではなくActive Playerから処理する。
 
 ## Block step
 
@@ -94,10 +94,12 @@ Blocking Unitの選択はDefending PlayerのUser Taskとする。その後、Gam
 Attack Commit時にAttackerをExhaustする。
 
 - Final TargetがCore: Attacker ATK分をCoreへDamage
-- Final TargetがUnit: 両UnitがATK分を同時にDamage
+- Final TargetがUnit: 両UnitがATK分を1つのSimultaneousGroupとして同時にDamage
 
 Unit Damageは蓄積し、Current HPが0以下ならDestroyする。
 
-CoreへのDamageで勝敗条件が成立したら、その場で結果を固定して返し、後続処理へ進まない。Gameが継続する場合はDestroy Checkを行ってAttack解決を完了する。Unit同士のDamageは同時に適用してからDestroy Checkを行う。同時と定義された1つの処理で両Playerの敗北条件が成立した場合はDrawであり、逐次処理の後段を追加適用して勝敗を変えることはない。
+CoreへのDamageで勝敗条件が成立したら、[Game end](../model/effect-resolution-model.md#game-end)に従って結果を固定して返し、後続処理へ進まない。Gameが継続する場合はDestroy Checkを行ってAttack解決を完了する。Unit同士のDamageはSimultaneousGroup全体を適用してからDestroy Checkを行い、Active Playerを先にDamage処理する逐次Effectへ変更しない。
+
+DestroyによるDiscard移動後の閲覧権は[Current visibility](../model/information-model.md#current-visibility)に従う。OpponentはDiscard内容を自由に確認できないが、UnitがPublicだった時点の観測は[Player knowledge](../model/information-model.md#player-knowledge)として別に扱う。
 
 通常のOverkill Damageは他Targetへ移動しない。

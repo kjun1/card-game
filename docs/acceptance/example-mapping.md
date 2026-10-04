@@ -203,6 +203,7 @@
 | Z4 | 基本ルールで自分のBoard Cardを任意Discardして空きを作ることはできない。Card Effectによる移動・Destroyは別であり、UnitのDestroyはDiscardへの移動を伴う。[GR-017](../requirements/game-requirements.md#requirements)、[Board](../rules/core-rules.md#board)、[Zone Capacity](../rules/deck-rules.md#zone-capacity)、[Damage and Destroy](../rules/combat-rules.md#damage-and-destroy)、[Effect](../model/card-model.md#effect) |
 | Z5 | Unit・Face-up Support・Zone使用数はPublic。Set Cardは存在とSlot使用がPublic、内容はHiddenであり、HandからSetしても内容はOpponentへ公開されない。[Information visibility](../rules/core-rules.md#information-visibility)、[Information](../rules/deck-rules.md#information)、[Set state](../model/state-model.md#set-state) |
 | Z6 | DiscardはOpponentへ枚数だけを公開し、所有Playerは全Cardの内容を確認できる。未RevealのSet CardもDiscard移動によってOpponentへ内容を公開しない。[Information visibility](../rules/core-rules.md#information-visibility)、[Information](../rules/deck-rules.md#information)、[Zoneの責務](../model/domain-model.md#responsibilities) |
+| Z7 | Current visibilityは現在の閲覧権限、Player KnowledgeはPlayerが観測して得た情報を扱う。PublicだったUnitがDiscardへ移っても公開時の観測事実は失われず、それによってDiscard全体の閲覧権限を得ることもない。未観測のCard内容は移動だけでは知識に加わらない。GR-020、[Information Model](../model/information-model.md#player-knowledge)、[Information visibility](../rules/core-rules.md#information-visibility) |
 
 [board-zone.feature](board-zone.feature)のExamples:
 
@@ -217,6 +218,8 @@
 | AC-BOARD-007 | Z4 | fixture AbilityによるUnit / Face-up Support / Set CardのHandへの移動、またはUnitのDestroyによるDiscard移動は成立し、元のZoneに1 Slotの空きができる | GR-013, GR-017 |
 | AC-BOARD-008 | Z1, Z2, Z5 | HandのCardをSetするとSupport Zoneの使用数は1→2。Unit・Face-up Support・Setの存在・Slot使用はPublicだがSet Cardの内容はOpponentへ公開されない | GR-013, GR-015, IR-017, IR-018 |
 | AC-BOARD-009 | Z4, Z6 | 未RevealのSet Cardを合法なEffectでDiscardへ移す。Discardは2→3枚でOpponentは枚数だけを確認でき、所有Playerは3枚すべての内容を確認できる | GR-015, GR-017, IR-018 |
+| AC-BOARD-010 | Z6, Z7 | Bが公開中に観測したAのUnitがDestroyされDiscard 2→3枚になっても、観測したName・ParameterとDestroyの事実は保持する。BはDiscard全体を閲覧できず、他の2枚の内容も新たに得ない | GR-015, GR-020 |
+| AC-BOARD-011 | Z5, Z6, Z7 | Bが内容を見ていないSet CardのDiscard移動では、公開された存在・移動・枚数変化だけを観測し、未公開のCard内容を知識に加えない | GR-015, GR-020, IR-018 |
 
 ### Board / ZoneのQuestion
 
@@ -227,6 +230,7 @@
 | Set済みTacticなら基本ルールで任意Discardしてよいか | 解決済み。GR-017の対象は自分のBoard Card全体であり、Set Cardも含む。規範文書の表記をこの既存要求へ揃え、Effectによる移動と区別する。Z4 | AC-BOARD-006〜007 |
 | HiddenなSet Cardは占有SlotもOpponentに見せないか | 解決済み。内容だけがHiddenであり、存在とSlot使用はPublic。Z5 | AC-BOARD-008 |
 | Q-BOARD-001: Discardへ移動したCardの内容はPublicか。Set CardがRevealを経ずに移動した場合も同じか | ユーザー合意により解決済み。相手には枚数のみ公開し、所有Playerは全Cardの内容を確認できる。未RevealのSet Cardも同じ扱い。Z6 | AC-BOARD-009、AC-DECK-012 |
+| 現在HiddenになったCardについて、以前の公開時に観測した情報も失われるか | レビュー対応として確定。現在のinspectionと観測済み事実を別責務とする。Discardの枚数のみ公開という規則は現在の閲覧権限を定め、Playerの過去の観測を消すものではない。[レビュー](https://github.com/kjun1/card-game/pull/9#issuecomment-5981379206)、Z7 | AC-BOARD-010〜011 |
 
 ## Capability: Deckを構築しDrawとHandを管理する
 
@@ -236,7 +240,7 @@
 | D2 | Drawは1枚ずつ処理する。Hand Limitは7であり、Drawで超えた場合はそのCardを直ちにDiscardし、既存Handの別Cardを代わりに選べない。[Draw and Hand Limit](../rules/deck-rules.md#draw-and-hand-limit)、[Card availability](../design/balance-model.md#card-availability)、[Zoneの責務](../model/domain-model.md#responsibilities) |
 | D3 | Deckが0枚になるだけでは敗北せず、必要なDrawの時点でCardがなければ直ちに敗北を確定する。残りのEffectを解決せず、再選択・Player切替も行わない。既に適用したCost・Effectは保持する。GR-018、[Draw and Hand Limit](../rules/deck-rules.md#draw-and-hand-limit)、[Game objective](../rules/core-rules.md#game-objective)、[Turn Flow](../process/turn-flow.md#semantics)、[Turn BPMN](../process/bpmn/turn-flow.bpmn) |
 | D4 | Deck内容とHandはHidden。通常のDrawでHandへ加えただけでは、その内容をOpponentへ公開しない。超過してDiscardへ移動した場合も相手へは枚数のみ公開し、所有Playerは全内容を確認できる。[Information](../rules/deck-rules.md#information)、[Information visibility](../rules/core-rules.md#information-visibility)、[Domain Model](../model/domain-model.md#model) |
-| D5 | 同じEffectで両PlayerにDrawを要求する場合はActive Playerから処理する。先にDraw不能になったPlayerの敗北を直ちに確定し、残りのDrawへ進まない。[Draw and Hand Limit](../rules/deck-rules.md#draw-and-hand-limit)、[Game objective](../rules/core-rules.md#game-objective) |
+| D5 | 両者Drawは複数Playerへの逐次適用に共通するPlayer orderの具体例として、Active Playerから処理する。[Player order](../model/effect-resolution-model.md#player-order)、先にDraw不能になったPlayerの敗北を直ちに確定し、残りのDrawへ進まない。[Draw and Hand Limit](../rules/deck-rules.md#draw-and-hand-limit)、[Game objective](../rules/core-rules.md#game-objective) |
 
 [deck.feature](deck.feature)のExamples:
 
@@ -270,6 +274,41 @@
 | Deck内容・HandがHiddenなら枚数もHiddenと解釈するか | 解決済み。Core RulesはDeck / HandをZoneに含め、Zone使用数をPublicとしている。内容のHiddenから枚数のHiddenを導かず、本Featureは内容公開だけを検証する。[Board](../rules/core-rules.md#board)、D4 | AC-DECK-007 |
 | Q-DECK-001: 複数部分からなるEffectの途中でDrawに失敗した場合、残りのEffectは解決するか | ユーザー合意により解決済み。勝敗条件成立時に結果を固定して残りのEffectを打ち切り、適用済みのCost・Effectを保持する。同時成立だけをDrawとし、逐次処理の後半で結果を変えない。D3・T4・GR-018 | AC-DECK-009、AC-TURN-011・013〜014 |
 | Q-DECK-002: 両PlayerにDrawを要求する1つのEffectでは、どちらから処理し、双方のDraw不能を同時敗北として扱うか | ユーザー合意により解決済み。Active Playerから処理し、必要なDrawに失敗した時点で敗北を確定する。相手のDrawへ進めず、両Deckが空でも同時敗北にはしない。D3・D5 | AC-DECK-010〜011・013 |
+
+## Capability: Effectの解決順と勝敗判定の境界を扱う
+
+| Rule | 内容と根拠 |
+| --- | --- |
+| E1 | Resolutionは順序付きのEffectStepからなる。逐次適用ごとに勝敗条件を確認し、成立時に結果を固定して以降のStepを停止する。支払済みCost・適用済みEffectは保持する。GR-018、[Resolution steps](../model/effect-resolution-model.md#resolution-steps)、[Game end](../model/effect-resolution-model.md#game-end)、[Game objective](../rules/core-rules.md#game-objective)、[Action / Reaction Flow](../process/action-reaction-flow.md#effect-resolution-and-game-end) |
+| E2 | 明示された同時適用をSimultaneousGroupとして扱い、Group全体の適用後に勝敗を判定する。両Player対象というだけで同時適用にはならない。[Resolution steps](../model/effect-resolution-model.md#resolution-steps)、[Combat resolution](../rules/combat-rules.md#combat-resolution)、[Game objective](../rules/core-rules.md#game-objective) |
+| E3 | 複数Playerへ逐次適用するEffectは、対象のActive Playerを先、Game継続時にOpponentを次として処理する。Source所有者からは始めず、Draw / Discard / Card移動で共通の順序を使う。同時適用や別々のEffectStepに明示された順序は変更しない。GR-019、[Player order](../model/effect-resolution-model.md#player-order)、[Effect resolution](../rules/core-rules.md#effect-resolution)、[Draw and Hand Limit](../rules/deck-rules.md#draw-and-hand-limit) |
+
+[effect-resolution.feature](effect-resolution.feature)のExamples:
+
+| Scenario ID | Rule | 具体例と期待結果 | Requirements |
+| --- | --- | --- | --- |
+| AC-RESOLUTION-001 | E1 | Aの指定Hand CardをDiscardへ移した後、BのCore HP 2→0で勝敗を固定する。次のAの空DeckからのDrawは行わず、先のCard移動と支払ったCostを保持する | GR-002, GR-018 |
+| AC-RESOLUTION-002 | E1, E2 | 両Core HP 2に同時に2 Damageを与えるGroup全体を適用し、双方0でDrawを確定する。その後にある空DeckからのDrawは実行しない | GR-002, GR-004, GR-018 |
+| AC-RESOLUTION-003 | E1, E3 | 非Active PlayerのReactionが両CoreへPlayerごとに2 Damageを逐次適用する。Active Player A / BのHP 2→0で敗北を固定し、OpponentのHP 2は変わらず、Reaction Costは保持する | GR-002, GR-018, GR-019, IR-005 |
+| AC-RESOLUTION-004 | E3 | 非Active PlayerのReactionで両Playerの指定Cardを逐次Discard / Unit ZoneからHandへ移動する。Active Player A / B側だけの移動を先に観測し、その後Opponent側も移動する | GR-019, IR-005 |
+
+既存の対応例:
+
+| Scenario ID | Rule | 確認する振る舞い |
+| --- | --- | --- |
+| [AC-TURN-011](turn.feature) | E2 | 両Coreへの同時DamageによるDraw |
+| [AC-TURN-013〜014](turn.feature) | E1 | 逐次処理で最初に成立した結果を固定し、適用済み結果を保持する |
+| [AC-DECK-008〜011・013](deck.feature) | E1, E3 | 1枚ずつのDraw、Active Player優先、Source所有者との区別、途中の敗北で停止 |
+| [AC-ATK-011・013](attack.feature) | E2 | Unit同士のDamageの同時適用 |
+
+### Effect ResolutionのQuestion
+
+| Question | 状態・結論と根拠 | Acceptance Scenario ID |
+| --- | --- | --- |
+| Effectの順序・同時適用・終了判定をどの単位で表すか | レビュー対応として確定。Resolution / EffectStep / SimultaneousGroupを概念モデルにし、GR-018の判定境界を示す。[レビュー](https://github.com/kjun1/card-game/pull/9#issuecomment-5981379206)、E1・E2 | AC-RESOLUTION-001〜002 |
+| Active Playerを先にする順序はDraw専用か | レビュー対応として確定。複数Playerへ逐次適用するEffectの共通Player orderとし、明示された同時適用とは区別する。[補足レビュー](https://github.com/kjun1/card-game/pull/9#issuecomment-5981429678)、E3 | AC-RESOLUTION-003〜004、AC-DECK-010〜011・013 |
+
+モデルはゲーム意味論と責務を表す。詳細Card Schema、Triggerの待ち行列、同時Effect間の競合解消、Hidden領域の個体追跡、観測履歴の保存・表示方法は今回の具体例で定義しない。
 
 ## Turn / Action / Attack: resolved questions
 

@@ -151,3 +151,30 @@ Feature: BoardのZone Capacityと公開情報
     And Aは自分のDiscardにある「既存1」「既存2」「未公開の伏せ札」の全内容を確認できる
     And BはAのDiscardについて枚数だけを確認できCardの内容を閲覧できない
     And 「未公開の伏せ札」の内容はBに公開されない
+
+  @GR-015 @GR-020 @AC-BOARD-010
+  Scenario: Discardの閲覧制限によって過去に公開されたUnitの観測情報は失われない
+    Given AのUnit ZoneにはUnit「公開兵」がありATKは2でMax HPは3である
+    And Bは「公開兵」のNameとATK 2とMax HP 3をPublic情報として既に観測している
+    And AのDiscardにはBが内容を観測していないCardが2枚ある
+    And AのBoardのSupport「処理施設」のAbility「解体」にはAction指定がなくCostはEnergy 1である
+    And 「解体」は指定した自分のUnitをDestroyするEffectだけを持つ
+    When Aが「公開兵」をTargetとして「解体」を使用する
+    Then 「公開兵」はDestroyされAのDiscardへ移動しDiscardは3枚になる
+    And BはDiscardの現在の枚数3を確認できるがその内容を自由に閲覧できない
+    And Bが以前観測したName「公開兵」とATK 2とMax HP 3の情報は既知のままである
+    And Bは公開されていた「公開兵」がDestroyされた事実を観測できる
+    And Discardに元からあった2枚のCardの内容は新たにBへ公開されない
+
+  @GR-015 @GR-020 @IR-018 @AC-BOARD-011
+  Scenario: 未公開のSet Cardの移動を観測しても内容を既知にしない
+    Given AのSupport ZoneにはSet済みTactic「未知の伏せ札」が1枚だけある
+    And BはそのSet Cardの存在とSlot使用を観測しているが内容は一度も観測していない
+    And AのDiscardは2枚でその内容はBに公開されていない
+    And AのBoardのUnit「回収係」のAbility「回収」にはAction指定がなくCostはEnergy 1である
+    And 「回収」は指定した自分のSet CardをRevealせず自分のDiscardへ移動するEffectだけを持つ
+    When Aが「未知の伏せ札」をTargetとして「回収」を使用する
+    Then BはSet CardがSupport ZoneからDiscardへ移動したことを観測できる
+    And Support Zoneの使用数0とDiscardの枚数3はBにPublicである
+    And Bにとって移動したCardの内容は未観測のままであり今回の移動によって既知にならない
+    And BはAのDiscardの内容を自由に閲覧できない

@@ -71,6 +71,8 @@ Core HPが0以下になった時点で勝敗を確定する。残りのEffectは
 ### Unit vs Unit
 AttackerとDefenderは互いのATK分のDamageを同時に与える。
 
+この相互Damageは[Effect Resolution Model](../model/effect-resolution-model.md#resolution-steps)のSimultaneousGroupとして扱い、Active Playerからの逐次適用には分割しない。
+
 ## Damage and Destroy
 
 Unit Damageは蓄積する。

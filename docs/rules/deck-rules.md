@@ -61,7 +61,7 @@ Drawは1枚ずつ処理する。
 
 Drawを要求された時点でDeckにCardが存在しない場合、そのPlayerの敗北を直ちに確定する。同じEffectに残りのDrawや別の処理があっても実行しない。既に成功したDrawや適用済みのCost・Effectは保持する。
 
-同じEffectで両PlayerにDrawを要求する場合は、Active Playerから処理する。ReactionのEffectでもSourceの所有Playerを優先しない。両Deckが空の状態で両者に1枚Drawを要求した場合、Active PlayerのDraw失敗で敗北が確定し、OpponentのDrawには進まない。
+同じEffectで両PlayerにDrawを要求する場合は、複数Playerへの逐次適用に共通する[Player order](../model/effect-resolution-model.md#player-order)に従い、Active Playerから処理する。ReactionのEffectでもSourceの所有Playerを優先しない。両Deckが空の状態で両者に1枚Drawを要求した場合、Active PlayerのDraw失敗で敗北が確定し、OpponentのDrawには進まない。
 
 CardをDrawした結果Hand Limit 7を超えた場合、**そのDrawで得たCardを直ちにDiscardする**。
 
@@ -86,3 +86,5 @@ Set Cardは存在がPublic、内容がHiddenである。
 Mulliganでは交換枚数だけをOpponentへ公開し、交換・退避Cardの内容は公開しない。
 
 DiscardはOpponentへ枚数だけを公開する。所有Playerは自分のDiscardにある全Cardの内容を確認できる。未RevealのSet CardやHand超過によって移動したCardも同じ扱いとする。
+
+これは現在の閲覧権限であり、以前公開されたCardについてPlayerが観測した情報を消すものではない。[Information Model](../model/information-model.md)に従って、現在の閲覧範囲と観測済みの知識を区別する。

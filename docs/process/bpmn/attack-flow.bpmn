@@ -4,6 +4,7 @@
     <bpmn:participant id="Participant_Attack" name="Attack" processRef="Process_AttackFlow" />
   </bpmn:collaboration>
   <bpmn:process id="Process_AttackFlow" name="Attack Flow" isExecutable="false">
+    <bpmn:documentation>Common Resolution contract: see ../../model/effect-resolution-model.md. Resolve ordered EffectSteps, checking defeat conditions after each sequential application. Apply an explicit SimultaneousGroup atomically, then check once; do not split it into Player order. When an Effect sequentially applies to both Players, process Active Player first and Opponent only if the Game continues. Do not reorder separate EffectSteps, change targets, or process a Player not affected by that Effect. Draw remains one card at a time under Deck Rules. Fix the first terminal result, stop remaining EffectSteps, and preserve paid costs and applied effects.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_AttackFlow">
       <bpmn:lane id="Lane_Attacker" name="Attacking Player">
         <bpmn:flowNodeRef>Task_DeclareAttack</bpmn:flowNodeRef>
@@ -116,7 +117,7 @@
       <bpmn:outgoing>AT_05</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_ResolveAttackReaction" name="Resolve Reaction">
-      <bpmn:documentation>Apply sequential effects only until a defeat condition is first reached. Immediately fix gameEnded and the win/lose/draw result, stop remaining sequential effects, and return the state applied so far. Apply an explicitly simultaneous effect as one unit; if both players meet defeat conditions in that unit, fix a draw. For draws requested from both players, the Active Player goes first; failed required draw stops later processing. Do not reevaluate or overwrite a fixed result.</bpmn:documentation>
+      <bpmn:documentation>Execute the Reaction Resolution using the common Resolution contract in this Process and ../../model/effect-resolution-model.md. Active Player order for sequential multi-player effects does not depend on Reaction Source ownership. Return the state applied so far and any fixed terminal result.</bpmn:documentation>
       <bpmn:incoming>AT_05</bpmn:incoming>
       <bpmn:outgoing>AT_06</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -140,17 +141,17 @@
       <bpmn:outgoing>AT_17</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="Task_DamageCore" name="Deal Attacker ATK Damage to Core">
-      <bpmn:documentation>Apply the attacker ATK damage to the Core. If a defeat condition is reached, immediately fix gameEnded and the result. The Attack body has resolved; preserve its existing completion record, but do not run later processing or reevaluate the result.</bpmn:documentation>
+      <bpmn:documentation>Apply attacker ATK damage to the Core as a sequential EffectStep under the common Resolution contract. If a defeat condition is reached, immediately fix gameEnded and the result. The Attack body has resolved; preserve its existing completion record without later processing or result reevaluation.</bpmn:documentation>
       <bpmn:incoming>AT_16</bpmn:incoming>
       <bpmn:outgoing>AT_20</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_DamageUnits" name="Deal Simultaneous ATK Damage">
-      <bpmn:documentation>Apply both Units' ATK damage simultaneously as one combat step, then perform the Destroy Check. Do not split this simultaneous damage into ordered player effects.</bpmn:documentation>
+      <bpmn:documentation>Apply both Units' ATK damage as one explicit SimultaneousGroup under ../../model/effect-resolution-model.md, then perform the Destroy Check. Active Player order never divides this simultaneous damage into sequential Player effects.</bpmn:documentation>
       <bpmn:incoming>AT_17</bpmn:incoming>
       <bpmn:outgoing>AT_18</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_DestroyCheck" name="Destroy Units with Current HP &#60;= 0">
-      <bpmn:documentation>Destroy Units whose Current HP is zero or below and move them to their owners' Discards. Owners can inspect their own Discard contents; opponents receive only the Discard count. This visibility rule does not erase information previously observed while the Unit was Public.</bpmn:documentation>
+      <bpmn:documentation>Destroy Units whose Current HP is zero or below and move them to their owners' Discards. Current visibility follows ../../model/information-model.md: owners may inspect their Discard contents, opponents may inspect only the count. Past observations of a Public Unit belong to Player knowledge and are not erased by this visibility change.</bpmn:documentation>
       <bpmn:incoming>AT_34</bpmn:incoming>
       <bpmn:incoming>AT_18</bpmn:incoming>
       <bpmn:outgoing>AT_19</bpmn:outgoing>

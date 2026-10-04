@@ -50,6 +50,7 @@
 - [Resource](acceptance/resource.feature)
 - [Board / Zone](acceptance/board-zone.feature)
 - [Deck / Draw / Hand](acceptance/deck.feature)
+- [Effect Resolution](acceptance/effect-resolution.feature)
 
 ## Process
 
@@ -71,6 +72,8 @@
 - [Domain model](model/domain-model.md)
 - [Card model](model/card-model.md)
 - [State model](model/state-model.md)
+- [Effect Resolution model](model/effect-resolution-model.md)
+- [Information model](model/information-model.md)
 
 ## Design
 
@@ -103,7 +106,9 @@ docs/
 ├─ model/
 │  ├─ domain-model.md
 │  ├─ card-model.md
-│  └─ state-model.md
+│  ├─ state-model.md
+│  ├─ effect-resolution-model.md
+│  └─ information-model.md
 ├─ design/
 │  ├─ card-pool.md
 │  └─ balance-model.md
@@ -116,5 +121,6 @@ docs/
    ├─ setup-mulligan.feature
    ├─ resource.feature
    ├─ board-zone.feature
-   └─ deck.feature
+   ├─ deck.feature
+   └─ effect-resolution.feature
 ~~~

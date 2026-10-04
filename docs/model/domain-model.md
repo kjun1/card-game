@@ -30,7 +30,11 @@ classDiagram
     class Action
     class Reaction
     class Ability
+    class Resolution
+    class EffectStep
+    class SimultaneousGroup
     class Effect
+    class PlayerKnowledge
 
     Game "1" --> "2" Player
     Player "1" --> "1" Core
@@ -39,6 +43,7 @@ classDiagram
     Player "1" --> "1" UnitZone
     Player "1" --> "1" SupportZone
     Player "1" --> "1" Discard
+    Player --> PlayerKnowledge : observed facts
 
     Card <|-- Unit
     Card <|-- Support
@@ -55,7 +60,11 @@ classDiagram
     Operation <|-- Action
     Action --> Reaction
     Card --> Ability
-    Ability --> Effect
+    Ability --> Resolution
+    Resolution o-- EffectStep : ordered
+    EffectStep --> Effect : sequential
+    EffectStep --> SimultaneousGroup : simultaneous
+    SimultaneousGroup o-- Effect
 ~~~
 
 ## Responsibilities
@@ -72,11 +81,18 @@ classDiagram
 | Action | Reaction可能なOperation。Attack、または当該操作・AbilityにActionが明記されたOperation |
 | Reaction | Actionに従属する応答。CancelはOperationを完了させず、Game継続時は同じTurnを継続する |
 | Ability | Cardが提供する利用可能な機能 |
+| Resolution | 順序付きEffectStepの解決。勝敗確定時は残りを停止する |
+| EffectStep | 逐次EffectまたはSimultaneousGroupのどちらかを表す |
+| SimultaneousGroup | 明示的に同時と定義されたEffectをまとめて適用し、その結果を判定する |
 | Effect | Game Stateに実際に発生する変更 |
+| Current visibility | 現在のState・Zone・閲覧者に基づく情報閲覧権限 |
+| PlayerKnowledge | Playerが観測から得た情報。現在の閲覧権限とは区別する |
 
 Discardは各Playerが所有するZoneである。所有Playerは全Cardの内容を確認でき、Opponentへは枚数だけを公開する。
 
-Gameの終了結果はEffectの途中でも確定し、その後は変更しない。同時適用が定義された処理による双方敗北と、順番に解決する途中の敗北は区別する。後者では残りのEffectへ進まない。
+非公開領域への移動で過去に観測した事実を失わせず、未観測の情報への閲覧権限も増やさない。Current visibility・Observed history・Player Knowledgeの関係は[Information Model](information-model.md)を参照する。
+
+Gameの終了結果はEffectの途中でも確定し、その後は変更しない。逐次Effect・SimultaneousGroupの判定境界と複数Playerへの適用順は[Effect Resolution Model](effect-resolution-model.md)を参照する。AbilityだけでなくCombatの解決にも同じ概念を使う。
 
 ## Turn / Operation cardinality
 

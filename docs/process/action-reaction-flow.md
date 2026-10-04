@@ -54,9 +54,9 @@ Gameが継続する場合、`Operation Complete`は`operationCompleted = true`�
 
 ## Effect resolution and Game end
 
-非Action・Action・Reactionの解決Taskは、順番にEffectを適用し、勝敗条件が初めて成立した時点で結果を固定する。例えば先のDrawで敗北したPlayerに対して、後続EffectによるDeck補充やCore HPの変更は行わない。同時と定義された1つの処理は一括して適用し、その時点で両Playerの敗北条件が成立した場合だけDrawとする。
+非Action・Action・Reactionの解決Taskは共通の[Effect Resolution Model](../model/effect-resolution-model.md)に従う。Resolutionは順序を持つEffectStepを解決し、逐次Stepの適用後に勝敗条件を判定する。明示されたSimultaneousGroupはEffectを一括適用してから判定し、内部をPlayer順に分割しない。勝敗が成立したら固定済みの結果と適用済みStateを返し、残りのEffectStepを処理しない。
 
-両PlayerへのDrawはActive Playerから処理する。必要なDrawに失敗した場合はその場で敗北を固定し、OpponentのDrawを含む後続の逐次処理を行わない。
+両Playerへ逐次適用するEffectは、[Player order](../model/effect-resolution-model.md#player-order)に従ってActive Playerから処理し、Gameが継続する場合だけOpponentへ進む。Draw・Discard・Card移動にも同じ順序を使うが、個別のEffectStepの並び順やTarget選択を変更せず、非対象Playerを処理へ追加しない。Drawは従来通り1枚ずつ処理し、失敗時にはその場で敗北を固定する。
 
 すべてのEffectを解決済みなら従来のOperation完了記録を保持する。終了結果の返却に残りのEffect解決や新しいOperation完了判定を要求しない。ReactionによるCancelは報告上の記録であり、終了後の追加Effectや固定した勝敗の変更を伴わない。
 

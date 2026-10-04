@@ -17,6 +17,14 @@
 
 同時に適用することが定義された処理では、その同時適用の結果を判定する。一方、同じEffect内でも順番に処理する部分は別であり、先の処理で勝敗が確定したら後の処理を実行してDrawへ変えることはない。
 
+## Effect resolution
+
+Resolutionは順序付きのEffectStepで表す。逐次的なEffectは適用ごとに、明示された同時適用はSimultaneousGroup全体の適用後に、勝敗条件を確認する。Gameが継続する場合だけ次のStepへ進む。共通の概念と境界は[Effect Resolution Model](../model/effect-resolution-model.md)を参照する。
+
+同じEffectを複数Playerへ逐次適用する場合は、対象のActive Playerから処理し、Gameが継続する場合にOpponentへ進む。Draw・Discard・Card移動・Damage等で共通のPlayer orderとし、ReactionでもSource所有者を先にしない。対象外のPlayerを追加したり、別々のEffectStepに明示された順序を並べ替えたりする規則ではない。
+
+明示された同時適用はこのPlayer orderで分割しない。両Playerが対象であること自体は同時適用を意味しない。
+
 ## Board
 
 各Playerは以下のZoneを持つ。
@@ -138,6 +146,8 @@ Handから直接Reactionすることは基本ルールでは認めない。
 
 ## Information visibility
 
+この節は現在の情報閲覧権限を定める。Playerが過去の観測から得た知識とは区別する。概念の責務は[Information Model](../model/information-model.md)を参照する。
+
 ### Public
 - Core HP
 - Energy
@@ -159,6 +169,8 @@ Handから直接Reactionすることは基本ルールでは認めない。
 - Discard内容（Opponentには非公開。所有Playerはすべて確認できる）
 
 Discardへ移動したことによってCard内容をOpponentへ公開しない。未RevealのSet CardやHand超過でDraw直後にDiscardするCardにも同じ公開範囲を適用する。
+
+以前PublicだったUnit等がDiscardへ移動しても、Opponentが公開時に観測した情報や観測した移動の事実は失われない。ただし、その知識によってDiscard Zoneの現在の内容を自由に閲覧したり、未観測Cardの内容を取得したりすることはできない。
 
 ## Core invariants
 

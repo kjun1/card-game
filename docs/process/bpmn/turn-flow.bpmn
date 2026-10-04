@@ -72,7 +72,7 @@
       <bpmn:outgoing>TF_16</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:task id="Task_ExecuteOperation" name="Execute Selected Operation">
-      <bpmn:documentation>Detailed in action-reaction-flow.bpmn and attack-flow.bpmn. Resolution fixes gameEnded and the result immediately when a defeat condition is first reached, and stops remaining sequential effects. Receive that fixed result and state applied so far; do not require all effects to finish or reevaluate the result. If play continues, use operationCompleted for completion or reselection. Preserve existing completed/cancelled reporting without further gameplay effects.</bpmn:documentation>
+      <bpmn:documentation>Detailed in action-reaction-flow.bpmn and attack-flow.bpmn. The common Resolution model in ../../model/effect-resolution-model.md fixes the first terminal result during EffectStep processing. Receive gameEnded, that fixed result, and the state applied so far; do not resume remaining EffectSteps or reevaluate the result. If play continues, use operationCompleted for completion or reselection. Preserve existing completed/cancelled reporting without further gameplay effects.</bpmn:documentation>
       <bpmn:incoming>TF_12</bpmn:incoming>
       <bpmn:outgoing>TF_13</bpmn:outgoing>
     </bpmn:task>
@@ -116,7 +116,7 @@
       <bpmn:outgoing>TF_01</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:serviceTask id="Task_DiscardDrawn" name="Discard Just-drawn Card">
-      <bpmn:documentation>Immediately move the just-drawn card to its owner's Discard. The owner can inspect all cards in that Discard; only its count is Public to the opponent. Moving the card does not newly reveal its contents to the opponent.</bpmn:documentation>
+      <bpmn:documentation>Immediately move the just-drawn card to its owner's Discard. Under ../../model/information-model.md the owner may inspect its contents; the opponent may inspect only its count. This move does not newly reveal card contents. Current inspection rights and knowledge from past observations are separate responsibilities.</bpmn:documentation>
       <bpmn:incoming>TF_09</bpmn:incoming>
       <bpmn:outgoing>TF_11</bpmn:outgoing>
     </bpmn:serviceTask>

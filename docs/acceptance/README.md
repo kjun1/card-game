@@ -12,8 +12,9 @@
 | [Attack](attack.feature) | 攻撃資格、Reaction、Block、Commit、Damage・Destroy |
 | [Setup / Mulligan](setup-mulligan.feature) | 先攻決定、Opening前のShuffle、交換対象の退避、両者完了後の返却・Shuffle、交換枚数の公開 |
 | [Resource](resource.feature) | SetupとTurn StartのEnergy、Operation / Reactionの共通予算、Momentum移転とCost不足 |
-| [Board / Zone](board-zone.feature) | Zone Capacity、SupportとSetの共有、任意Discard禁止、SetとDiscardの公開範囲 |
+| [Board / Zone](board-zone.feature) | Zone Capacity、SupportとSetの共有、任意Discard禁止、公開範囲と観測済みの情報 |
 | [Deck / Draw / Hand](deck.feature) | Deck構築の枚数制限、逐次Draw、Hand超過、Deck切れでの即時終了、両者Drawの先後、Hidden情報 |
+| [Effect Resolution](effect-resolution.feature) | 順序付きEffectStep、SimultaneousGroup、勝敗確定後の停止、複数Playerへの共通の逐次適用順 |
 
 要求定義は[Game](../requirements/game-requirements.md)、[Interaction](../requirements/interaction-requirements.md)、[Play-experience](../requirements/play-experience-requirements.md)を参照する。Gherkinは規範文書を具体例で表すものであり、新しいルールやCard Poolを独立して定義しない。
 

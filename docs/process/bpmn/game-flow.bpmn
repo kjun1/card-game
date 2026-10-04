@@ -4,6 +4,7 @@
     <bpmn:participant id="Participant_Game" name="Card Game" processRef="Process_GameFlow"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_GameFlow" name="Game Flow" isExecutable="false">
+    <bpmn:documentation>Set up the Game, including independent Mulligan selections and parallel exchanges. These Setup activities are distinct from sequential multi-player Effects governed by ../../model/effect-resolution-model.md. Receive and report fixed terminal results without reevaluating them.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_GameFlow">
       <bpmn:lane id="Lane_PlayerA" name="Player A">
         <bpmn:flowNodeRef>Task_PrepareDeckA</bpmn:flowNodeRef>

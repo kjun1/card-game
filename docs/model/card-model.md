@@ -78,6 +78,8 @@ Resolution = Change Attack Target to this Unit
 
 Block可能性を表す別のBlocker属性は設けない。
 
+Resolutionは順序付きEffectStepからなり、各Stepは逐次Effectまたは明示されたSimultaneousGroupを表す。共通の解決順・Player order・勝敗判定境界は[Effect Resolution Model](effect-resolution-model.md)に従う。この概念構造は詳細なCard Schemaや記法を指定しない。
+
 ## Effect
 
 EffectはGame Stateへ実際に発生させる変更である。
@@ -97,7 +99,7 @@ EffectはGame Stateへ実際に発生させる変更である。
 
 AbilityはEffectを利用する機能であり、Effectそのものとは区別する。
 
-Effectを順番に解決する途中で勝敗条件が成立した場合は、その時点で結果を固定し、残りを解決しない。同時適用が定義された処理はその同時適用の結果を判定する。詳細は[Game objective](../rules/core-rules.md#game-objective)を参照する。
+逐次Effectの適用後、またはSimultaneousGroup全体の適用後に勝敗を確認する。勝敗確定後は残りを解決しない。詳細は[Resolution steps](effect-resolution-model.md#resolution-steps)と[Game end](effect-resolution-model.md#game-end)を参照する。
 
 ## Activation categories
 

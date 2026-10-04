@@ -4,6 +4,7 @@
     <bpmn:participant id="Participant_ActionReaction" name="Action / Reaction" processRef="Process_ActionReaction"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_ActionReaction" name="Action / Reaction Flow" isExecutable="false">
+    <bpmn:documentation>Common Resolution contract: see ../../model/effect-resolution-model.md. Resolve ordered EffectSteps, checking defeat conditions after each sequential application. Apply an explicit SimultaneousGroup atomically, then check once; do not split it into Player order. When an Effect sequentially applies to both Players, process Active Player first and Opponent only if the Game continues. Do not reorder separate EffectSteps, change targets, or process a Player not affected by that Effect. Draw remains one card at a time under Deck Rules. Fix the first terminal result, stop remaining EffectSteps, and preserve paid costs and applied effects.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_ActionReaction">
       <bpmn:lane id="Lane_AR_System" name="Game System">
         <bpmn:flowNodeRef>Gateway_IsAction</bpmn:flowNodeRef>
@@ -66,7 +67,7 @@
       <bpmn:outgoing>AR_23</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_ResolveImmediate" name="Resolve Non-Action Operation">
-      <bpmn:documentation>Apply sequential effects only until a defeat condition is first reached. Immediately fix gameEnded and the win/lose/draw result, stop remaining sequential effects, and return the state applied so far. Apply an explicitly simultaneous effect as one unit; if both players meet defeat conditions in that unit, fix a draw. For draws requested from both players, the Active Player goes first; failed required draw stops later processing. Do not reevaluate or overwrite a fixed result.</bpmn:documentation>
+      <bpmn:documentation>Execute the non-Action Operation Resolution using the common Resolution contract in this Process and ../../model/effect-resolution-model.md. Return the state applied so far and any fixed terminal result; do not require remaining EffectSteps to finish.</bpmn:documentation>
       <bpmn:incoming>AR_23</bpmn:incoming>
       <bpmn:outgoing>AR_03</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -109,13 +110,13 @@
       <bpmn:outgoing>AR_08</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_ResolveReaction" name="Resolve Reaction">
-      <bpmn:documentation>Apply sequential effects only until a defeat condition is first reached. Immediately fix gameEnded and the win/lose/draw result, stop remaining sequential effects, and return the state applied so far. Apply an explicitly simultaneous effect as one unit; if both players meet defeat conditions in that unit, fix a draw. For draws requested from both players, the Active Player goes first; failed required draw stops later processing. Do not reevaluate or overwrite a fixed result.</bpmn:documentation>
+      <bpmn:documentation>Execute the Reaction Resolution using the common Resolution contract in this Process and ../../model/effect-resolution-model.md. Return the state applied so far and any fixed terminal result; do not require remaining EffectSteps to finish.</bpmn:documentation>
       <bpmn:incoming>AR_08</bpmn:incoming>
       <bpmn:outgoing>Flow_1itt36p</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1itt36p" sourceRef="Task_ResolveReaction" targetRef="Task_CancelAction"/>
     <bpmn:serviceTask id="Task_ResolveAction" name="Resolve Action">
-      <bpmn:documentation>Apply sequential effects only until a defeat condition is first reached. Immediately fix gameEnded and the win/lose/draw result, stop remaining sequential effects, and return the state applied so far. Apply an explicitly simultaneous effect as one unit; if both players meet defeat conditions in that unit, fix a draw. For draws requested from both players, the Active Player goes first; failed required draw stops later processing. Do not reevaluate or overwrite a fixed result.</bpmn:documentation>
+      <bpmn:documentation>Execute the Action Resolution using the common Resolution contract in this Process and ../../model/effect-resolution-model.md. Return the state applied so far and any fixed terminal result; do not require remaining EffectSteps to finish.</bpmn:documentation>
       <bpmn:incoming>AR_12</bpmn:incoming>
       <bpmn:outgoing>AR_13</bpmn:outgoing>
     </bpmn:serviceTask>
