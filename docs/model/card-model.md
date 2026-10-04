@@ -41,6 +41,16 @@ TagはCardの意味分類である。
 
 Tag自体には原則動作を持たせず、Affinity、Condition、Target等から参照する。
 
+## Action keyword
+
+`Action`はReaction Windowを発生させる動作キーワードであり、意味分類用のTagとは区別する。
+
+基本ルールではAttackだけが常にActionである。その他のOperationは、Cardの当該操作・Abilityに`Action`を明記した場合だけActionとなる。未指定なら非Actionとする。
+
+指定はCard全体ではなく操作・Ability単位に適用する。たとえば、同じTacticのPlayだけに`Action`を指定しても、Setや別AbilityはActionにならない。複数のAbilityもそれぞれ独立して指定する。
+
+これはCard記述の意味規約であり、詳細なCard Schemaは別途定義する。
+
 ## Ability
 
 ~~~text

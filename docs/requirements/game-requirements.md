@@ -30,8 +30,8 @@ Victory / Defeat
 | GR-004 | 同一処理によって両Playerの敗北条件が同時に成立した場合、GameをDrawとして終了しなければならない。 |
 | GR-005 | PlayerはGame開始前にCard Poolの制約下でDeckを構築できなければならない。 |
 | GR-006 | Gameは単一のBoardを使用し、Unit ZoneとSupport Zoneを区別しなければならない。 |
-| GR-007 | TurnはActive Playerが制御権を持つ区間であり、Turn Start後に選択されたOperationが完了した時点でOpponentへ制御権を移さなければならない。 |
-| GR-008 | Reaction等で選択中のOperationがCancelされた場合、そのTurnを終了せずActive PlayerへOperation選択権を戻さなければならない。 |
+| GR-007 | TurnはActive Playerが制御権を持つ区間であり、Turn Start後に選択されたOperationが完了しGameが継続する場合、Opponentへ制御権を移さなければならない。Game終了をOperation完了判定より優先し、Operationが一度も完了せずGameが終了する場合も認めなければならない。 |
+| GR-008 | Reaction等で選択中のOperationがCancelされ、Gameが継続する場合、そのTurnを終了せずActive PlayerへOperation選択権を戻さなければならない。Game終了時は再選択や制御権移転を行ってはならない。 |
 | GR-009 | Turn開始時にUnit状態、Energy、Drawを更新しなければならない。 |
 | GR-010 | EnergyはCard / Abilityの基本利用量を制約するResourceとして機能しなければならない。 |
 | GR-011 | Momentumは使用すると相手へ移転するResourceとして機能しなければならない。 |

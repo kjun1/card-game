@@ -25,7 +25,7 @@
 | --- | --- | --- |
 | Game Flow | Setup、Player切替、Game結果の確定と終了 | Turnの終了報告に従って終了または次のTurnを開始 |
 | Turn Flow | Turn Start、Operation選択、勝敗評価、Operation完了判定 | `gameEnded`と勝敗またはDrawの結果をGameへ返す |
-| Action / Reaction Flow | Action成立またはCancel、CostとEffectの適用 | `operationCompleted`と更新後のStateをTurnへ返す |
+| Action / Reaction Flow | 非Actionの検証、Action成立またはCancel、CostとEffectの適用 | `operationCompleted`と更新後のStateをTurnへ返す |
 | Attack Flow | Attack宣言、Reaction、Block、Combat、Destroy Check | `operationCompleted`と更新後のStateをTurnへ返す |
 
-Operation Flowの取消結果は`Operation Incomplete`とする。再選択を行うかは、結果を受け取ったTurn FlowがGame終了を評価した後に決定する。
+Operation Flowの取消結果と非Actionの検証失敗は`Operation Incomplete`とする。再選択を行うかは、結果を受け取ったTurn FlowがGame終了を評価した後に決定する。

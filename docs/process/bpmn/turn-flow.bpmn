@@ -38,7 +38,7 @@
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="TF_13" sourceRef="Task_ExecuteOperation" targetRef="Task_EvaluateGameEndTurn"/>
     <bpmn:sequenceFlow id="TF_12" sourceRef="Task_SelectOperation" targetRef="Task_ExecuteOperation"/>
-    <bpmn:sequenceFlow id="TF_14" name="No / Cancelled" sourceRef="Gateway_OperationCompleted" targetRef="Task_SelectOperation">
+    <bpmn:sequenceFlow id="TF_14" name="No / Invalid or Cancelled" sourceRef="Gateway_OperationCompleted" targetRef="Task_SelectOperation">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(operationCompleted)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="TF_11" sourceRef="Task_DiscardDrawn" targetRef="Task_SelectOperation"/>
@@ -71,7 +71,7 @@
       <bpmn:outgoing>TF_16</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:task id="Task_ExecuteOperation" name="Execute Selected Operation">
-      <bpmn:documentation>Detailed in action-reaction-flow.bpmn and attack-flow.bpmn. Receive operationCompleted and the updated state after all effects belonging to the resolution. A cancelled action returns an incomplete operation; evaluate game end before deciding the next step.</bpmn:documentation>
+      <bpmn:documentation>Detailed in action-reaction-flow.bpmn and attack-flow.bpmn. Receive operationCompleted and the updated state after all effects belonging to the resolution. A cancelled Action or invalid Non-Action returns an incomplete operation; evaluate Game end before deciding the next step. A Game may end with zero completed operations in this Turn.</bpmn:documentation>
       <bpmn:incoming>TF_12</bpmn:incoming>
       <bpmn:outgoing>TF_13</bpmn:outgoing>
     </bpmn:task>
@@ -295,7 +295,7 @@
         <di:waypoint x="1365" y="100"/>
         <di:waypoint x="1365" y="140"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1655" y="78" width="120" height="14"/>
+          <dc:Bounds x="1635" y="78" width="180" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="TF_15_di" bpmnElement="TF_15">
