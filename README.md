@@ -2,6 +2,14 @@
 
 1対1の対戦型カードゲームの要求・ルール・モデル・設計を管理するリポジトリ。
 
+## License
+
+Copyright (c) 2026 kjun1. All rights reserved.
+
+本リポジトリに含まれるkjun1が著作権を有する文書・図・コードなどについて、営利・非営利を問わず、利用・複製・改変・再配布を許可するライセンスは付与していません。[LICENSE](LICENSE)には定型の著作権表示を記載しています。これはGitHubが案内する[No License（利用許諾なし）](https://choosealicense.com/no-permission/)の方針です。
+
+法令上認められる利用、既存の個別許諾、第三者ライセンスに基づく利用、および[GitHub利用規約](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service#d-user-generated-content)上の権利は別途認められます。Publicとして公開した場合、GitHub上での閲覧・forkは制限できず、著作権表示はコピーを技術的に防止するものではありません。
+
 ## Core concept
 
 - 単一盤面で Unit / Support / Tactic を運用する。
