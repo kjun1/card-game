@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  id="Definitions_GameFlow"
+  targetNamespace="https://github.com/kjun1/card-game/bpmn">
+
+  <bpmn:collaboration id="Collaboration_GameFlow">
+    <bpmn:participant id="Participant_Game" name="Card Game" processRef="Process_GameFlow"/>
+  </bpmn:collaboration>
+
+  <bpmn:process id="Process_GameFlow" name="Game Flow" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_GameFlow">
+      <bpmn:lane id="Lane_PlayerA" name="Player A">
+        <bpmn:flowNodeRef>Task_PrepareDeckA</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_MulliganA</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ReturnShuffleA</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PlayerB" name="Player B">
+        <bpmn:flowNodeRef>Task_PrepareDeckB</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_MulliganB</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ReturnShuffleB</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_GameSystem" name="Game System">
+        <bpmn:flowNodeRef>Start_Game</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PrepareSplit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PrepareJoin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CoinToss</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_OpeningDraw</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_MulliganSplit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_MulliganJoin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ReturnSplit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ReturnJoin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Initialize</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ExecuteTurn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_GameEnded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SwitchActivePlayer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_DetermineResult</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Game</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="Start_Game" name="Game Start"/>
+    <bpmn:parallelGateway id="Gateway_PrepareSplit" name="Prepare Decks"/>
+    <bpmn:userTask id="Task_PrepareDeckA" name="Prepare Deck A"/>
+    <bpmn:userTask id="Task_PrepareDeckB" name="Prepare Deck B"/>
+    <bpmn:parallelGateway id="Gateway_PrepareJoin"/>
+    <bpmn:serviceTask id="Task_CoinToss" name="Coin Toss / Determine First Player"/>
+    <bpmn:serviceTask id="Task_OpeningDraw" name="Deal Opening Hands"/>
+    <bpmn:parallelGateway id="Gateway_MulliganSplit" name="Mulligan"/>
+    <bpmn:userTask id="Task_MulliganA" name="Select Mulligan Cards A">
+      <bpmn:documentation>Select 0-5 cards, set them aside, and draw the same number.</bpmn:documentation>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_MulliganB" name="Select Mulligan Cards B">
+      <bpmn:documentation>Select 0-5 cards, set them aside, and draw the same number.</bpmn:documentation>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="Gateway_MulliganJoin"/>
+    <bpmn:parallelGateway id="Gateway_ReturnSplit"/>
+    <bpmn:userTask id="Task_ReturnShuffleA" name="Return Set-aside Cards and Shuffle A"/>
+    <bpmn:userTask id="Task_ReturnShuffleB" name="Return Set-aside Cards and Shuffle B"/>
+    <bpmn:parallelGateway id="Gateway_ReturnJoin"/>
+    <bpmn:serviceTask id="Task_Initialize" name="Initialize Core / Energy / Momentum"/>
+    <bpmn:task id="Task_ExecuteTurn" name="Execute Active Player Turn">
+      <bpmn:documentation>Detailed in turn-flow.bpmn.</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_GameEnded" name="Game End Condition Met?"/>
+    <bpmn:serviceTask id="Task_SwitchActivePlayer" name="Switch Active Player"/>
+    <bpmn:serviceTask id="Task_DetermineResult" name="Determine Win / Lose / Draw"/>
+    <bpmn:endEvent id="End_Game" name="Game End"/>
+
+    <bpmn:sequenceFlow id="GF_01" sourceRef="Start_Game" targetRef="Gateway_PrepareSplit"/>
+    <bpmn:sequenceFlow id="GF_02" sourceRef="Gateway_PrepareSplit" targetRef="Task_PrepareDeckA"/>
+    <bpmn:sequenceFlow id="GF_03" sourceRef="Gateway_PrepareSplit" targetRef="Task_PrepareDeckB"/>
+    <bpmn:sequenceFlow id="GF_04" sourceRef="Task_PrepareDeckA" targetRef="Gateway_PrepareJoin"/>
+    <bpmn:sequenceFlow id="GF_05" sourceRef="Task_PrepareDeckB" targetRef="Gateway_PrepareJoin"/>
+    <bpmn:sequenceFlow id="GF_06" sourceRef="Gateway_PrepareJoin" targetRef="Task_CoinToss"/>
+    <bpmn:sequenceFlow id="GF_07" sourceRef="Task_CoinToss" targetRef="Task_OpeningDraw"/>
+    <bpmn:sequenceFlow id="GF_08" sourceRef="Task_OpeningDraw" targetRef="Gateway_MulliganSplit"/>
+    <bpmn:sequenceFlow id="GF_09" sourceRef="Gateway_MulliganSplit" targetRef="Task_MulliganA"/>
+    <bpmn:sequenceFlow id="GF_10" sourceRef="Gateway_MulliganSplit" targetRef="Task_MulliganB"/>
+    <bpmn:sequenceFlow id="GF_11" sourceRef="Task_MulliganA" targetRef="Gateway_MulliganJoin"/>
+    <bpmn:sequenceFlow id="GF_12" sourceRef="Task_MulliganB" targetRef="Gateway_MulliganJoin"/>
+    <bpmn:sequenceFlow id="GF_13" sourceRef="Gateway_MulliganJoin" targetRef="Gateway_ReturnSplit"/>
+    <bpmn:sequenceFlow id="GF_14" sourceRef="Gateway_ReturnSplit" targetRef="Task_ReturnShuffleA"/>
+    <bpmn:sequenceFlow id="GF_15" sourceRef="Gateway_ReturnSplit" targetRef="Task_ReturnShuffleB"/>
+    <bpmn:sequenceFlow id="GF_16" sourceRef="Task_ReturnShuffleA" targetRef="Gateway_ReturnJoin"/>
+    <bpmn:sequenceFlow id="GF_17" sourceRef="Task_ReturnShuffleB" targetRef="Gateway_ReturnJoin"/>
+    <bpmn:sequenceFlow id="GF_18" sourceRef="Gateway_ReturnJoin" targetRef="Task_Initialize"/>
+    <bpmn:sequenceFlow id="GF_19" sourceRef="Task_Initialize" targetRef="Task_ExecuteTurn"/>
+    <bpmn:sequenceFlow id="GF_20" sourceRef="Task_ExecuteTurn" targetRef="Gateway_GameEnded"/>
+    <bpmn:sequenceFlow id="GF_21" name="No" sourceRef="Gateway_GameEnded" targetRef="Task_SwitchActivePlayer">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[not(gameEnded)]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="GF_22" sourceRef="Task_SwitchActivePlayer" targetRef="Task_ExecuteTurn"/>
+    <bpmn:sequenceFlow id="GF_23" name="Yes" sourceRef="Gateway_GameEnded" targetRef="Task_DetermineResult">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[gameEnded]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="GF_24" sourceRef="Task_DetermineResult" targetRef="End_Game"/>
+  </bpmn:process>
+</bpmn:definitions>
