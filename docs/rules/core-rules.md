@@ -33,9 +33,13 @@ Unit ZoneとSupport Zoneは単一盤面上に存在する。
 
 ## Turn
 
-Turnは、そのPlayerがTurn Start処理を行い、1回のOperationを完了するまでの区間である。
+Turnは、**Active Playerがゲーム進行の制御権を持つ区間**である。
 
-Operation完了時に相手PlayerのTurnへ移る。
+Turn Startから始まり、そのTurnで選択された1つのOperationが完了した時点で終了する。Turn終了後、Opponentが新しいActive Playerとなる。
+
+ActionがReactionによってCancelされた場合、そのActionを含むOperationは完了していない。そのためTurnは終了せず、同じActive PlayerがOperationを選択し直す。
+
+したがって、1 Turn中に複数回のOperation選択やAction Declarationが発生することはあるが、**Turnを終了させるcompleted Operationは1つだけ**である。
 
 ### Turn Start order
 
@@ -47,9 +51,11 @@ Operation完了時に相手PlayerのTurnへ移る。
 
 Draw不能なら即座に敗北する。
 
+Turn Start処理はTurn中に一度だけ実行し、ReactionによるOperation再選択では再実行しない。
+
 ## Operation
 
-Playerは1 Turnにつき1回のOperationを完了する。
+Operationは、**Active PlayerがTurn中に選択する主操作**である。
 
 Operation例:
 
@@ -60,6 +66,10 @@ Operation例:
 - Ability使用
 - Attack
 - 何もしない
+
+Operationは、解決または「何もしない」の選択によって完了する。
+
+Actionに分類されるOperationがReactionでCancelされた場合、そのOperationは完了せず、同じTurn内でOperation Selectionへ戻る。
 
 何もしない場合、その時点でOperation Completeとする。
 
@@ -84,7 +94,7 @@ Action Costを支払い、Action固有処理を解決し、Operation Completeと
 3. 宣言済みActionをCancelする。
 4. Action側の未払いEnergy Costは消費しない。
 5. ReactionによるCost・状態変更は巻き戻さない。
-6. Action側PlayerへOperation選択権を戻す。
+6. Operationは未完了のため、同じActive PlayerへOperation選択権を戻す。
 
 Reactionに対するReactionは行わない。
 
@@ -120,13 +130,15 @@ Handから直接Reactionすることは基本ルールでは認めない。
 
 ## Core invariants
 
-- 1 Turn = 1 completed Operation
-- Operation Completeで相手Turnへ移る
-- ActionのみReaction可能
-- ReactionされたActionは成立しない
-- Reaction後も同じPlayerのTurnを継続する
-- Handからの直接Reactionなし
-- Momentumは原則として両Player間で保存される
+- TurnはActive Playerが制御権を持つ区間である。
+- Turn Start処理は各Turnにつき1回だけ行う。
+- completed Operationが1つ発生するとTurnが終了し、Opponentへ制御権が移る。
+- CancelされたActionはOperation Completeを発生させない。
+- ActionのみReaction可能。
+- ReactionされたActionは成立しない。
+- Reaction後も同じActive PlayerのTurnを継続する。
+- Handからの直接Reactionなし。
+- Momentumは原則として両Player間で保存される。
 
 ## Related rules
 

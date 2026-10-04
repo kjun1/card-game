@@ -5,9 +5,11 @@
 ## Core concept
 
 - 単一盤面で Unit / Support / Tactic を運用する。
-- Energy は1 Turnの1 Operationで使用できる基本出力予算として機能する。
+- Turn は Active Player が制御権を持つ区間であり、Turn Startから1つのOperationが完了するまで続く。
+- Operation は Active Player がTurn中に選択する主操作であり、完了すると相手へ制御権が移る。
+- ReactionでActionがCancelされた場合、そのOperationは完了していないため同じTurnでOperationを選択し直す。
+- Energy は自分のTurn Startで回復し、次の自分Turn StartまでCard / Abilityの基本Costに使用する。
 - Momentum は追加能力や Block に使用し、使用した分が相手へ移転する。
-- 1 Turnにつき1 Operationを完了し、その時点で相手Turnへ移る。
 - Action と定義された Operation だけが Reaction Window を発生させる。
 - Reaction は原則として事前に Board へコミットされた Card / Ability から行う。
 - Attack は Reaction の後に Block Step と Combat を持つ。
