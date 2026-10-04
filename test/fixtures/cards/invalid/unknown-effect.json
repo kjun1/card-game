@@ -1,0 +1,29 @@
+{
+  "id": "unknown-effect",
+  "name": "非Action射撃",
+  "cardType": "tactic",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "play": {
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "teleport",
+            "target": {
+              "type": "core",
+              "player": "opponent"
+            },
+            "amount": 2
+          }
+        }
+      ]
+    }
+  },
+  "abilities": []
+}

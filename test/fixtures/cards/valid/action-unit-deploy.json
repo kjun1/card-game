@@ -1,0 +1,20 @@
+{
+  "id": "action-unit-deploy",
+  "name": "例示Card",
+  "cardType": "unit",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {
+    "atk": 2,
+    "maxHp": 3
+  },
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      },
+      "action": true
+    }
+  },
+  "abilities": []
+}

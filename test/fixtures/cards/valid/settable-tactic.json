@@ -1,0 +1,35 @@
+{
+  "id": "settable-tactic",
+  "name": "双用札",
+  "cardType": "tactic",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "play": {
+      "cost": {
+        "energy": 2
+      },
+      "action": true,
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "core",
+              "player": "opponent"
+            },
+            "amount": 2
+          }
+        }
+      ]
+    },
+    "set": {
+      "cost": {
+        "energy": 1
+      }
+    }
+  },
+  "abilities": []
+}

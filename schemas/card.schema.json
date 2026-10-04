@@ -1,0 +1,1182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/kjun1/card-game/schemas/card.schema.json",
+  "title": "Card Definition",
+  "description": "Structural contract for the currently specified Core game. See docs/model/card-definition-schema.md; game semantics remain in Rules, BPMN and Models.",
+  "type": "object",
+  "$ref": "#/$defs/Card",
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "Cost": {
+      "type": "object",
+      "properties": {
+        "energy": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "momentum": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "minProperties": 1,
+      "description": "One cost bundle, not ordered payments. Validate the entire bundle before payment under Resource Rules. Missing resource means no cost in that resource; explicit energy:0 represents free use."
+    },
+    "Condition": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "turn"
+            },
+            "player": {
+              "enum": [
+                "self",
+                "opponent"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "player"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Only an additional turn restriction is supported. self is the Source owner. Core timing and source legality still apply."
+    },
+    "Limit": {
+      "type": "null",
+      "description": "No card-specific usage limit is defined in this version. Omit or use null; Core limits remain in Core procedures."
+    },
+    "UnitParameters": {
+      "type": "object",
+      "properties": {
+        "atk": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxHp": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "atk",
+        "maxHp"
+      ],
+      "additionalProperties": false
+    },
+    "EmptyParameters": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "CoreSelection": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "core"
+        },
+        "player": {
+          "enum": [
+            "self",
+            "opponent"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "player"
+      ],
+      "additionalProperties": false
+    },
+    "CardSelection": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "card"
+        },
+        "player": {
+          "enum": [
+            "self",
+            "opponent",
+            "each"
+          ]
+        },
+        "zone": {
+          "enum": [
+            "hand",
+            "unit_zone",
+            "support_zone"
+          ]
+        },
+        "cardType": {
+          "enum": [
+            "unit",
+            "support",
+            "tactic"
+          ]
+        },
+        "state": {
+          "enum": [
+            "face_up",
+            "set"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "player",
+        "zone"
+      ],
+      "additionalProperties": false,
+      "description": "Select one Card, or one per Player for each. These are requirements on runtime choices, not stored runtime state. Visibility, type/zone compatibility and selection legality require semantic validation."
+    },
+    "Selection": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/CoreSelection"
+        },
+        {
+          "$ref": "#/$defs/CardSelection"
+        }
+      ]
+    },
+    "TargetSelections": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/Selection"
+      },
+      "description": "Keys are local definition symbols. Actual choices and object IDs live in runtime state."
+    },
+    "CoreTarget": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "core"
+        },
+        "player": {
+          "enum": [
+            "self",
+            "opponent",
+            "both"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "player"
+      ],
+      "additionalProperties": false
+    },
+    "PlayerTarget": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "player"
+        },
+        "player": {
+          "enum": [
+            "self",
+            "opponent",
+            "both"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "player"
+      ],
+      "additionalProperties": false
+    },
+    "SelectedTarget": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "selected"
+        },
+        "selection": {
+          "$ref": "#/$defs/Identifier"
+        }
+      },
+      "required": [
+        "type",
+        "selection"
+      ],
+      "additionalProperties": false
+    },
+    "SourceTarget": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "source"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "DeclaredActionSourceTarget": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "declared_action_source"
+        },
+        "cardType": {
+          "const": "tactic"
+        },
+        "zone": {
+          "const": "hand"
+        }
+      },
+      "required": [
+        "type",
+        "cardType",
+        "zone"
+      ],
+      "additionalProperties": false,
+      "description": "The declared Tactic Play source in the current Reaction context. Engine must check the context and constraints before paying; this does not permit inspecting arbitrary opponent Hand cards."
+    },
+    "Target": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/CoreTarget"
+        },
+        {
+          "$ref": "#/$defs/PlayerTarget"
+        },
+        {
+          "$ref": "#/$defs/SelectedTarget"
+        },
+        {
+          "$ref": "#/$defs/SourceTarget"
+        },
+        {
+          "$ref": "#/$defs/DeclaredActionSourceTarget"
+        }
+      ]
+    },
+    "CardTarget": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/SelectedTarget"
+        },
+        {
+          "$ref": "#/$defs/SourceTarget"
+        }
+      ]
+    },
+    "MoveTarget": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/SelectedTarget"
+        },
+        {
+          "$ref": "#/$defs/SourceTarget"
+        },
+        {
+          "$ref": "#/$defs/DeclaredActionSourceTarget"
+        }
+      ]
+    },
+    "DamageTarget": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/CoreTarget"
+        },
+        {
+          "$ref": "#/$defs/SelectedTarget"
+        }
+      ]
+    },
+    "DamageEffect": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "damage"
+        },
+        "target": {
+          "$ref": "#/$defs/DamageTarget"
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "type",
+        "target",
+        "amount"
+      ],
+      "additionalProperties": false
+    },
+    "DrawEffect": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "draw"
+        },
+        "target": {
+          "$ref": "#/$defs/PlayerTarget"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "type",
+        "target",
+        "count"
+      ],
+      "additionalProperties": false,
+      "description": "Count does not make Draw atomic: apply Deck Rules and Effect Resolution Model for every required card and Player."
+    },
+    "MoveCardEffect": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "move_card"
+        },
+        "target": {
+          "$ref": "#/$defs/MoveTarget"
+        },
+        "destination": {
+          "type": "object",
+          "properties": {
+            "player": {
+              "const": "target_owner"
+            },
+            "zone": {
+              "enum": [
+                "hand",
+                "discard"
+              ]
+            }
+          },
+          "required": [
+            "player",
+            "zone"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "type",
+        "target",
+        "destination"
+      ],
+      "additionalProperties": false
+    },
+    "DestroyEffect": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "destroy"
+        },
+        "target": {
+          "$ref": "#/$defs/CardTarget"
+        }
+      },
+      "required": [
+        "type",
+        "target"
+      ],
+      "additionalProperties": false,
+      "description": "Target must resolve to a Board Unit; reference compatibility and runtime legality require semantic validation."
+    },
+    "ReadyEffect": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "ready"
+        },
+        "target": {
+          "$ref": "#/$defs/CardTarget"
+        }
+      },
+      "required": [
+        "type",
+        "target"
+      ],
+      "additionalProperties": false,
+      "description": "Target must resolve to a Board Unit; reference compatibility and runtime legality require semantic validation."
+    },
+    "ExhaustEffect": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "exhaust"
+        },
+        "target": {
+          "$ref": "#/$defs/CardTarget"
+        }
+      },
+      "required": [
+        "type",
+        "target"
+      ],
+      "additionalProperties": false,
+      "description": "Target must resolve to a Board Unit; reference compatibility and runtime legality require semantic validation."
+    },
+    "RevealEffect": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "reveal"
+        },
+        "target": {
+          "$ref": "#/$defs/CardTarget"
+        }
+      },
+      "required": [
+        "type",
+        "target"
+      ],
+      "additionalProperties": false,
+      "description": "Only Set Card -> Revealed is currently supported semantically (State Model). No arbitrary Hand/Deck reveal or knowledge editing."
+    },
+    "ChangeFinalTargetEffect": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "change_final_target"
+        },
+        "target": {
+          "$ref": "#/$defs/SourceTarget"
+        }
+      },
+      "required": [
+        "type",
+        "target"
+      ],
+      "additionalProperties": false,
+      "description": "Only within a Unit Block Step Ability. Core Attack procedure supplies the current Attack; source is the Blocking Unit."
+    },
+    "Effect": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/DamageEffect"
+        },
+        {
+          "$ref": "#/$defs/DrawEffect"
+        },
+        {
+          "$ref": "#/$defs/MoveCardEffect"
+        },
+        {
+          "$ref": "#/$defs/DestroyEffect"
+        },
+        {
+          "$ref": "#/$defs/ReadyEffect"
+        },
+        {
+          "$ref": "#/$defs/ExhaustEffect"
+        },
+        {
+          "$ref": "#/$defs/RevealEffect"
+        }
+      ]
+    },
+    "SequentialEffectStep": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "effect"
+        },
+        "effect": {
+          "$ref": "#/$defs/Effect"
+        }
+      },
+      "required": [
+        "type",
+        "effect"
+      ],
+      "additionalProperties": false
+    },
+    "SimultaneousCoreDamage": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "damage"
+        },
+        "target": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "core"
+            },
+            "player": {
+              "enum": [
+                "self",
+                "opponent"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "player"
+          ],
+          "additionalProperties": false
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "type",
+        "target",
+        "amount"
+      ],
+      "additionalProperties": false
+    },
+    "SimultaneousGroup": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "simultaneous"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SimultaneousCoreDamage"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "allOf": [
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "target": {
+                    "type": "object",
+                    "properties": {
+                      "player": {
+                        "const": "self"
+                      }
+                    },
+                    "required": [
+                      "player"
+                    ]
+                  }
+                },
+                "required": [
+                  "target"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "target": {
+                    "type": "object",
+                    "properties": {
+                      "player": {
+                        "const": "opponent"
+                      }
+                    },
+                    "required": [
+                      "player"
+                    ]
+                  }
+                },
+                "required": [
+                  "target"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            }
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "effects"
+      ],
+      "additionalProperties": false,
+      "description": "Initial supported subset: exactly one explicit Damage to each Core. General dependency/conflict groups are unsupported. Semantics belong to docs/model/effect-resolution-model.md."
+    },
+    "EffectStep": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/SequentialEffectStep"
+        },
+        {
+          "$ref": "#/$defs/SimultaneousGroup"
+        }
+      ]
+    },
+    "Resolution": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EffectStep"
+      },
+      "minItems": 1,
+      "description": "Ordered EffectSteps. Effect Resolution Model is authoritative for Player order, Game End boundaries, stopping and retaining applied effects. No per-card override."
+    },
+    "PlacementOperation": {
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/Cost"
+        },
+        "action": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cost"
+      ],
+      "additionalProperties": false,
+      "description": "deploy/set provide card-specific cost and Action designation only. Core supplies movement and initialization; omitted action is non-Action."
+    },
+    "PlayOperation": {
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/Cost"
+        },
+        "action": {
+          "type": "boolean"
+        },
+        "targets": {
+          "$ref": "#/$defs/TargetSelections"
+        },
+        "resolution": {
+          "$ref": "#/$defs/Resolution"
+        }
+      },
+      "required": [
+        "cost",
+        "resolution"
+      ],
+      "additionalProperties": false
+    },
+    "OperationDefinition": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/PlacementOperation"
+        },
+        {
+          "$ref": "#/$defs/PlayOperation"
+        }
+      ]
+    },
+    "DeployOperations": {
+      "type": "object",
+      "properties": {
+        "deploy": {
+          "$ref": "#/$defs/PlacementOperation"
+        }
+      },
+      "required": [
+        "deploy"
+      ],
+      "additionalProperties": false
+    },
+    "TacticOperations": {
+      "type": "object",
+      "properties": {
+        "play": {
+          "$ref": "#/$defs/PlayOperation"
+        },
+        "set": {
+          "$ref": "#/$defs/PlacementOperation"
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "OperationAbility": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "$ref": "#/$defs/Text"
+        },
+        "condition": {
+          "$ref": "#/$defs/Condition"
+        },
+        "limit": {
+          "$ref": "#/$defs/Limit"
+        },
+        "cost": {
+          "$ref": "#/$defs/Cost"
+        },
+        "targets": {
+          "$ref": "#/$defs/TargetSelections"
+        },
+        "resolution": {
+          "$ref": "#/$defs/Resolution"
+        },
+        "activation": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "operation"
+            },
+            "source": {
+              "enum": [
+                "unit",
+                "face_up_support"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "action": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "activation",
+        "cost",
+        "resolution"
+      ],
+      "additionalProperties": false
+    },
+    "ReactionAbility": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "$ref": "#/$defs/Text"
+        },
+        "condition": {
+          "$ref": "#/$defs/Condition"
+        },
+        "limit": {
+          "$ref": "#/$defs/Limit"
+        },
+        "cost": {
+          "$ref": "#/$defs/Cost"
+        },
+        "targets": {
+          "$ref": "#/$defs/TargetSelections"
+        },
+        "resolution": {
+          "$ref": "#/$defs/Resolution"
+        },
+        "activation": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "reaction"
+            },
+            "source": {
+              "enum": [
+                "unit",
+                "face_up_support",
+                "set_card"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "source"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "activation",
+        "cost",
+        "resolution"
+      ],
+      "additionalProperties": false
+    },
+    "BlockAbility": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "$ref": "#/$defs/Text"
+        },
+        "activation": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "block_step"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        "condition": {
+          "type": "null"
+        },
+        "limit": {
+          "$ref": "#/$defs/Limit"
+        },
+        "cost": {
+          "$ref": "#/$defs/Cost"
+        },
+        "resolution": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "effect"
+              },
+              "effect": {
+                "$ref": "#/$defs/ChangeFinalTargetEffect"
+              }
+            },
+            "required": [
+              "type",
+              "effect"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "activation",
+        "cost",
+        "resolution"
+      ],
+      "additionalProperties": false,
+      "description": "The existing Block Ability: resolve to source without extra effects, Action designation or readiness/attack-lock conditions. Max one Block per Attack remains a Core rule."
+    },
+    "Ability": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/OperationAbility"
+        },
+        {
+          "$ref": "#/$defs/ReactionAbility"
+        },
+        {
+          "$ref": "#/$defs/BlockAbility"
+        }
+      ]
+    },
+    "UnitAbility": {
+      "oneOf": [
+        {
+          "allOf": [
+            {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/OperationAbility"
+                },
+                {
+                  "$ref": "#/$defs/ReactionAbility"
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "activation": {
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "const": "unit"
+                    }
+                  },
+                  "required": [
+                    "source"
+                  ]
+                }
+              },
+              "required": [
+                "activation"
+              ]
+            }
+          ]
+        },
+        {
+          "$ref": "#/$defs/BlockAbility"
+        }
+      ]
+    },
+    "SupportAbility": {
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/OperationAbility"
+            },
+            {
+              "$ref": "#/$defs/ReactionAbility"
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "activation": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "const": "face_up_support"
+                }
+              },
+              "required": [
+                "source"
+              ]
+            }
+          },
+          "required": [
+            "activation"
+          ]
+        }
+      ]
+    },
+    "TacticAbility": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ReactionAbility"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "activation": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "const": "set_card"
+                }
+              },
+              "required": [
+                "source"
+              ]
+            }
+          },
+          "required": [
+            "activation"
+          ]
+        }
+      ]
+    },
+    "Card": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "$ref": "#/$defs/Text"
+        },
+        "cardType": {
+          "enum": [
+            "unit",
+            "support",
+            "tactic"
+          ]
+        },
+        "poolIdentity": {
+          "type": "null",
+          "description": "Unassigned in this schema version. This is not a neutral faction or an access rule."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Text"
+          },
+          "uniqueItems": true
+        },
+        "parameters": {
+          "type": "object"
+        },
+        "operations": {
+          "type": "object"
+        },
+        "abilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ability"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "cardType",
+        "poolIdentity",
+        "tags",
+        "parameters",
+        "operations",
+        "abilities"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "cardType": {
+                "const": "unit"
+              }
+            },
+            "required": [
+              "cardType"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "parameters": {
+                "$ref": "#/$defs/UnitParameters"
+              },
+              "operations": {
+                "$ref": "#/$defs/DeployOperations"
+              },
+              "abilities": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/UnitAbility"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "cardType": {
+                "const": "support"
+              }
+            },
+            "required": [
+              "cardType"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "parameters": {
+                "$ref": "#/$defs/EmptyParameters"
+              },
+              "operations": {
+                "$ref": "#/$defs/DeployOperations"
+              },
+              "abilities": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/SupportAbility"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "cardType": {
+                "const": "tactic"
+              }
+            },
+            "required": [
+              "cardType"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "parameters": {
+                "$ref": "#/$defs/EmptyParameters"
+              },
+              "operations": {
+                "$ref": "#/$defs/TacticOperations"
+              },
+              "abilities": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/TacticAbility"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "cardType": {
+                "const": "tactic"
+              },
+              "abilities": {
+                "type": "array",
+                "minItems": 1
+              }
+            },
+            "required": [
+              "cardType",
+              "abilities"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "operations": {
+                "type": "object",
+                "properties": {
+                  "set": {
+                    "$ref": "#/$defs/PlacementOperation"
+                  }
+                },
+                "required": [
+                  "set"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "description": "Static Card Definition only. Technical id is not Card Name or runtime instance identity. Type cases close parameters and operations. Runtime State, Game State and Player Knowledge are excluded."
+    }
+  }
+}

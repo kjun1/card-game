@@ -1,0 +1,48 @@
+{
+  "name": "処理施設",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "dismantle",
+      "name": "解体",
+      "activation": {
+        "type": "operation",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "destroy",
+            "target": {
+              "type": "selected",
+              "selection": "own-unit"
+            }
+          }
+        }
+      ],
+      "targets": {
+        "own-unit": {
+          "type": "card",
+          "player": "self",
+          "zone": "unit_zone",
+          "cardType": "unit"
+        }
+      }
+    }
+  ],
+  "id": "destroy-unit"
+}

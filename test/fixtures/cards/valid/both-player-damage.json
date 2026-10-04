@@ -1,0 +1,41 @@
+{
+  "name": "両刃装置",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "double-edge",
+      "name": "両刃",
+      "activation": {
+        "type": "reaction",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "core",
+              "player": "both"
+            },
+            "amount": 2
+          }
+        }
+      ]
+    }
+  ],
+  "id": "both-player-damage"
+}

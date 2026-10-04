@@ -1,0 +1,44 @@
+{
+  "id": "ready-unit",
+  "name": "再起兵",
+  "cardType": "unit",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {
+    "atk": 2,
+    "maxHp": 3
+  },
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "ready-self",
+      "name": "再起",
+      "activation": {
+        "type": "operation",
+        "source": "unit"
+      },
+      "cost": {
+        "energy": 0
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "ready",
+            "target": {
+              "type": "source"
+            }
+          }
+        }
+      ],
+      "condition": null,
+      "limit": null
+    }
+  ]
+}

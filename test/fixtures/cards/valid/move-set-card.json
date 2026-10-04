@@ -1,0 +1,56 @@
+{
+  "id": "move-set-card",
+  "name": "回収係",
+  "cardType": "unit",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {
+    "atk": 2,
+    "maxHp": 3
+  },
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "recover-set",
+      "name": "回収",
+      "activation": {
+        "type": "operation",
+        "source": "unit"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "move_card",
+            "target": {
+              "type": "selected",
+              "selection": "own-set"
+            },
+            "destination": {
+              "player": "target_owner",
+              "zone": "discard"
+            }
+          }
+        }
+      ],
+      "targets": {
+        "own-set": {
+          "type": "card",
+          "player": "self",
+          "zone": "support_zone",
+          "cardType": "tactic",
+          "state": "set"
+        }
+      }
+    }
+  ]
+}

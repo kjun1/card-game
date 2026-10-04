@@ -1,0 +1,31 @@
+{
+  "name": "分類札",
+  "cardType": "tactic",
+  "poolIdentity": null,
+  "tags": [
+    "Action"
+  ],
+  "parameters": {},
+  "operations": {
+    "play": {
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "core",
+              "player": "opponent"
+            },
+            "amount": 1
+          }
+        }
+      ]
+    }
+  },
+  "abilities": [],
+  "id": "tag-action-tactic"
+}

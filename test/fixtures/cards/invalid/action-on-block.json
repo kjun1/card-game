@@ -1,0 +1,42 @@
+{
+  "id": "action-on-block",
+  "name": "護衛",
+  "cardType": "unit",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {
+    "atk": 1,
+    "maxHp": 5
+  },
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "block",
+      "name": "Block",
+      "activation": {
+        "type": "block_step"
+      },
+      "cost": {
+        "momentum": 2
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "change_final_target",
+            "target": {
+              "type": "source"
+            }
+          }
+        }
+      ],
+      "action": true
+    }
+  ]
+}

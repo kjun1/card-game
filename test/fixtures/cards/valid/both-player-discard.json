@@ -1,0 +1,52 @@
+{
+  "name": "整理装置",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "tidy-both",
+      "name": "双方整理",
+      "activation": {
+        "type": "reaction",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "move_card",
+            "target": {
+              "type": "selected",
+              "selection": "each-unit"
+            },
+            "destination": {
+              "player": "target_owner",
+              "zone": "discard"
+            }
+          }
+        }
+      ],
+      "targets": {
+        "each-unit": {
+          "type": "card",
+          "player": "each",
+          "zone": "hand",
+          "cardType": "unit"
+        }
+      }
+    }
+  ],
+  "id": "both-player-discard"
+}

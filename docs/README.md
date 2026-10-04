@@ -12,6 +12,7 @@
 | rules | 現在有効な規範的ルール |
 | model | 概念、関係、状態、データ構造 |
 | design | 実現方式の設計空間、仮説、検証軸 |
+| schemas | 合意済み概念の機械可読な構造契約。ゲーム動作の意味論はRules / Modelを参照 |
 
 具体例を使って要求と仕様を検討し、合意した内容をrequirements・process・rules・modelへ反映する。処理順の正本はBPMN、規範的ルールはrulesとし、Gherkinから未合意のルールを暗黙に追加しない。
 
@@ -23,9 +24,9 @@
 4. 合意した具体例をGherkinにし、要求タグとScenario IDを付ける。
 5. 要求・BPMN・process Markdown・Rules・Modelへ合意内容を反映する。数値やCard Pool方式を変える場合はDesignも更新し、関連するルールと整合させる。
 6. 具体例と規範文書をレビューし、仕様CIを通す。
-7. ゲーム実装の段階ではCard Schema・Codeを実装し、同じFeatureをStep DefinitionsでDomain Engineへ接続する。受入テストを通してからPlaytestで検証する。
+7. Card Schemaで静的定義を構造化・検証し、ゲーム実装の段階で同じFeatureをStep DefinitionsによりDomain Engineへ接続する。受入テストを通してからPlaytestで検証する。
 
-現在は手順6までを行う。[受入仕様の作成・検証方法](acceptance/README.md)を参照する。検討履歴・却下案・未決事項の議論は仕様本文へ混ぜず、GitHub Issuesで管理する。
+現在は仕様検証に加え、手順7の前段として[Card Definition Schema](model/card-definition-schema.md)とfixtureの構造検証までを行う。Domain Engineとゲーム動作を実行する受入テストは未実装。[受入仕様の作成・検証方法](acceptance/README.md)を参照する。検討履歴・却下案・未決事項の議論は仕様本文へ混ぜず、GitHub Issuesで管理する。
 
 ## Process notation
 
@@ -71,6 +72,7 @@
 
 - [Domain model](model/domain-model.md)
 - [Card model](model/card-model.md)
+- [Card Definition Schema](model/card-definition-schema.md) / [JSON Schema](../schemas/card.schema.json) / [Fixture mapping](../test/fixtures/cards/README.md)
 - [State model](model/state-model.md)
 - [Effect Resolution model](model/effect-resolution-model.md)
 - [Information model](model/information-model.md)
@@ -106,6 +108,7 @@ docs/
 ├─ model/
 │  ├─ domain-model.md
 │  ├─ card-model.md
+│  ├─ card-definition-schema.md
 │  ├─ state-model.md
 │  ├─ effect-resolution-model.md
 │  └─ information-model.md

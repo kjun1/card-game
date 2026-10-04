@@ -1,0 +1,27 @@
+{
+  "id": "block-outside-block-step",
+  "name": "非Action射撃",
+  "cardType": "tactic",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "play": {
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "change_final_target",
+            "target": {
+              "type": "source"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "abilities": []
+}

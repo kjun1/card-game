@@ -1,0 +1,48 @@
+{
+  "name": "牽制装置",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "exhaust-enemy",
+      "name": "足止め",
+      "activation": {
+        "type": "reaction",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "exhaust",
+            "target": {
+              "type": "selected",
+              "selection": "enemy-unit"
+            }
+          }
+        }
+      ],
+      "targets": {
+        "enemy-unit": {
+          "type": "card",
+          "player": "opponent",
+          "zone": "unit_zone",
+          "cardType": "unit"
+        }
+      }
+    }
+  ],
+  "id": "exhaust-reaction"
+}

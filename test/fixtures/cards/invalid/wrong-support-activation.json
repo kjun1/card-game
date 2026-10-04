@@ -1,0 +1,45 @@
+{
+  "id": "wrong-support-activation",
+  "name": "迎撃装置",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "intercept",
+      "name": "迎撃",
+      "activation": {
+        "type": "reaction",
+        "source": "unit"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "core",
+              "player": "opponent"
+            },
+            "amount": 1
+          }
+        }
+      ],
+      "condition": {
+        "type": "turn",
+        "player": "opponent"
+      }
+    }
+  ]
+}

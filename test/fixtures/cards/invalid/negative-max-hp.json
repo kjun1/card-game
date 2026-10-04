@@ -1,0 +1,19 @@
+{
+  "id": "negative-max-hp",
+  "name": "歩兵",
+  "cardType": "unit",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {
+    "atk": 2,
+    "maxHp": -1
+  },
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": []
+}

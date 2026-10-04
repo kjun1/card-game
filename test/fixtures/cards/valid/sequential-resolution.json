@@ -1,0 +1,73 @@
+{
+  "id": "sequential-resolution",
+  "name": "組立砲台",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "assembly-fire",
+      "name": "組立射撃",
+      "activation": {
+        "type": "operation",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "move_card",
+            "target": {
+              "type": "selected",
+              "selection": "material"
+            },
+            "destination": {
+              "player": "target_owner",
+              "zone": "discard"
+            }
+          }
+        },
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "core",
+              "player": "opponent"
+            },
+            "amount": 2
+          }
+        },
+        {
+          "type": "effect",
+          "effect": {
+            "type": "draw",
+            "target": {
+              "type": "player",
+              "player": "self"
+            },
+            "count": 1
+          }
+        }
+      ],
+      "targets": {
+        "material": {
+          "type": "card",
+          "player": "self",
+          "zone": "hand"
+        }
+      }
+    }
+  ]
+}

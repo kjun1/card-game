@@ -1,0 +1,46 @@
+{
+  "id": "wrong-tactic-operation",
+  "name": "迎撃札",
+  "cardType": "tactic",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "set": {
+      "cost": {
+        "energy": 1
+      }
+    },
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "intercept",
+      "name": "迎撃",
+      "activation": {
+        "type": "reaction",
+        "source": "set_card"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "core",
+              "player": "opponent"
+            },
+            "amount": 1
+          }
+        }
+      ]
+    }
+  ]
+}

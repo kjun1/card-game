@@ -1,0 +1,47 @@
+{
+  "id": "wrong-support-parameters",
+  "name": "迎撃装置",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {
+    "atk": 2
+  },
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "intercept",
+      "name": "迎撃",
+      "activation": {
+        "type": "reaction",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "core",
+              "player": "opponent"
+            },
+            "amount": 1
+          }
+        }
+      ],
+      "condition": {
+        "type": "turn",
+        "player": "opponent"
+      }
+    }
+  ]
+}

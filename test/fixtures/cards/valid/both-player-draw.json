@@ -1,0 +1,41 @@
+{
+  "name": "相互補給所",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "mutual-supply",
+      "name": "相互補給",
+      "activation": {
+        "type": "reaction",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "draw",
+            "target": {
+              "type": "player",
+              "player": "both"
+            },
+            "count": 1
+          }
+        }
+      ]
+    }
+  ],
+  "id": "both-player-draw"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "zero-parameters",
+  "name": "数値境界fixture",
+  "cardType": "unit",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {
+    "atk": 0,
+    "maxHp": 0
+  },
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 0
+      }
+    }
+  },
+  "abilities": []
+}

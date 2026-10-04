@@ -28,6 +28,7 @@
 | 現在のルールを読む | [Core rules](docs/rules/core-rules.md) |
 | 処理順と制御権の移動を確認する | [BPMN processes](docs/process/bpmn/README.md) |
 | 用語と概念の関係を確認する | [Domain model](docs/model/domain-model.md) |
+| Cardの機械可読な静的定義を記述する | [Card Definition Schema](docs/model/card-definition-schema.md) |
 | 具体例から仕様を検討する | [Acceptance specifications](docs/acceptance/README.md) |
 | Card Poolの設計を検討する | [Card-pool architecture](docs/design/card-pool.md) |
 
@@ -45,9 +46,10 @@
 npm ci
 npm test
 npm run check:spec
+npm run check:cards
 ~~~
 
-`npm test`は仕様検証器をテストし、`check:spec`はGherkin構文・要求参照・Scenario IDを検証する。ゲーム動作を実行する受入テストは後続で接続する。
+`npm test`は仕様・Card検証器をテストする。`check:spec`はGherkin構文・要求参照・Scenario IDを、`check:cards`はJSON Schema自体とvalid / invalid fixtureの構造契約を検証する。ゲーム動作を実行する受入テストは後続で接続する。
 
 ## License
 
