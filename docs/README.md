@@ -1,27 +1,86 @@
 # Documentation
 
-このディレクトリは、**現在の仕様**と**設計上の概念モデル**を分離して管理する。
-
 ## Structure
 
-### `rules/`
+~~~text
+docs/
+├─ requirements/
+│  ├─ game-requirements.md
+│  ├─ interaction-requirements.md
+│  └─ play-experience-requirements.md
+├─ process/
+│  ├─ game-flow.md
+│  ├─ turn-flow.md
+│  ├─ action-reaction-flow.md
+│  └─ attack-flow.md
+├─ rules/
+│  ├─ core-rules.md
+│  ├─ resource-rules.md
+│  ├─ combat-rules.md
+│  └─ deck-rules.md
+├─ model/
+│  ├─ domain-model.md
+│  ├─ card-model.md
+│  └─ state-model.md
+└─ design/
+   ├─ card-pool.md
+   └─ balance-model.md
+~~~
 
-プレイヤーまたは実装が従う規範的なルール。
+## Responsibility
 
-- [core-rules.md](rules/core-rules.md) — ゲーム開始から終了までのコアルール
+| Layer | Responsibility |
+| --- | --- |
+| requirements | ゲームが何を満たす必要があるか |
+| process | 主体間の処理順・制御移譲 |
+| rules | 現在有効な規範的ルール |
+| model | 概念、関係、状態、データ構造 |
+| design | 実現方式の設計空間、仮説、検証軸 |
 
-ここには検討履歴、比較調査、却下案を書かない。
+依存方向は原則として次を保つ。
 
-### `design/`
+~~~text
+Requirements
+    ↓
+Process / Rules
+    ↓
+Model
+    ↓
+Card / Balance Design
+~~~
 
-ルールを成立させる概念・責任・データモデル。
+## Requirements
+- [Game requirements](requirements/game-requirements.md)
+- [Interaction requirements](requirements/interaction-requirements.md)
+- [Play-experience requirements](requirements/play-experience-requirements.md)
 
-- [system-model.md](design/system-model.md) — 用語階層、責任、相互作用モデル
-- [card-pool.md](design/card-pool.md) — Card Pool / Deck Constructionの概念設計
+## Process
+- [Game flow](process/game-flow.md)
+- [Turn flow](process/turn-flow.md)
+- [Action / Reaction flow](process/action-reaction-flow.md)
+- [Attack flow](process/attack-flow.md)
+
+Process文書ではBPMNの考え方に合わせてParticipant / Task / Gateway / Eventを明示し、図はGitHub上で読めるようMermaidで表現する。
+
+## Rules
+- [Core rules](rules/core-rules.md)
+- [Resource rules](rules/resource-rules.md)
+- [Combat rules](rules/combat-rules.md)
+- [Deck rules](rules/deck-rules.md)
+
+## Model
+- [Domain model](model/domain-model.md)
+- [Card model](model/card-model.md)
+- [State model](model/state-model.md)
+
+## Design
+- [Card-pool architecture](design/card-pool.md)
+- [Balance model](design/balance-model.md)
 
 ## Change policy
 
-- ルール変更時は、まず `rules/` の整合性を更新する。
-- 概念や責任境界が変わる場合のみ `design/` も更新する。
-- 未決事項、代替案、調査結果、意思決定の経緯はGitHub Issuesへ分離する。
-- 仕様本文では「以前は〜」「検討中に〜」などの履歴説明を行わない。
+- 要求変更はrequirementsから反映する。
+- 処理順変更はprocessとrulesを整合させる。
+- 用語、責任、状態構造変更はmodelを更新する。
+- 数値やCard Pool方式など実現方式の変更はdesignからrulesへの影響を確認する。
+- 検討経緯や未決事項はGitHub Issuesへ分離する。
