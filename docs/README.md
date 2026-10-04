@@ -27,9 +27,15 @@ docs/
 │  ├─ domain-model.md
 │  ├─ card-model.md
 │  └─ state-model.md
-└─ design/
-   ├─ card-pool.md
-   └─ balance-model.md
+├─ design/
+│  ├─ card-pool.md
+│  └─ balance-model.md
+└─ acceptance/
+   ├─ README.md
+   ├─ example-mapping.md
+   ├─ turn.feature
+   ├─ action-reaction.feature
+   └─ attack.feature
 ~~~
 
 ## Responsibility
@@ -41,6 +47,7 @@ docs/
 | rules | 現在有効な規範的ルール |
 | model | 概念、関係、状態、データ構造 |
 | design | 実現方式の設計空間、仮説、検証軸 |
+| acceptance | 要求・ルールを具体例で表すExample MappingとGherkin |
 
 依存方向は原則として次を保つ。
 
@@ -53,6 +60,8 @@ Model
     ↓
 Card / Balance Design
 ~~~
+
+acceptanceは各層の仕様を具体例で照合する。処理順の正本はBPMN、規範的ルールはrulesとし、Gherkinから未定義のルールを暗黙に追加しない。
 
 ## Process notation
 
@@ -87,10 +96,20 @@ Card / Balance Design
 - [Card-pool architecture](design/card-pool.md)
 - [Balance model](design/balance-model.md)
 
+## Acceptance
+
+- [Acceptance specifications and checks](acceptance/README.md)
+- [Example Mapping](acceptance/example-mapping.md)
+- [Turn](acceptance/turn.feature)
+- [Action / Reaction](acceptance/action-reaction.feature)
+- [Attack](acceptance/attack.feature)
+
 ## Change policy
 
 - 要求変更はrequirementsから反映する。
+- Example MappingでRule・Example・Questionを整理し、Questionを解消してからGherkinを作成する。解決済みの結論と根拠をExample Mappingへ反映する。
 - 処理順変更はBPMNとprocess Markdownを更新し、rulesとの整合性を確認する。
 - 用語、責任、状態構造変更はmodelを更新する。
 - 数値やCard Pool方式など実現方式の変更はdesignからrulesへの影響を確認する。
+- 変更に対応する受入仕様を更新し、仕様CIを通してからCard Schema・ゲーム実装へ進む。将来は同じFeatureをDomain Engineに接続し、受入テストとPlaytestで検証する。
 - 検討経緯や未決事項はGitHub Issuesへ分離する。

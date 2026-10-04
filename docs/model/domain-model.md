@@ -51,7 +51,7 @@ classDiagram
     Discard o-- Card
 
     Game --> Turn
-    Turn --> Operation : selects until one completes
+    Turn --> Operation : selects until completion or game end
     Operation <|-- Action
     Action --> Reaction
     Card --> Ability
@@ -67,26 +67,26 @@ classDiagram
 | Core | Playerに対応する勝敗対象 |
 | Card | Parameter / Tag / Abilityを持つObject |
 | Zone | Cardの所在、公開範囲、利用可能ルール |
-| Turn | Active Playerが制御権を持つ区間。Turn Startからcompleted Operationまで続く |
-| Operation | Active PlayerがTurn中に選択する主操作。完了するとTurnを終了させる |
-| Action | Reaction可能なOperation |
-| Reaction | Actionに従属する応答。ActionをCancelしてもTurnは終了させない |
+| Turn | Active Playerが制御権を持つ区間。Turn StartからOperation完了またはGame終了まで続く |
+| Operation | Active PlayerがTurn中に選択する主操作。Gameが継続する場合、完了するとTurnを終了させる |
+| Action | Reaction可能なOperation。Attack、または当該操作・AbilityにActionが明記されたOperation |
+| Reaction | Actionに従属する応答。CancelはOperationを完了させず、Game継続時は同じTurnを継続する |
 | Ability | Cardが提供する利用可能な機能 |
 | Effect | Game Stateに実際に発生する変更 |
 
 ## Turn / Operation cardinality
 
-1 Turnはcompleted Operationを1つだけ持つ。
+Gameが継続する通常のTurn終了では、1 Turnはcompleted Operationを1つだけ持つ。Game終了をOperation完了判定より優先するため、Turn StartのDraw不能や致死Reactionによってcompleted Operationが0のまま終了する場合もある。
 
-ただしActionがReactionでCancelされた場合、同じTurn内でOperationを再選択するため、Operation SelectionまたはAction Declarationは複数回発生し得る。
+ActionがReactionでCancelされGameが継続する場合、同じTurn内でOperationを再選択するため、Operation SelectionまたはAction Declarationは複数回発生し得る。Game終了時は再選択やPlayer切替を行わない。
 
 ~~~text
 Turn
-├─ Turn Start (once)
+├─ Turn Start (once; failed Draw may end Game)
 └─ Operation Selection
-    ├─ Cancelled Action → reselect
-    ├─ Cancelled Action → reselect
-    └─ Completed Operation → Turn End
+    ├─ Game ended → Game End (no reselection or Player switch)
+    ├─ Invalid Non-Action / Cancelled Action → reselect if Game continues
+    └─ Completed Operation → Turn End if Game continues
 ~~~
 
 ## Value classification

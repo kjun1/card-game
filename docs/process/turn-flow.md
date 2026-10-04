@@ -35,7 +35,7 @@ flowchart TD
     V --> G{Game ended?}
     G -- Yes --> GE([Game End Reported])
     G -- No --> F{Operation completed?}
-    F -- No / Cancelled --> O
+    F -- No / Invalid or Cancelled --> O
     F -- Yes --> T([Turn Complete])
 ~~~
 
@@ -49,9 +49,9 @@ flowchart TD
 - Turn StartのDraw不能も失敗を記録して同じ勝敗評価へ渡す。Operation選択へは進まない。
 - 同じ解決で両Playerの敗北条件が成立した場合はDrawとして報告する。
 - OperationまたはReactionの解決でGameが終了した場合、Operation完了判定より先にGame終了へ進み、再選択や制御権移転は行わない。
-- Gameが終了しておらずActionがReactionでCancelされた場合、そのOperationは完了していないためOperation Selectionへ戻る。
+- Gameが終了しておらず非Actionの検証失敗またはActionのCancelでOperationが未完了の場合、Operation Selectionへ戻る。
 - この再選択ではTurn Start処理を繰り返さない。
-- 1 Turn中に複数のOperation選択が発生し得るが、Turnを終了させるcompleted Operationは1つだけである。
+- 1 Turn中に複数のOperation選択が発生し得るが、Gameが継続する通常のTurn終了ではcompleted Operationは1つだけである。Draw不能や致死Reactionによってcompleted Operationが0のままGameが終了する場合もある。
 - 「何もしない」を選択した場合は、その選択をOperation CompleteとしてTurnを終了する。
 - DrawによってHand Limitを超えた場合、そのDrawで得たCardを直ちにDiscardする。
 - `Game End Reported`は`gameEnded = true`と評価結果を、`Turn Complete`は`gameEnded = false`をGame Flowへ返す。Game Flowは受け取った結果に従ってGame終了またはPlayer切替を行う。

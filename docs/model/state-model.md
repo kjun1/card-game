@@ -39,16 +39,18 @@ OperationはActive PlayerがTurn中に選択する主操作である。
 ~~~mermaid
 stateDiagram-v2
     [*] --> Selected
+    Selected --> Invalid: non-Action validation failed
     Selected --> Cancelled: selected Action receives Reaction
-    Selected --> Completed: non-Action resolved
+    Selected --> Completed: valid non-Action paid and resolved
     Selected --> Completed: Action resolved without Reaction
+    Invalid --> [*]
     Cancelled --> [*]
     Completed --> [*]
 ~~~
 
-Cancelled OperationはTurn Endを発生させない。同じTurn内で新しいOperationを選択する。
+Invalid / Cancelled OperationはOperation Completeを発生させない。更新後のStateでGame終了を先に評価し、Gameが継続する場合だけ同じTurn内で新しいOperationを選択する。InvalidではCost消費・Card移動・Effect解決を行わない。
 
-Completed OperationだけがTurn Endを発生させる。
+Gameが継続する場合、Completed OperationだけがTurn Endを発生させる。Game終了時はOperation完了判定・再選択・Player切替へ進まず、completed Operationが0でも終了する。
 
 ## Action lifecycle
 
@@ -63,6 +65,8 @@ stateDiagram-v2
 ~~~
 
 ActionがCancelledされた場合、そのActionを含むOperationもCancelledとなる。
+
+CancelそのものではHandのCardを移動せず、未払いEnergy Costも消費しない。Reactionが適用したCost・Card移動・状態変更は保持する。Gameが継続し合法であれば、同じCardの再宣言は新しいActionとReaction Windowを開始する。
 
 ## Attack lifecycle
 

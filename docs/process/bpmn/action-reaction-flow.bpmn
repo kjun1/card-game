@@ -8,6 +8,9 @@
       <bpmn:lane id="Lane_AR_System" name="Game System">
         <bpmn:flowNodeRef>Gateway_IsAction</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_ResolveImmediate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ValidateImmediate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ImmediateValid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_PayImmediateCost</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Start_OperationSelected</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_UsesReaction</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_ResolveReaction</bpmn:flowNodeRef>
@@ -30,6 +33,7 @@
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:exclusiveGateway id="Gateway_IsAction" name="Is Action?">
+      <bpmn:documentation>Attack is always an Action. Other Operations are Actions only when Action is explicitly specified for that operation or ability on the Card. Unspecified operations are non-Actions; the designation does not propagate to other operations or abilities on the same Card.</bpmn:documentation>
       <bpmn:incoming>AR_01</bpmn:incoming>
       <bpmn:outgoing>AR_02</bpmn:outgoing>
       <bpmn:outgoing>AR_04</bpmn:outgoing>
@@ -44,10 +48,25 @@
       <bpmn:incoming>AR_16</bpmn:incoming>
       <bpmn:outgoing>AR_05</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:task id="Task_ResolveImmediate" name="Resolve Non-Action Operation">
+    <bpmn:serviceTask id="Task_ValidateImmediate" name="Validate Non-Action Operation">
+      <bpmn:documentation>Check the selected source, choices, targets, zone limits, and ability to pay without spending resources or applying effects. Invalid input returns operationCompleted = false without side effects.</bpmn:documentation>
       <bpmn:incoming>AR_02</bpmn:incoming>
+      <bpmn:outgoing>AR_20</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_ImmediateValid" name="Non-Action Valid?">
+      <bpmn:incoming>AR_20</bpmn:incoming>
+      <bpmn:outgoing>AR_21</bpmn:outgoing>
+      <bpmn:outgoing>AR_22</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_PayImmediateCost" name="Pay Non-Action Cost">
+      <bpmn:documentation>After validation, deduct the configured cost from the payer. Transfer any Momentum spent to the opponent. Choosing to do nothing has no cost or effect and completes the operation.</bpmn:documentation>
+      <bpmn:incoming>AR_21</bpmn:incoming>
+      <bpmn:outgoing>AR_23</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_ResolveImmediate" name="Resolve Non-Action Operation">
+      <bpmn:incoming>AR_23</bpmn:incoming>
       <bpmn:outgoing>AR_03</bpmn:outgoing>
-    </bpmn:task>
+    </bpmn:serviceTask>
     <bpmn:startEvent id="Start_OperationSelected" name="Operation Selected">
       <bpmn:outgoing>AR_01</bpmn:outgoing>
     </bpmn:startEvent>
@@ -62,7 +81,7 @@
       <bpmn:outgoing>AR_06</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="AR_01" sourceRef="Start_OperationSelected" targetRef="Gateway_IsAction"/>
-    <bpmn:sequenceFlow id="AR_02" name="No" sourceRef="Gateway_IsAction" targetRef="Task_ResolveImmediate">
+    <bpmn:sequenceFlow id="AR_02" name="No" sourceRef="Gateway_IsAction" targetRef="Task_ValidateImmediate">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(isAction)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="AR_04" name="Yes" sourceRef="Gateway_IsAction" targetRef="Task_DeclareAction">
@@ -96,6 +115,7 @@
       <bpmn:outgoing>AR_13</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_CancelAction" name="Cancel Declared Action">
+      <bpmn:documentation>Do not spend the original Action's unpaid Energy cost or move its Hand Card as a consequence of cancellation itself. Preserve all Reaction costs, effects, and Card movements. A legal redeclaration starts a new Reaction Window only if the Game continues.</bpmn:documentation>
       <bpmn:incoming>Flow_1itt36p</bpmn:incoming>
       <bpmn:outgoing>AR_10</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -105,8 +125,9 @@
       <bpmn:incoming>AR_03</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:endEvent id="End_OperationNotComplete" name="Operation Incomplete">
-      <bpmn:documentation>Return operationCompleted = false and the updated state to turn-flow.bpmn. The declared action was cancelled. Turn Flow decides game end or reselection.</bpmn:documentation>
+      <bpmn:documentation>Return operationCompleted = false and the updated state to turn-flow.bpmn. The declared Action was cancelled or Non-Action validation failed. Turn Flow evaluates Game end before deciding whether to allow reselection.</bpmn:documentation>
       <bpmn:incoming>AR_10</bpmn:incoming>
+      <bpmn:incoming>AR_22</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:serviceTask id="Task_ValidateAction" name="Validate Action">
       <bpmn:documentation>Check the declared source, choices, targets, zone limits, and ability to pay the action cost without spending resources. Only valid declarations open a reaction window.</bpmn:documentation>
@@ -142,6 +163,14 @@
     <bpmn:sequenceFlow id="AR_19" sourceRef="Gateway_ReactionValid" targetRef="Task_ChooseReaction" name="No">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(reactionValid)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AR_20" sourceRef="Task_ValidateImmediate" targetRef="Gateway_ImmediateValid"/>
+    <bpmn:sequenceFlow id="AR_21" sourceRef="Gateway_ImmediateValid" targetRef="Task_PayImmediateCost" name="Yes">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">nonActionValid</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AR_22" sourceRef="Gateway_ImmediateValid" targetRef="End_OperationNotComplete" name="No">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not(nonActionValid)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="AR_23" sourceRef="Task_PayImmediateCost" targetRef="Task_ResolveImmediate"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration_ActionReaction">
     <bpmndi:BPMNPlane id="BPMNPlane_Collaboration_ActionReaction" bpmnElement="Collaboration_ActionReaction">
@@ -223,11 +252,23 @@
       <bpmndi:BPMNShape id="End_OperationNotComplete_di" bpmnElement="End_OperationNotComplete">
         <dc:Bounds x="1790" y="672" width="36" height="36"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1738.0" y="716" width="140" height="40"/>
+          <dc:Bounds x="1738" y="625" width="140" height="27"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_ResolveImmediate_di" bpmnElement="Task_ResolveImmediate">
+      <bpmndi:BPMNShape id="Task_ValidateImmediate_di" bpmnElement="Task_ValidateImmediate">
         <dc:Bounds x="350" y="830" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ImmediateValid_di" bpmnElement="Gateway_ImmediateValid" isMarkerVisible="true">
+        <dc:Bounds x="550" y="845" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="505" y="790" width="140" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_PayImmediateCost_di" bpmnElement="Task_PayImmediateCost">
+        <dc:Bounds x="700" y="830" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ResolveImmediate_di" bpmnElement="Task_ResolveImmediate">
+        <dc:Bounds x="900" y="830" width="130" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="AR_01_di" bpmnElement="AR_01">
         <di:waypoint x="186" y="510"/>
@@ -335,9 +376,33 @@
         <di:waypoint x="2040" y="510"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="AR_03_di" bpmnElement="AR_03">
-        <di:waypoint x="480" y="870"/>
+        <di:waypoint x="1030" y="870"/>
         <di:waypoint x="2058" y="870"/>
         <di:waypoint x="2058" y="528"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_20_di" bpmnElement="AR_20">
+        <di:waypoint x="480" y="870"/>
+        <di:waypoint x="550" y="870"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_21_di" bpmnElement="AR_21">
+        <di:waypoint x="600" y="870"/>
+        <di:waypoint x="700" y="870"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="640" y="848" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_22_di" bpmnElement="AR_22">
+        <di:waypoint x="575" y="895"/>
+        <di:waypoint x="575" y="960"/>
+        <di:waypoint x="1808" y="960"/>
+        <di:waypoint x="1808" y="708"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="585" y="920" width="20" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AR_23_di" bpmnElement="AR_23">
+        <di:waypoint x="830" y="870"/>
+        <di:waypoint x="900" y="870"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

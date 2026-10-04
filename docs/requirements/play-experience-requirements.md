@@ -8,7 +8,7 @@
 
 | ID | Requirement |
 | --- | --- |
-| PER-001 | 一方のPlayerが完了済みOperationを連続して実行する構造を避け、1つのOperationが完了したら相手へ制御権を渡さなければならない。 |
+| PER-001 | 一方のPlayerが完了済みOperationを連続して実行する構造を避け、1つのOperationが完了しGameが継続する場合は相手へ制御権を渡さなければならない。 |
 | PER-002 | 相手の行動を確認してから判断する機会を提供しつつ、すべてのOperationでReaction確認を発生させてはならない。 |
 | PER-003 | Reactionの脅威は原則として事前にBoardへコミットされ、相手が存在を推測可能でなければならない。 |
 | PER-004 | Energyは自分のTurn Startで回復し、次の自分Turn StartまでのCard / Ability利用を制約する予算として機能しなければならない。 |

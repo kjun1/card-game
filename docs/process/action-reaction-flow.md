@@ -9,7 +9,8 @@ Actionとして定義されたOperationに対するReaction処理とOperation完
 ## Principle
 
 - ActionだけがReaction Windowを発生させる。
-- ActionではないOperationはReactionを挟まず解決する。
+- Attackは常にAction。それ以外はCardの当該操作・Abilityに`Action`が明記された場合だけActionで、同じCard内の別操作へ指定を波及させない。
+- ActionではないOperationも合法性・Cost支払い可能性を検証し、合法ならReactionを挟まずCostを支払い解決する。不正なら副作用なしで未完了を返す。
 - Reactionを受けたActionは成立しない。
 - Reaction後、Gameが終了していなければ同じTurnを継続する。
 - Reactionに対するReactionは発生させない。
@@ -19,7 +20,11 @@ Actionとして定義されたOperationに対するReaction処理とOperation完
 ~~~mermaid
 flowchart TD
     S[Operation Selected] --> A{Is Action?}
-    A -- No --> N[Resolve Operation]
+    A -- No --> VN[Validate Non-Action Operation]
+    VN --> NV{Non-Action valid?}
+    NV -- No --> U([Operation Incomplete])
+    NV -- Yes --> NC[Pay Non-Action Cost]
+    NC --> N[Resolve Non-Action Operation]
     N --> C([Operation Complete])
 
     A -- Yes --> D[Declare Action]
@@ -34,7 +39,7 @@ flowchart TD
     G -- Yes --> RC[Pay Reaction Cost]
     RC --> RR[Resolve Reaction]
     RR --> X[Cancel Declared Action]
-    X --> U([Operation Incomplete])
+    X --> U
 
     G -- No --> AC[Pay Action Cost]
     AC --> AR[Resolve Action]
@@ -48,6 +53,7 @@ Game終了判定とOperation再選択の判断はTurn Flowが行う。Reaction�
 ## Selection and validation
 
 - Active PlayerはActionのSource・Target等を宣言し、OpponentはReactionのSource・Target等を選択するか辞退する。
+- 非Actionも、選択されたSource・Target・Zone Capacity等の合法性とCost支払い可能性をGame Systemが検証する。不正ならCost消費・Card移動・Effect解決なしで`Operation Incomplete`を返し、Turn FlowによるGame終了評価後、継続時はOperation選択へ戻る。
 - Game SystemはAction宣言の合法性とCost支払い可能性を検証し、合法な宣言だけがReaction Windowを開く。
 - Reactionの辞退は有効な選択として扱う。Reactionを選択した場合は、Game SystemがSource・Timing・Target・Cost支払い可能性を検証する。
 - 不正なAction宣言は宣言へ、不正なReactionはReaction選択へ戻る。検証失敗ではCost消費・Effect解決・Action Cancelを行わない。
@@ -64,6 +70,7 @@ Reactionが使用された場合:
 - Reaction Effectを解決する。
 - 元ActionをCancelする。
 - 元Actionの未払いEnergy Costは消費しない。
-- Reactionによる状態変更は巻き戻さない。
+- CancelそのものではActionに使用しようとしたHandのCardを移動させない。
+- ReactionによるCard移動・状態変更は巻き戻さない。Reaction EffectでHandから移動したCardをCancelによってHandへ戻さない。
 
-再宣言されたActionは新しいReaction Windowを発生させる。Reaction回数に一律のシステム上限は設けない。
+Gameが継続し合法であれば同じCardを再宣言でき、再宣言されたActionは新しいReaction Windowを発生させる。Reaction回数に一律のシステム上限は設けない。

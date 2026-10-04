@@ -32,7 +32,7 @@ Attack Declaration時点ではAttackerをExhaustしない。
 
 Attack Declaration後にReaction Windowを開く。
 
-Reactionが使用された場合、Reactionを解決しAttackをCancelしてOperation選択へ戻る。
+Reactionが使用された場合、Reactionを解決しAttackをCancelする。Game終了を先に評価し、Gameが継続する場合だけOperation選択へ戻る。Block・Attack Commit・Combatには進まない。
 
 Reactionがない場合のみBlock Stepへ進む。
 

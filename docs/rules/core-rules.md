@@ -41,11 +41,13 @@ Playerは基本ルールによって自分のUnit / Supportを任意にDiscard�
 
 Turnは、**Active Playerがゲーム進行の制御権を持つ区間**である。
 
-Turn Startから始まり、そのTurnで選択された1つのOperationが完了した時点で終了する。Turn終了後、Opponentが新しいActive Playerとなる。
+Turn Startから始まり、Gameが継続する場合は、そのTurnで選択された1つのOperationが完了した時点で終了する。Turn終了後、Opponentが新しいActive Playerとなる。
 
-ActionがReactionによってCancelされた場合、そのActionを含むOperationは完了していない。そのためTurnは終了せず、同じActive PlayerがOperationを選択し直す。
+ActionがReactionによってCancelされた場合、そのActionを含むOperationは完了していない。Gameが継続する場合、Turnは終了せず、同じActive PlayerがOperationを選択し直す。
 
-したがって、1 Turn中に複数回のOperation選択やAction Declarationが発生することはあるが、Turnを終了させるcompleted Operationは1つだけである。
+したがって、1 Turn中に複数回のOperation選択やAction Declarationが発生することはあるが、Gameが継続する通常のTurn終了ではcompleted Operationは1つだけである。
+
+Game終了はOperation完了判定より優先する。Turn StartのDraw不能や致死Reaction等で、Operationが一度も完了せずGameが終了する場合もある。Game終了時はOperation再選択・Player切替を行わない。
 
 ### Turn Start order
 
@@ -76,7 +78,9 @@ Operation例:
 
 Operationは、解決または「何もしない」の選択によって完了する。
 
-Actionに分類されるOperationがReactionでCancelされた場合、そのOperationは完了せず、同じTurn内でOperation Selectionへ戻る。
+Actionかどうかにかかわらず、Game SystemはSource・Target・Zone Capacity等の合法性とCost支払い可能性を支払い前に検証する。非ActionのOperationは、合法な場合にCostを支払って解決し、Operation Completeとする。不正な非ActionはCost消費・Card移動・Effect解決等の副作用なしでOperation未完了として返し、Gameが継続する場合はOperation Selectionへ戻る。
+
+Actionに分類されるOperationがReactionでCancelされた場合、そのOperationは完了せず、Gameが継続する場合は同じTurn内でOperation Selectionへ戻る。
 
 何もしない場合、その時点でOperation Completeとする。
 
@@ -86,9 +90,13 @@ Actionに分類されるOperationがReactionでCancelされた場合、そのOpe
 
 ActionはReaction可能なOperationである。
 
-Action Declaration後、必ずReaction Windowを開く。
+基本ルールでActionとなるOperationはAttackだけである。その他のOperationは、Cardの当該操作・Abilityに`Action`と明記された場合だけActionとなり、未指定なら非Actionとする。
 
-ActionではないOperationには原則Reaction Windowを開かない。
+`Action`は意味分類用のTagとは異なる動作キーワードであり、指定は操作・Ability単位で適用する。同じCardのPlayに`Action`があっても、Setや別Abilityへは波及しない。
+
+合法なAction Declaration後、必ずReaction Windowを開く。不正な宣言はCostを消費せず、Reaction Windowを開かずに宣言へ戻る。
+
+ActionではないOperationにはReaction Windowを開かない。
 
 ### Reactionなし
 
@@ -100,8 +108,11 @@ Action Costを支払い、Action固有処理を解決し、Operation Completeと
 2. Reactionを解決する。
 3. 宣言済みActionをCancelする。
 4. Action側の未払いEnergy Costは消費しない。
-5. ReactionによるCost・状態変更は巻き戻さない。
-6. Operationは未完了のため、同じActive PlayerへOperation選択権を戻す。
+5. Cancelそのものでは、Actionに使用しようとしたHandのCardを移動させない。
+6. ReactionによるCost・Card移動・状態変更は巻き戻さない。
+7. Operationは未完了として扱い、Gameが継続する場合だけ同じActive PlayerへOperation選択権を戻す。
+
+Gameが継続し合法であれば、保持した同じCardを再宣言できる。Reaction EffectによってCardがHandから移動した場合は、Cancelを理由にHandへ戻さない。
 
 Reactionに対するReactionは行わない。
 
@@ -139,11 +150,15 @@ Handから直接Reactionすることは基本ルールでは認めない。
 
 - TurnはActive Playerが制御権を持つ区間である。
 - Turn Start処理は各Turnにつき1回だけ行う。
-- completed Operationが1つ発生するとTurnが終了し、Opponentへ制御権が移る。
+- Game終了をOperation完了判定より優先し、終了時は再選択・制御権移転を行わない。
+- Gameが継続する場合、completed Operationが1つ発生するとTurnが終了し、Opponentへ制御権が移る。
+- Game終了時にはcompleted Operationが0のTurnもあり得る。
 - CancelされたActionはOperation Completeを発生させない。
 - ActionのみReaction可能。
+- Attackは常にAction。他のOperationは当該操作・Abilityの明示的なAction指定がある場合だけAction。
 - ReactionされたActionは成立しない。
-- Reaction後も同じActive PlayerのTurnを継続する。
+- Reaction後もGameが継続する場合は同じActive PlayerのTurnを継続する。
+- CancelそのものではHandのCardを移動せず、ReactionのCost・Effectは巻き戻さない。
 - Handからの直接Reactionなし。
 - Momentumは原則として両Player間で保存される。
 

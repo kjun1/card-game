@@ -1,0 +1,18 @@
+{
+  "name": "card-game-specification",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Specification validation for card-game",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "check:spec": "node scripts/check-spec.mjs",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@cucumber/gherkin": "42.0.1",
+    "@cucumber/messages": "34.2.1"
+  }
+}
