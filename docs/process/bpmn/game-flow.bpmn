@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
   id="Definitions_GameFlow"
   targetNamespace="https://github.com/kjun1/card-game/bpmn">
 
@@ -96,4 +99,229 @@
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="GF_24" sourceRef="Task_DetermineResult" targetRef="End_Game"/>
   </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration_GameFlow">
+    <bpmndi:BPMNPlane id="BPMNPlane_Collaboration_GameFlow" bpmnElement="Collaboration_GameFlow">
+      <bpmndi:BPMNShape id="Participant_Game_di" bpmnElement="Participant_Game" isHorizontal="true">
+        <dc:Bounds x="60" y="60" width="3600" height="900"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_PlayerA_di" bpmnElement="Lane_PlayerA" isHorizontal="true">
+        <dc:Bounds x="90" y="60" width="3570" height="300"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_PlayerB_di" bpmnElement="Lane_PlayerB" isHorizontal="true">
+        <dc:Bounds x="90" y="360" width="3570" height="300"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_GameSystem_di" bpmnElement="Lane_GameSystem" isHorizontal="true">
+        <dc:Bounds x="90" y="660" width="3570" height="300"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_Game_di" bpmnElement="Start_Game">
+        <dc:Bounds x="180" y="715" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PrepareSplit_di" bpmnElement="Gateway_PrepareSplit">
+        <dc:Bounds x="370" y="715" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_PrepareDeckA_di" bpmnElement="Task_PrepareDeckA">
+        <dc:Bounds x="560" y="115" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_PrepareDeckB_di" bpmnElement="Task_PrepareDeckB">
+        <dc:Bounds x="560" y="415" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PrepareJoin_di" bpmnElement="Gateway_PrepareJoin">
+        <dc:Bounds x="750" y="715" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CoinToss_di" bpmnElement="Task_CoinToss">
+        <dc:Bounds x="940" y="715" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_OpeningDraw_di" bpmnElement="Task_OpeningDraw">
+        <dc:Bounds x="1130" y="715" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_MulliganSplit_di" bpmnElement="Gateway_MulliganSplit">
+        <dc:Bounds x="1320" y="715" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_MulliganA_di" bpmnElement="Task_MulliganA">
+        <dc:Bounds x="1510" y="115" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_MulliganB_di" bpmnElement="Task_MulliganB">
+        <dc:Bounds x="1510" y="415" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_MulliganJoin_di" bpmnElement="Gateway_MulliganJoin">
+        <dc:Bounds x="1700" y="715" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ReturnSplit_di" bpmnElement="Gateway_ReturnSplit">
+        <dc:Bounds x="1890" y="715" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ReturnShuffleA_di" bpmnElement="Task_ReturnShuffleA">
+        <dc:Bounds x="2080" y="115" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ReturnShuffleB_di" bpmnElement="Task_ReturnShuffleB">
+        <dc:Bounds x="2080" y="415" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ReturnJoin_di" bpmnElement="Gateway_ReturnJoin">
+        <dc:Bounds x="2270" y="715" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Initialize_di" bpmnElement="Task_Initialize">
+        <dc:Bounds x="2460" y="715" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ExecuteTurn_di" bpmnElement="Task_ExecuteTurn">
+        <dc:Bounds x="2650" y="715" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_GameEnded_di" bpmnElement="Gateway_GameEnded">
+        <dc:Bounds x="2840" y="715" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SwitchActivePlayer_di" bpmnElement="Task_SwitchActivePlayer">
+        <dc:Bounds x="3030" y="715" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_DetermineResult_di" bpmnElement="Task_DetermineResult">
+        <dc:Bounds x="3030" y="815" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Game_di" bpmnElement="End_Game">
+        <dc:Bounds x="3220" y="715" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="GF_01_di" bpmnElement="GF_01">
+        <di:waypoint x="216" y="733"/>
+        <di:waypoint x="293" y="733"/>
+        <di:waypoint x="293" y="740"/>
+        <di:waypoint x="370" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_02_di" bpmnElement="GF_02">
+        <di:waypoint x="420" y="740"/>
+        <di:waypoint x="490" y="740"/>
+        <di:waypoint x="490" y="155"/>
+        <di:waypoint x="560" y="155"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_03_di" bpmnElement="GF_03">
+        <di:waypoint x="420" y="740"/>
+        <di:waypoint x="490" y="740"/>
+        <di:waypoint x="490" y="455"/>
+        <di:waypoint x="560" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_04_di" bpmnElement="GF_04">
+        <di:waypoint x="690" y="155"/>
+        <di:waypoint x="720" y="155"/>
+        <di:waypoint x="720" y="740"/>
+        <di:waypoint x="750" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_05_di" bpmnElement="GF_05">
+        <di:waypoint x="690" y="455"/>
+        <di:waypoint x="720" y="455"/>
+        <di:waypoint x="720" y="740"/>
+        <di:waypoint x="750" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_06_di" bpmnElement="GF_06">
+        <di:waypoint x="800" y="740"/>
+        <di:waypoint x="870" y="740"/>
+        <di:waypoint x="870" y="755"/>
+        <di:waypoint x="940" y="755"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_07_di" bpmnElement="GF_07">
+        <di:waypoint x="1070" y="755"/>
+        <di:waypoint x="1100" y="755"/>
+        <di:waypoint x="1100" y="755"/>
+        <di:waypoint x="1130" y="755"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_08_di" bpmnElement="GF_08">
+        <di:waypoint x="1260" y="755"/>
+        <di:waypoint x="1290" y="755"/>
+        <di:waypoint x="1290" y="740"/>
+        <di:waypoint x="1320" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_09_di" bpmnElement="GF_09">
+        <di:waypoint x="1370" y="740"/>
+        <di:waypoint x="1440" y="740"/>
+        <di:waypoint x="1440" y="155"/>
+        <di:waypoint x="1510" y="155"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_10_di" bpmnElement="GF_10">
+        <di:waypoint x="1370" y="740"/>
+        <di:waypoint x="1440" y="740"/>
+        <di:waypoint x="1440" y="455"/>
+        <di:waypoint x="1510" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_11_di" bpmnElement="GF_11">
+        <di:waypoint x="1640" y="155"/>
+        <di:waypoint x="1670" y="155"/>
+        <di:waypoint x="1670" y="740"/>
+        <di:waypoint x="1700" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_12_di" bpmnElement="GF_12">
+        <di:waypoint x="1640" y="455"/>
+        <di:waypoint x="1670" y="455"/>
+        <di:waypoint x="1670" y="740"/>
+        <di:waypoint x="1700" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_13_di" bpmnElement="GF_13">
+        <di:waypoint x="1750" y="740"/>
+        <di:waypoint x="1820" y="740"/>
+        <di:waypoint x="1820" y="740"/>
+        <di:waypoint x="1890" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_14_di" bpmnElement="GF_14">
+        <di:waypoint x="1940" y="740"/>
+        <di:waypoint x="2010" y="740"/>
+        <di:waypoint x="2010" y="155"/>
+        <di:waypoint x="2080" y="155"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_15_di" bpmnElement="GF_15">
+        <di:waypoint x="1940" y="740"/>
+        <di:waypoint x="2010" y="740"/>
+        <di:waypoint x="2010" y="455"/>
+        <di:waypoint x="2080" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_16_di" bpmnElement="GF_16">
+        <di:waypoint x="2210" y="155"/>
+        <di:waypoint x="2240" y="155"/>
+        <di:waypoint x="2240" y="740"/>
+        <di:waypoint x="2270" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_17_di" bpmnElement="GF_17">
+        <di:waypoint x="2210" y="455"/>
+        <di:waypoint x="2240" y="455"/>
+        <di:waypoint x="2240" y="740"/>
+        <di:waypoint x="2270" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_18_di" bpmnElement="GF_18">
+        <di:waypoint x="2320" y="740"/>
+        <di:waypoint x="2390" y="740"/>
+        <di:waypoint x="2390" y="755"/>
+        <di:waypoint x="2460" y="755"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_19_di" bpmnElement="GF_19">
+        <di:waypoint x="2590" y="755"/>
+        <di:waypoint x="2620" y="755"/>
+        <di:waypoint x="2620" y="755"/>
+        <di:waypoint x="2650" y="755"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_20_di" bpmnElement="GF_20">
+        <di:waypoint x="2780" y="755"/>
+        <di:waypoint x="2810" y="755"/>
+        <di:waypoint x="2810" y="740"/>
+        <di:waypoint x="2840" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_21_di" bpmnElement="GF_21">
+        <di:waypoint x="2890" y="740"/>
+        <di:waypoint x="2960" y="740"/>
+        <di:waypoint x="2960" y="755"/>
+        <di:waypoint x="3030" y="755"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_22_di" bpmnElement="GF_22">
+        <di:waypoint x="3160" y="755"/>
+        <di:waypoint x="3195" y="755"/>
+        <di:waypoint x="3195" y="865"/>
+        <di:waypoint x="2615" y="865"/>
+        <di:waypoint x="2615" y="755"/>
+        <di:waypoint x="2650" y="755"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_23_di" bpmnElement="GF_23">
+        <di:waypoint x="2890" y="740"/>
+        <di:waypoint x="2960" y="740"/>
+        <di:waypoint x="2960" y="855"/>
+        <di:waypoint x="3030" y="855"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="GF_24_di" bpmnElement="GF_24">
+        <di:waypoint x="3160" y="855"/>
+        <di:waypoint x="3190" y="855"/>
+        <di:waypoint x="3190" y="733"/>
+        <di:waypoint x="3220" y="733"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </bpmn:definitions>

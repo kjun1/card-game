@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
   id="Definitions_TurnFlow"
   targetNamespace="https://github.com/kjun1/card-game/bpmn">
 
@@ -75,4 +78,153 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[operationCompleted]]></bpmn:conditionExpression>
     </bpmn:sequenceFlow>
   </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration_TurnFlow">
+    <bpmndi:BPMNPlane id="BPMNPlane_Collaboration_TurnFlow" bpmnElement="Collaboration_TurnFlow">
+      <bpmndi:BPMNShape id="Participant_Turn_di" bpmnElement="Participant_Turn" isHorizontal="true">
+        <dc:Bounds x="60" y="60" width="2650" height="600"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_ActivePlayer_di" bpmnElement="Lane_ActivePlayer" isHorizontal="true">
+        <dc:Bounds x="90" y="60" width="2620" height="300"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_TurnSystem_di" bpmnElement="Lane_TurnSystem" isHorizontal="true">
+        <dc:Bounds x="90" y="360" width="2620" height="300"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_Turn_di" bpmnElement="Start_Turn">
+        <dc:Bounds x="180" y="415" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ReadyUnits_di" bpmnElement="Task_ReadyUnits">
+        <dc:Bounds x="370" y="415" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ClearAttackLock_di" bpmnElement="Task_ClearAttackLock">
+        <dc:Bounds x="560" y="415" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_IncreaseCapacity_di" bpmnElement="Task_IncreaseCapacity">
+        <dc:Bounds x="750" y="415" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_RefreshEnergy_di" bpmnElement="Task_RefreshEnergy">
+        <dc:Bounds x="940" y="415" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_CanDraw_di" bpmnElement="Gateway_CanDraw">
+        <dc:Bounds x="1130" y="415" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Draw_di" bpmnElement="Task_Draw">
+        <dc:Bounds x="1320" y="415" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_HandLimit_di" bpmnElement="Gateway_HandLimit">
+        <dc:Bounds x="1510" y="415" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_DiscardDrawn_di" bpmnElement="Task_DiscardDrawn">
+        <dc:Bounds x="1700" y="415" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SelectOperation_di" bpmnElement="Task_SelectOperation">
+        <dc:Bounds x="1700" y="115" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ExecuteOperation_di" bpmnElement="Task_ExecuteOperation">
+        <dc:Bounds x="1890" y="415" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_OperationCompleted_di" bpmnElement="Gateway_OperationCompleted">
+        <dc:Bounds x="2080" y="415" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Turn_di" bpmnElement="End_Turn">
+        <dc:Bounds x="2270" y="415" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_LoseDeckOut_di" bpmnElement="End_LoseDeckOut">
+        <dc:Bounds x="1320" y="515" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="TF_01_di" bpmnElement="TF_01">
+        <di:waypoint x="216" y="433"/>
+        <di:waypoint x="293" y="433"/>
+        <di:waypoint x="293" y="455"/>
+        <di:waypoint x="370" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_02_di" bpmnElement="TF_02">
+        <di:waypoint x="500" y="455"/>
+        <di:waypoint x="530" y="455"/>
+        <di:waypoint x="530" y="455"/>
+        <di:waypoint x="560" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_03_di" bpmnElement="TF_03">
+        <di:waypoint x="690" y="455"/>
+        <di:waypoint x="720" y="455"/>
+        <di:waypoint x="720" y="455"/>
+        <di:waypoint x="750" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_04_di" bpmnElement="TF_04">
+        <di:waypoint x="880" y="455"/>
+        <di:waypoint x="910" y="455"/>
+        <di:waypoint x="910" y="455"/>
+        <di:waypoint x="940" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_05_di" bpmnElement="TF_05">
+        <di:waypoint x="1070" y="455"/>
+        <di:waypoint x="1100" y="455"/>
+        <di:waypoint x="1100" y="440"/>
+        <di:waypoint x="1130" y="440"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_06_di" bpmnElement="TF_06">
+        <di:waypoint x="1180" y="440"/>
+        <di:waypoint x="1250" y="440"/>
+        <di:waypoint x="1250" y="533"/>
+        <di:waypoint x="1320" y="533"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_07_di" bpmnElement="TF_07">
+        <di:waypoint x="1180" y="440"/>
+        <di:waypoint x="1250" y="440"/>
+        <di:waypoint x="1250" y="455"/>
+        <di:waypoint x="1320" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_08_di" bpmnElement="TF_08">
+        <di:waypoint x="1450" y="455"/>
+        <di:waypoint x="1480" y="455"/>
+        <di:waypoint x="1480" y="440"/>
+        <di:waypoint x="1510" y="440"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_09_di" bpmnElement="TF_09">
+        <di:waypoint x="1560" y="440"/>
+        <di:waypoint x="1630" y="440"/>
+        <di:waypoint x="1630" y="455"/>
+        <di:waypoint x="1700" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_10_di" bpmnElement="TF_10">
+        <di:waypoint x="1560" y="440"/>
+        <di:waypoint x="1630" y="440"/>
+        <di:waypoint x="1630" y="155"/>
+        <di:waypoint x="1700" y="155"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_11_di" bpmnElement="TF_11">
+        <di:waypoint x="1830" y="455"/>
+        <di:waypoint x="1865" y="455"/>
+        <di:waypoint x="1865" y="565"/>
+        <di:waypoint x="1665" y="565"/>
+        <di:waypoint x="1665" y="155"/>
+        <di:waypoint x="1700" y="155"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_12_di" bpmnElement="TF_12">
+        <di:waypoint x="1830" y="155"/>
+        <di:waypoint x="1860" y="155"/>
+        <di:waypoint x="1860" y="455"/>
+        <di:waypoint x="1890" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_13_di" bpmnElement="TF_13">
+        <di:waypoint x="2020" y="455"/>
+        <di:waypoint x="2050" y="455"/>
+        <di:waypoint x="2050" y="440"/>
+        <di:waypoint x="2080" y="440"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_14_di" bpmnElement="TF_14">
+        <di:waypoint x="2130" y="440"/>
+        <di:waypoint x="2165" y="440"/>
+        <di:waypoint x="2165" y="550"/>
+        <di:waypoint x="1665" y="550"/>
+        <di:waypoint x="1665" y="155"/>
+        <di:waypoint x="1700" y="155"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="TF_15_di" bpmnElement="TF_15">
+        <di:waypoint x="2130" y="440"/>
+        <di:waypoint x="2200" y="440"/>
+        <di:waypoint x="2200" y="433"/>
+        <di:waypoint x="2270" y="433"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </bpmn:definitions>
