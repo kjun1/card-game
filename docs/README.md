@@ -46,6 +46,10 @@
 - [Turn](acceptance/turn.feature)
 - [Action / Reaction](acceptance/action-reaction.feature)
 - [Attack](acceptance/attack.feature)
+- [Setup / Mulligan](acceptance/setup-mulligan.feature)
+- [Resource](acceptance/resource.feature)
+- [Board / Zone](acceptance/board-zone.feature)
+- [Deck / Draw / Hand](acceptance/deck.feature)
 
 ## Process
 
@@ -108,5 +112,9 @@ docs/
    ├─ example-mapping.md
    ├─ turn.feature
    ├─ action-reaction.feature
-   └─ attack.feature
+   ├─ attack.feature
+   ├─ setup-mulligan.feature
+   ├─ resource.feature
+   ├─ board-zone.feature
+   └─ deck.feature
 ~~~

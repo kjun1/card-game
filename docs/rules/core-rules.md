@@ -27,7 +27,7 @@ Unit ZoneとSupport Zoneは単一盤面上に存在する。
 
 Zone Capacityを超えるDeploy / Setは実行できない。
 
-Playerは基本ルールによって自分のUnit / Supportを任意にDiscardして空きを作ることはできない。Card Effect等による移動・Destroyはこの制約の対象外である。
+Playerは基本ルールによって自分のBoard Card（Unit / Face-up Support / Set Card）を任意にDiscardして空きを作ることはできない。Card Effect等による移動・Destroyはこの制約の対象外である。
 
 ## Card types
 

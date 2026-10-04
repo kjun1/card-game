@@ -6,10 +6,14 @@
 
 | File | 内容 |
 | --- | --- |
-| [Example Mapping](example-mapping.md) | Capability → Rule → Example、要求・根拠・Scenario IDの対応と確定したQuestion |
+| [Example Mapping](example-mapping.md) | Capability → Rule → Example、要求・根拠・Scenario IDの対応、解決済み・未解決のQuestion |
 | [Turn](turn.feature) | Turn Start、Operation完了・再選択、Game終了優先 |
 | [Action / Reaction](action-reaction.feature) | 操作別Action指定、検証、Cost、取消と再宣言 |
 | [Attack](attack.feature) | 攻撃資格、Reaction、Block、Commit、Damage・Destroy |
+| [Setup / Mulligan](setup-mulligan.feature) | 先攻決定、Opening Hand、交換対象の退避、両者完了後の返却・Shuffle |
+| [Resource](resource.feature) | SetupとTurn StartのEnergy、Operation / Reactionの共通予算、Momentum移転とCost不足 |
+| [Board / Zone](board-zone.feature) | Zone Capacity、SupportとSetの共有、任意Discard禁止、公開範囲 |
+| [Deck / Draw / Hand](deck.feature) | Deck構築の枚数制限、逐次Draw、Hand超過、Deck切れ、Hidden情報 |
 
 要求定義は[Game](../requirements/game-requirements.md)、[Interaction](../requirements/interaction-requirements.md)、[Play-experience](../requirements/play-experience-requirements.md)を参照する。Gherkinは規範文書を具体例で表すものであり、新しいルールやCard Poolを独立して定義しない。
 
@@ -17,7 +21,7 @@
 
 1. 要求・変更案から対象のCapabilityを選び、既存のRules・Process・Modelを確認する。
 2. Example MappingにRule・Example・Questionを整理する。具体的なResource値・Zone・Unit状態を使い、正常例・境界例・拒否される例から疑問を見つける。
-3. Questionを解消し、合意した結論と根拠をExample Mappingへ反映する。議論・未決事項はGitHub Issuesで管理する。
+3. Questionを既存仕様と照合し、解決した結論と根拠をExample Mappingへ反映する。一意に解決できないQuestionも同Mappingへ明示し、その結論に依存する期待結果はGherkin化しない。議論・合意はGitHub Issuesで管理する。
 4. 合意した具体例をScenario / Scenario Outlineにし、要求タグと一意なScenario IDを直接付ける。
 5. 要求・BPMN・Rules・Modelなどの規範文書へ合意内容を反映し、Featureと照合して仕様検証を行う。
 
@@ -60,7 +64,7 @@ Scenario: Cancel後の手札保持を確認する
 - 各Scenario / Outline自身に`Then`を含める。OutlineのExamplesには見出しと1行以上のデータが必要で、本文の置換変数を列で定義する。
 - 要求タグは追跡の入口である。例えば`IR-011`自体はAttackのAction分類を要求し、Damage計算などの細則は[Combat Rules](../rules/combat-rules.md)にある。細則の根拠はExample MappingのRule参照で示す。
 
-要求変更時は要求定義・Rules・Model・Processと対応する例を合わせて更新する。全要求を今回の3 Featureで網羅することは合格条件にしない。Deck構築・Mulliganなどの独立したCapabilityは後続のFeatureへ追加する。
+要求変更時は要求定義・Rules・Model・Processと対応する例を合わせて更新する。全要求の網羅を合格条件にせず、各Capabilityの合意済みの範囲を例にする。未解決QuestionやCard Poolの具体方式を、Featureの追加によって暗黙に確定しない。複数Capabilityに関わる既存例はExample Mappingから参照し、意味を保つ限り既存IDを維持する。
 
 ## Local validation and CI
 

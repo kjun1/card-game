@@ -67,7 +67,7 @@ Unit ZoneがCapacity 5に達している場合、追加のUnit Deployはでき�
 
 Support ZoneがCapacity 3に達している場合、追加のSupport DeployおよびSetはできない。
 
-Playerは基本ルールによって自分のUnit / Supportを任意にDiscardしてZoneを空けることはできない。
+Playerは基本ルールによって自分のBoard Card（Unit / Face-up Support / Set Card）を任意にDiscardしてZoneを空けることはできない。
 
 Card Effect等による移動・Destroyは可能である。
 
