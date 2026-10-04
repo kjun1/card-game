@@ -1,0 +1,49 @@
+{
+  "name": "観測装置",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "reveal-set",
+      "name": "公開",
+      "activation": {
+        "type": "operation",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "reveal",
+            "target": {
+              "type": "selected",
+              "selection": "own-set"
+            }
+          }
+        }
+      ],
+      "targets": {
+        "own-set": {
+          "type": "card",
+          "player": "self",
+          "zone": "support_zone",
+          "cardType": "tactic",
+          "state": "set"
+        }
+      }
+    }
+  ],
+  "id": "reveal-set-card"
+}

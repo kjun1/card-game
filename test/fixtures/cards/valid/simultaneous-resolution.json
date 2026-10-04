@@ -1,0 +1,62 @@
+{
+  "id": "simultaneous-resolution",
+  "name": "共振装置",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "resonate-and-draw",
+      "name": "共振補給",
+      "activation": {
+        "type": "operation",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "simultaneous",
+          "effects": [
+            {
+              "type": "damage",
+              "target": {
+                "type": "core",
+                "player": "self"
+              },
+              "amount": 2
+            },
+            {
+              "type": "damage",
+              "target": {
+                "type": "core",
+                "player": "opponent"
+              },
+              "amount": 2
+            }
+          ]
+        },
+        {
+          "type": "effect",
+          "effect": {
+            "type": "draw",
+            "target": {
+              "type": "player",
+              "player": "self"
+            },
+            "count": 1
+          }
+        }
+      ]
+    }
+  ]
+}

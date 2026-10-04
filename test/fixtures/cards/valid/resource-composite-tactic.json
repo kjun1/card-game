@@ -1,0 +1,30 @@
+{
+  "name": "連携射撃",
+  "cardType": "tactic",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "play": {
+      "cost": {
+        "energy": 2,
+        "momentum": 2
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "core",
+              "player": "opponent"
+            },
+            "amount": 1
+          }
+        }
+      ]
+    }
+  },
+  "abilities": [],
+  "id": "resource-composite-tactic"
+}

@@ -1,0 +1,41 @@
+{
+  "name": "補給所",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "draw-three",
+      "name": "三枚補充",
+      "activation": {
+        "type": "operation",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "draw",
+            "target": {
+              "type": "player",
+              "player": "self"
+            },
+            "count": 3
+          }
+        }
+      ]
+    }
+  ],
+  "id": "multi-draw"
+}

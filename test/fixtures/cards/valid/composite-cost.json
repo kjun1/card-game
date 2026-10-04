@@ -1,0 +1,42 @@
+{
+  "id": "composite-cost",
+  "name": "複合砲台",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "combined-fire",
+      "name": "複合射撃",
+      "activation": {
+        "type": "operation",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 2,
+        "momentum": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "core",
+              "player": "opponent"
+            },
+            "amount": 1
+          }
+        }
+      ]
+    }
+  ]
+}

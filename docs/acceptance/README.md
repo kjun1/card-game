@@ -79,13 +79,16 @@ nvm use
 npm ci
 npm test
 npm run check:spec
+npm run check:cards
 ~~~
 
 `nvm`以外のバージョン管理を使う場合もNode.js 24系へ切り替えてからnpmのコマンドを実行する。
 
-`npm test`はNode標準テスト機能による**仕様検証器のテスト**。`npm run check:spec`は公式の`@cucumber/gherkin`と`@cucumber/messages`で全Featureを解析・展開し、構文、空のFeature、Thenの有無、Outlineの実例、要求タグの形式・存在・欠落、Scenario IDの形式・欠落・重複、要求定義の重複を検証する。違反はファイルと行番号付きで報告し非ゼロで終了する。
+`npm test`はNode標準テスト機能による**仕様・Card検証器のテスト**。`npm run check:spec`は公式の`@cucumber/gherkin`と`@cucumber/messages`で全Featureを解析・展開し、構文、空のFeature、Thenの有無、Outlineの実例、要求タグの形式・存在・欠落、Scenario IDの形式・欠落・重複、要求定義の重複を検証する。違反はファイルと行番号付きで報告し非ゼロで終了する。
 
-GitHub Actionsはpush / pull_requestで`npm ci`、`npm test`、`npm run check:spec`を実行する。依存は`package-lock.json`で固定する。
+`npm run check:cards`は[Card Definition Schema](../model/card-definition-schema.md)の自己検証、valid fixtureの成功、invalid fixtureの想定した拒否を確認する。既存AcceptanceのCardを静的定義として表す範囲は[Fixture mapping](../../test/fixtures/cards/README.md)で追跡する。Gherkinの初期状態や結果をSchemaへ埋め込まず、Scenarioごとの指定値を保つ。
+
+GitHub Actionsはpush / pull_requestで`npm ci`、`npm test`、`npm run check:spec`、`npm run check:cards`を実行する。依存は`package-lock.json`で固定する。
 
 **CI成功は仕様検証の成功を意味する。** 日本語の意味、計算結果、ルール同士の整合性は自動判定しない。Example Mappingと規範文書を照合するレビューを併用する。BPMN・文書リンクの継続的CI、要求対応表の自動生成は今回の範囲に含めない。
 
@@ -93,4 +96,4 @@ GitHub Actionsはpush / pull_requestで`npm ci`、`npm test`、`npm run check:sp
 
 ゲーム実装時にCucumber RunnerとStep Definitionsを追加し、同じFeatureをDomain Engineへ直接接続する。`Given`でfixture Stateを構成し、`When`でドメイン操作を渡し、`Then`でState・利用可能な選択・発生イベントを検証する。UI操作を経由せずにルールを検証できる形にする。
 
-実装のAPIや詳細Card Schemaはその時点で定義する。現段階ではRunner・Step Definitions・ゲーム実装を追加せず、仕様検証と将来のゲーム動作の受入テストをコマンドと出力上も区別する。
+静的なCard Definitionは[JSON Schema](../../schemas/card.schema.json)で先に構造化する。実装のAPI、定義内の参照解決、Stateへの束縛と意味検証は後続で定義する。現段階ではRunner・Step Definitions・ゲーム実装を追加せず、仕様とCardの構造検証を、将来のゲーム動作の受入テストとコマンド・出力上も区別する。

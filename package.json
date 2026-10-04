@@ -9,10 +9,12 @@
   },
   "scripts": {
     "check:spec": "node scripts/check-spec.mjs",
+    "check:cards": "node scripts/check-cards.mjs",
     "test": "node --test"
   },
   "devDependencies": {
     "@cucumber/gherkin": "42.0.1",
-    "@cucumber/messages": "34.2.1"
+    "@cucumber/messages": "34.2.1",
+    "ajv": "8.20.0"
   }
 }

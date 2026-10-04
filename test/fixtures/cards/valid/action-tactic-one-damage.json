@@ -1,0 +1,30 @@
+{
+  "name": "火矢",
+  "cardType": "tactic",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "play": {
+      "cost": {
+        "energy": 2
+      },
+      "action": true,
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "core",
+              "player": "opponent"
+            },
+            "amount": 1
+          }
+        }
+      ]
+    }
+  },
+  "abilities": [],
+  "id": "action-tactic-one-damage"
+}

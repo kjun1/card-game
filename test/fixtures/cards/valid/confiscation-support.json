@@ -1,0 +1,45 @@
+{
+  "name": "没収装置",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "confiscate",
+      "name": "没収",
+      "activation": {
+        "type": "reaction",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "move_card",
+            "target": {
+              "type": "declared_action_source",
+              "cardType": "tactic",
+              "zone": "hand"
+            },
+            "destination": {
+              "player": "target_owner",
+              "zone": "discard"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "id": "confiscation-support"
+}

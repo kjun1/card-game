@@ -1,0 +1,235 @@
+{
+  "unknown-card-type.json": {
+    "instancePath": "/cardType",
+    "keyword": "enum"
+  },
+  "missing-unit-parameter.json": {
+    "instancePath": "/parameters",
+    "keyword": "required",
+    "params": {
+      "missingProperty": "maxHp"
+    }
+  },
+  "negative-cost.json": {
+    "instancePath": "/operations/deploy/cost/energy",
+    "keyword": "minimum",
+    "params": {
+      "limit": 0
+    }
+  },
+  "noninteger-cost.json": {
+    "instancePath": "/operations/deploy/cost/energy",
+    "keyword": "type",
+    "params": {
+      "type": "integer"
+    }
+  },
+  "empty-cost.json": {
+    "instancePath": "/operations/deploy/cost",
+    "keyword": "minProperties"
+  },
+  "negative-max-hp.json": {
+    "instancePath": "/parameters/maxHp",
+    "keyword": "minimum",
+    "params": {
+      "limit": 0
+    }
+  },
+  "unknown-effect.json": {
+    "instancePath": "/operations/play/resolution/0/effect/type",
+    "keyword": "const"
+  },
+  "mixed-step.json": {
+    "instancePath": "/operations/play/resolution/0",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "effects"
+    }
+  },
+  "empty-simultaneous.json": {
+    "instancePath": "/abilities/0/resolution/0/effects",
+    "keyword": "minItems"
+  },
+  "invalid-target.json": {
+    "instancePath": "/operations/play/resolution/0/effect/target/player",
+    "keyword": "enum"
+  },
+  "card-level-action.json": {
+    "instancePath": "",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "action"
+    }
+  },
+  "runtime-current-hp.json": {
+    "instancePath": "",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "currentHp"
+    }
+  },
+  "runtime-accumulated-damage.json": {
+    "instancePath": "",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "accumulatedDamage"
+    }
+  },
+  "runtime-current-zone.json": {
+    "instancePath": "",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "currentZone"
+    }
+  },
+  "runtime-ready.json": {
+    "instancePath": "",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "ready"
+    }
+  },
+  "runtime-exhausted.json": {
+    "instancePath": "",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "exhausted"
+    }
+  },
+  "runtime-revealed.json": {
+    "instancePath": "",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "revealed"
+    }
+  },
+  "runtime-attack-restricted.json": {
+    "instancePath": "",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "attackRestricted"
+    }
+  },
+  "runtime-opponent-knows-this-card.json": {
+    "instancePath": "",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "opponentKnowsThisCard"
+    }
+  },
+  "parameter-typo.json": {
+    "instancePath": "/parameters",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "maxHP"
+    }
+  },
+  "top-level-typo.json": {
+    "instancePath": "",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "abilites"
+    }
+  },
+  "wrong-unit-operation.json": {
+    "instancePath": "/operations",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "play"
+    }
+  },
+  "wrong-support-parameters.json": {
+    "instancePath": "/parameters",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "atk"
+    }
+  },
+  "wrong-tactic-operation.json": {
+    "instancePath": "/operations",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "deploy"
+    }
+  },
+  "unsupported-trigger.json": {
+    "instancePath": "/abilities/0/activation/type",
+    "keyword": "const"
+  },
+  "unknown-activation-source.json": {
+    "instancePath": "/abilities/0/activation/source",
+    "keyword": "enum"
+  },
+  "unknown-condition.json": {
+    "instancePath": "/abilities/0/condition/type",
+    "keyword": "const"
+  },
+  "unsupported-limit.json": {
+    "instancePath": "/abilities/0/limit",
+    "keyword": "type",
+    "params": {
+      "type": "null"
+    }
+  },
+  "action-on-reaction.json": {
+    "instancePath": "/abilities/0",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "action"
+    }
+  },
+  "action-on-block.json": {
+    "instancePath": "/abilities/0",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "action"
+    }
+  },
+  "simultaneous-draw.json": {
+    "instancePath": "/abilities/0/resolution/0/effects/1/type",
+    "keyword": "const"
+  },
+  "runtime-target-id.json": {
+    "instancePath": "/operations/play/resolution/0/effect/target",
+    "keyword": "additionalProperties",
+    "params": {
+      "additionalProperty": "instanceId"
+    }
+  },
+  "zero-damage.json": {
+    "instancePath": "/operations/play/resolution/0/effect/amount",
+    "keyword": "minimum",
+    "params": {
+      "limit": 1
+    }
+  },
+  "empty-resolution.json": {
+    "instancePath": "/operations/play/resolution",
+    "keyword": "minItems"
+  },
+  "duplicate-tags.json": {
+    "instancePath": "/tags",
+    "keyword": "uniqueItems"
+  },
+  "wrong-support-activation.json": {
+    "instancePath": "/abilities/0/activation/source",
+    "keyword": "const",
+    "params": {
+      "allowedValue": "face_up_support"
+    }
+  },
+  "reaction-without-set.json": {
+    "instancePath": "/operations",
+    "keyword": "required",
+    "params": {
+      "missingProperty": "set"
+    }
+  },
+  "block-outside-block-step.json": {
+    "instancePath": "/operations/play/resolution/0/effect/type",
+    "keyword": "const",
+    "params": {
+      "allowedValue": "damage"
+    }
+  }
+}

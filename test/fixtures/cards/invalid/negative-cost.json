@@ -1,0 +1,19 @@
+{
+  "id": "negative-cost",
+  "name": "歩兵",
+  "cardType": "unit",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {
+    "atk": 2,
+    "maxHp": 3
+  },
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": -1
+      }
+    }
+  },
+  "abilities": []
+}

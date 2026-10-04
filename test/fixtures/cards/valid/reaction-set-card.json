@@ -1,0 +1,41 @@
+{
+  "id": "reaction-set-card",
+  "name": "迎撃札",
+  "cardType": "tactic",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "set": {
+      "cost": {
+        "energy": 1
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "intercept",
+      "name": "迎撃",
+      "activation": {
+        "type": "reaction",
+        "source": "set_card"
+      },
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "core",
+              "player": "opponent"
+            },
+            "amount": 1
+          }
+        }
+      ]
+    }
+  ]
+}

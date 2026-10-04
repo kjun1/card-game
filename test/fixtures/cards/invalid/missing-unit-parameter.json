@@ -1,0 +1,18 @@
+{
+  "id": "missing-unit-parameter",
+  "name": "歩兵",
+  "cardType": "unit",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {
+    "atk": 2
+  },
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": []
+}

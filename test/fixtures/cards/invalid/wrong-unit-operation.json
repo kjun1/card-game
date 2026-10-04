@@ -1,0 +1,37 @@
+{
+  "id": "wrong-unit-operation",
+  "name": "歩兵",
+  "cardType": "unit",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {
+    "atk": 2,
+    "maxHp": 3
+  },
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    },
+    "play": {
+      "cost": {
+        "energy": 1
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "draw",
+            "target": {
+              "type": "player",
+              "player": "self"
+            },
+            "count": 1
+          }
+        }
+      ]
+    }
+  },
+  "abilities": []
+}

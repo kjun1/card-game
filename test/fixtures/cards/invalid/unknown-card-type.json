@@ -1,0 +1,19 @@
+{
+  "id": "unknown-card-type",
+  "name": "歩兵",
+  "cardType": "spell",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {
+    "atk": 2,
+    "maxHp": 3
+  },
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": []
+}

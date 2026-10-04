@@ -1,0 +1,47 @@
+{
+  "name": "射撃装置",
+  "cardType": "support",
+  "poolIdentity": null,
+  "tags": [],
+  "parameters": {},
+  "operations": {
+    "deploy": {
+      "cost": {
+        "energy": 2
+      }
+    }
+  },
+  "abilities": [
+    {
+      "id": "light-shot",
+      "name": "小射",
+      "activation": {
+        "type": "operation",
+        "source": "face_up_support"
+      },
+      "cost": {
+        "energy": 2
+      },
+      "resolution": [
+        {
+          "type": "effect",
+          "effect": {
+            "type": "damage",
+            "target": {
+              "type": "selected",
+              "selection": "enemy-core"
+            },
+            "amount": 2
+          }
+        }
+      ],
+      "targets": {
+        "enemy-core": {
+          "type": "core",
+          "player": "opponent"
+        }
+      }
+    }
+  ],
+  "id": "non-action-ability"
+}
