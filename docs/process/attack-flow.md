@@ -38,6 +38,8 @@ flowchart TD
     F -- No --> OC([Operation Complete])
 ~~~
 
+ReactionでGameが終了した場合は、[Turn Flow](turn-flow.md)のGame終了判定により、Operationを再選択せず終了する。
+
 ## Attack declaration
 
 AttackerはReadyかつAttack可能でなければならない。

@@ -30,7 +30,9 @@ flowchart TD
     H -- No --> O[Select Operation]
     HD --> O
     O --> P[[Execute Selected Operation]]
-    P --> F{Operation completed?}
+    P --> G{Game ended?}
+    G -- Yes --> GE([Game End])
+    G -- No --> F{Operation completed?}
     F -- No / Cancelled --> O
     F -- Yes --> T([Turn End / Transfer Control])
 ~~~
@@ -41,7 +43,8 @@ flowchart TD
 - Energy CapacityはGame Setup時に2で初期化し、すべてのTurn Startで1増加する。
 - EnergyはCapacity増加後にCapacityまで回復する。
 - OperationはActive PlayerがTurn中に選択する主操作である。
-- ActionがReactionでCancelされた場合、そのOperationは完了していないためOperation Selectionへ戻る。
+- OperationまたはReactionの解決でGameが終了した場合、Operation完了判定より先にGame終了へ進み、再選択や制御権移転は行わない。
+- Gameが終了しておらずActionがReactionでCancelされた場合、そのOperationは完了していないためOperation Selectionへ戻る。
 - この再選択ではTurn Start処理を繰り返さない。
 - 1 Turn中に複数のOperation選択が発生し得るが、Turnを終了させるcompleted Operationは1つだけである。
 - 「何もしない」を選択した場合は、その選択をOperation CompleteとしてTurnを終了する。

@@ -11,7 +11,7 @@ Actionとして定義されたOperationに対するReaction処理とOperation完
 - ActionだけがReaction Windowを発生させる。
 - ActionではないOperationはReactionを挟まず解決する。
 - Reactionを受けたActionは成立しない。
-- Reaction後も同じTurnを継続する。
+- Reaction後、Gameが終了していなければ同じTurnを継続する。
 - Reactionに対するReactionは発生させない。
 
 ## Review preview
@@ -34,6 +34,8 @@ flowchart TD
     AC --> AR[Resolve Action]
     AR --> C
 ~~~
+
+Operation解決後のGame終了判定は[Turn Flow](turn-flow.md)で行う。ReactionでGameが終了した場合も、Operation再選択よりGame終了を優先する。
 
 ## Cost semantics
 
