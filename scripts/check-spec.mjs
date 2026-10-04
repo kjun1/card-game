@@ -6,7 +6,7 @@ import { IdGenerator, SourceMediaType } from '@cucumber/messages';
 
 const requirementId = /^(GR|IR|PER)-\d{3}$/;
 const requirementTag = /^@(GR|IR|PER)-\d{3}$/;
-const scenarioTag = /^@AC-(TURN|AR|ATK)-(?!000)\d{3}$/;
+const scenarioTag = /^@AC-[A-Z][A-Z0-9-]*-(?!000)\d{3}$/;
 const isRequirementTag = (name) => /^@(GR|IR|PER)(?:[^a-z]|$)/i.test(name);
 const isScenarioTag = (name) => /^@AC(?:[^a-z]|$)/i.test(name);
 

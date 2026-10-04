@@ -53,7 +53,8 @@ Scenario: Cancel後の手札保持を確認する
 ~~~
 
 - 要求タグは`@GR-001`、`@IR-001`、`@PER-001`形式で、要求定義表に存在するIDを1つ以上付ける。
-- Scenario IDは`@AC-TURN-001`、`@AC-AR-001`、`@AC-ATK-001`形式で、3桁の番号は001から使う。全Featureで一意なIDをちょうど1つ付け、既存例の意味を保つ変更ではIDを維持する。
+- Scenario IDは`@AC-<CAPABILITY>-NNN`形式とする。Capability名は英大文字で始め、以降は英大文字・数字・ハイフンを使用できる。番号は001〜999の3桁とする。既存の`@AC-TURN-001`、`@AC-AR-001`、`@AC-ATK-001`に加え、`@AC-DECK-001`、`@AC-MULLIGAN-001`、`@AC-RESOURCE-001`などを検証器の変更なしで追加できる。
+- 全Featureで一意なScenario IDをちょうど1つ付け、既存例の意味を保つ変更ではIDを維持する。同じ番号でもCapability名が異なれば別のIDになる。
 - 要求タグとScenario IDは各Scenario / Scenario Outlineの直前に直接付ける。Feature・Rule・Examplesからの継承では代用しない。
 - Outlineの行ごとにはScenario IDを付けない。複数のExamples表・行は同じScenario IDの例に属する。
 - 各Scenario / Outline自身に`Then`を含める。OutlineのExamplesには見出しと1行以上のデータが必要で、本文の置換変数を列で定義する。

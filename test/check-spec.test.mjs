@@ -137,7 +137,25 @@ test('requires definition tables and Feature files', () => {
   assert.deepEqual(codes(result), ['requirements-empty', 'features-empty']);
 });
 
-for (const tag of ['@AC-TURN-01', '@AC-TURN-000', '@ac-turn-001', '@AC-OTHER-001']) {
+test('accepts Scenario IDs for capabilities beyond the initial three Features', () => {
+  const capabilities = ['DECK', 'MULLIGAN', 'RESOURCE', 'OTHER', 'A', 'SETUP2', 'DECK-V2'];
+  const body = capabilities.map((capability) => scenario.replace('@AC-TURN-001', `@AC-${capability}-001`)).join('');
+  const result = validate(feature(body));
+  assert.deepEqual(result.diagnostics, []);
+  assert.equal(result.counts.scenarios, capabilities.length);
+  assert.equal(result.counts.examples, capabilities.length);
+});
+
+for (const tag of [
+  '@AC-TURN-01',
+  '@AC-DECK-000',
+  '@ac-turn-001',
+  '@AC-deck-001',
+  '@AC--001',
+  '@AC-DECK-0001',
+  '@AC-2DECK-001',
+  '@AC-DECK_SETUP-001',
+]) {
   test(`rejects malformed Scenario ID ${tag}`, () => {
     expectCode(feature(scenario.replace('@AC-TURN-001', tag)), 'scenario-id-format');
   });
@@ -145,14 +163,15 @@ for (const tag of ['@AC-TURN-01', '@AC-TURN-000', '@ac-turn-001', '@AC-OTHER-001
 
 test('requires exactly one Scenario ID', () => {
   expectCode(feature(scenario.replace('@AC-TURN-001', '')), 'scenario-id-count');
-  expectCode(feature(scenario.replace('@AC-TURN-001', '@AC-TURN-001 @AC-AR-001')), 'scenario-id-count');
+  expectCode(feature(scenario.replace('@AC-TURN-001', '@AC-DECK-001 @AC-RESOURCE-001')), 'scenario-id-count');
 });
 
 test('detects duplicate Scenario IDs in the same file and across files', () => {
-  expectCode(feature(`${scenario}${scenario}`), 'scenario-id-duplicate');
+  const deckScenario = scenario.replace('@AC-TURN-001', '@AC-DECK-001');
+  expectCode(feature(`${deckScenario}${deckScenario}`), 'scenario-id-duplicate');
   const result = validateSpecifications({
     requirements: [{ path: 'requirements.md', source: requirementSource }],
-    features: [{ path: 'a.feature', source: feature() }, { path: 'nested/b.feature', source: feature() }],
+    features: [{ path: 'a.feature', source: feature(deckScenario) }, { path: 'nested/b.feature', source: feature(deckScenario) }],
   });
   const diagnostic = result.diagnostics.find((item) => item.code === 'scenario-id-duplicate');
   assert.equal(diagnostic.path, 'nested/b.feature');
