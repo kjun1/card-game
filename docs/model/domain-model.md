@@ -51,7 +51,7 @@ classDiagram
     Discard o-- Card
 
     Game --> Turn
-    Turn --> Operation
+    Turn --> Operation : selects until one completes
     Operation <|-- Action
     Action --> Reaction
     Card --> Ability
@@ -67,12 +67,27 @@ classDiagram
 | Core | Playerに対応する勝敗対象 |
 | Card | Parameter / Tag / Abilityを持つObject |
 | Zone | Cardの所在、公開範囲、利用可能ルール |
-| Turn | 1 Operationを完了する区間 |
-| Operation | Turn中の主要操作 |
+| Turn | Active Playerが制御権を持つ区間。Turn Startからcompleted Operationまで続く |
+| Operation | Active PlayerがTurn中に選択する主操作。完了するとTurnを終了させる |
 | Action | Reaction可能なOperation |
-| Reaction | Actionに従属する応答 |
+| Reaction | Actionに従属する応答。ActionをCancelしてもTurnは終了させない |
 | Ability | Cardが提供する利用可能な機能 |
 | Effect | Game Stateに実際に発生する変更 |
+
+## Turn / Operation cardinality
+
+1 Turnはcompleted Operationを1つだけ持つ。
+
+ただしActionがReactionでCancelされた場合、同じTurn内でOperationを再選択するため、Operation SelectionまたはAction Declarationは複数回発生し得る。
+
+~~~text
+Turn
+├─ Turn Start (once)
+└─ Operation Selection
+    ├─ Cancelled Action → reselect
+    ├─ Cancelled Action → reselect
+    └─ Completed Operation → Turn End
+~~~
 
 ## Value classification
 

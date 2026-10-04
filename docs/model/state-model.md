@@ -32,6 +32,24 @@ stateDiagram-v2
 
 Set状態ではCard内容はHidden、存在とSlot利用はPublic。
 
+## Operation lifecycle
+
+OperationはActive PlayerがTurn中に選択する主操作である。
+
+~~~mermaid
+stateDiagram-v2
+    [*] --> Selected
+    Selected --> Cancelled: selected Action receives Reaction
+    Selected --> Completed: non-Action resolved
+    Selected --> Completed: Action resolved without Reaction
+    Cancelled --> [*]
+    Completed --> [*]
+~~~
+
+Cancelled OperationはTurn Endを発生させない。同じTurn内で新しいOperationを選択する。
+
+Completed OperationだけがTurn Endを発生させる。
+
 ## Action lifecycle
 
 ~~~mermaid
@@ -44,7 +62,7 @@ stateDiagram-v2
     Resolved --> [*]
 ~~~
 
-Cancelled ActionはOperation Completeを発生させず、同じTurn内のOperation Selectionへ戻る。
+ActionがCancelledされた場合、そのActionを含むOperationもCancelledとなる。
 
 ## Attack lifecycle
 

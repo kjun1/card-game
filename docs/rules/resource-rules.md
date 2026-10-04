@@ -26,7 +26,11 @@ EnergyはCardやAbilityの基本利用に使用する。
 
 Capacity増加はEnergy Refreshより先に行う。
 
-Energyは1 Turnに1回だけ行うOperationの基本出力上限として機能する。
+Energyは、**自分のTurn Startから次の自分Turn Startまで** Card / Abilityの基本Costに利用できる予算である。
+
+この期間には、自分Turnで完了させるOperationだけでなく、Opponent Turn中に使用するReaction Costも含まれる。
+
+ReactionによってActionがCancelされOperationを選択し直しても、Energy Refreshは行わない。
 
 ## Momentum
 

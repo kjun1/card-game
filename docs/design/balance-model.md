@@ -8,9 +8,11 @@
 
 ### Energy
 
-1 Turnに1回だけ行うOperationの基本出力上限を制御する。
+Energyは自分のTurn StartでCapacityまで回復し、次の自分Turn Startまで利用できる基本Cost Budgetである。
 
-Energyは毎Turn Capacityまで回復するため、蓄財ResourceではなくTurn単位の出力Budgetとして扱う。
+このBudgetは、自分Turnで完了させるOperationと、Opponent Turn中に使用するReactionの双方で共有される。
+
+したがってEnergyの評価では、単一OperationのCostだけでなく、相手TurnへどれだけEnergyを残すかも扱う。
 
 ### Momentum
 
@@ -72,11 +74,14 @@ Block、Reaction、追加AbilityでMomentum用途が競合することも含め�
 
 ## Playtest metrics
 
-- Average Operations per Game
+- Average completed Operations per Game
 - Average Game Duration
+- Operation reselections per Turn
 - Core Damage per Turn
-- Energy spent per Operation
-- Unused Energy ratio
+- Energy spent on completed Operation
+- Energy spent on Reactions
+- Energy remaining after own Operation
+- Unused Energy at next own Turn Start
 - Momentum distribution over time
 - Momentum spent per Player
 - Block frequency
@@ -90,8 +95,9 @@ Block、Reaction、追加AbilityでMomentum用途が競合することも含め�
 
 ## Validation questions
 
-- Energyが意図どおり1 Operationの出力上限として機能するか。
-- Energyが毎Turn全回復することでCost差が十分な意思決定になるか。
+- TurnとOperationの区別がプレイヤーに自然に理解できるか。
+- Energyを自分Operationと相手Turn中のReactionへどう配分するかが意味のある判断になるか。
+- 毎Turn全回復するEnergyのCost差が十分な意思決定になるか。
 - Momentumが一方へ固定されず往復するか。
 - Momentumの現在価値と相手へ渡す将来価値が釣り合うか。
 - Reactionが戦略性を増やしつつ進行を過剰に停止させないか。

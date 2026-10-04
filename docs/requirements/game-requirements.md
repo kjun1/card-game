@@ -29,14 +29,15 @@ Victory / Defeat
 | GR-003 | 必要なDrawを行えないPlayerは敗北しなければならない。 |
 | GR-004 | PlayerはGame開始前にCard Poolの制約下でDeckを構築できなければならない。 |
 | GR-005 | Gameは単一のBoardを使用し、Unit ZoneとSupport Zoneを区別しなければならない。 |
-| GR-006 | Playerは交互にTurnを取得し、1 Turnにつき1 Operationを完了しなければならない。 |
-| GR-007 | Turn開始時にUnit状態、Energy、Drawを更新しなければならない。 |
-| GR-008 | Energyは通常のCard利用量を制約するResourceとして機能しなければならない。 |
-| GR-009 | Momentumは使用すると相手へ移転するResourceとして機能しなければならない。 |
-| GR-010 | Cardは少なくともUnit、Support、Tacticの役割を表現できなければならない。 |
-| GR-011 | HandとBoardは未コミット情報とコミット済み情報として区別されなければならない。 |
-| GR-012 | Game開始時にOpening Handを配布し、各Playerが1回のMulliganを行えなければならない。 |
-| GR-013 | Public情報とHidden情報をルール上区別できなければならない。 |
+| GR-006 | TurnはActive Playerが制御権を持つ区間であり、Turn Start後に選択されたOperationが完了した時点でOpponentへ制御権を移さなければならない。 |
+| GR-007 | Reaction等で選択中のOperationがCancelされた場合、そのTurnを終了せずActive PlayerへOperation選択権を戻さなければならない。 |
+| GR-008 | Turn開始時にUnit状態、Energy、Drawを更新しなければならない。 |
+| GR-009 | EnergyはCard / Abilityの基本利用量を制約するResourceとして機能しなければならない。 |
+| GR-010 | Momentumは使用すると相手へ移転するResourceとして機能しなければならない。 |
+| GR-011 | Cardは少なくともUnit、Support、Tacticの役割を表現できなければならない。 |
+| GR-012 | HandとBoardは未コミット情報とコミット済み情報として区別されなければならない。 |
+| GR-013 | Game開始時にOpening Handを配布し、各Playerが1回のMulliganを行えなければならない。 |
+| GR-014 | Public情報とHidden情報をルール上区別できなければならない。 |
 
 ## Traceability
 
@@ -45,8 +46,8 @@ Victory / Defeat
 | GR-001〜003 | ../rules/core-rules.md |
 | GR-004 | ../design/card-pool.md, ../rules/deck-rules.md |
 | GR-005 | ../model/domain-model.md |
-| GR-006〜007 | ../process/turn-flow.md |
-| GR-008〜009 | ../rules/resource-rules.md |
-| GR-010〜011 | ../model/card-model.md |
-| GR-012 | ../rules/deck-rules.md |
-| GR-013 | ../rules/core-rules.md |
+| GR-006〜008 | ../process/turn-flow.md |
+| GR-009〜010 | ../rules/resource-rules.md |
+| GR-011〜012 | ../model/card-model.md |
+| GR-013 | ../rules/deck-rules.md |
+| GR-014 | ../rules/core-rules.md |
