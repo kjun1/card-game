@@ -8,11 +8,13 @@
 
 ### Energy
 
-Energyは自分のTurn StartでCapacityまで回復し、次の自分Turn Startまで利用できる基本Cost Budgetである。
+Game Setup時にEnergy Capacity / Energyを2で初期化し、自分の各Turn StartでCapacityを1増加してからEnergyをCapacityまで回復する。
+
+したがって各Playerの最初の自分TurnではEnergy 3となる一方、後攻Playerも先攻Playerの最初のTurn中にSetup Energy 2をReactionへ使用できる。
+
+Energyは自分のTurn Startから次の自分Turn Startまで利用できる基本Cost Budgetである。
 
 このBudgetは、自分Turnで完了させるOperationと、Opponent Turn中に使用するReactionの双方で共有される。
-
-したがってEnergyの評価では、単一OperationのCostだけでなく、相手TurnへどれだけEnergyを残すかも扱う。
 
 ### Momentum
 
@@ -24,11 +26,15 @@ Momentum Costは単純な消費ではなく相手へのResource移転である�
 
 Unit ZoneとSupport Zoneの有限Capacityによって継続価値を制約する。
 
+満杯のZoneへ追加Deploy / Setはできず、基本ルールによる任意Discardで空きを作ることもできない。
+
 Support ZoneではFace-up SupportとSet Cardが同じCapacityを競合する。
 
 ### Card availability
 
 Handは現在利用可能な未コミット選択肢を表す。
+
+Hand Limitを超えるDrawは、そのDrawn Card自体をDiscardするため、Hand Limit到達後の追加Draw価値は低下する。
 
 ## Provisional parameters
 
@@ -36,16 +42,21 @@ Handは現在利用可能な未コミット選択肢を表す。
 | --- | ---: |
 | Core HP | 20 |
 | Deck Size | 30 |
+| Copies per Card Name | 3 |
 | Opening Hand | 5 |
-| Hand Limit target | 7 |
+| Hand Limit | 7 |
 | Unit Zone Capacity | 5 |
 | Support Zone Capacity | 3 |
-| Initial Energy Capacity | 3 |
+| Setup Energy Capacity | 2 |
+| Setup Energy | 2 |
+| First own Turn Energy | 3 |
 | Maximum Energy Capacity | 7 |
 | Total Momentum | 6 |
 | Initial Momentum | 3 : 3 |
 
 これらはルール構造から分離して調整可能なBalance Parameterとして扱う。
+
+先攻・後攻補正は現時点では設けず、プレイテストで必要性を評価する。
 
 ## Card valuation dimensions
 
@@ -74,6 +85,7 @@ Block、Reaction、追加AbilityでMomentum用途が競合することも含め�
 
 ## Playtest metrics
 
+- First-player win rate
 - Average completed Operations per Game
 - Average Game Duration
 - Operation reselections per Turn
@@ -82,6 +94,7 @@ Block、Reaction、追加AbilityでMomentum用途が競合することも含め�
 - Energy spent on Reactions
 - Energy remaining after own Operation
 - Unused Energy at next own Turn Start
+- Hand-limit overflow count
 - Momentum distribution over time
 - Momentum spent per Player
 - Block frequency
@@ -95,7 +108,8 @@ Block、Reaction、追加AbilityでMomentum用途が競合することも含め�
 
 ## Validation questions
 
-- TurnとOperationの区別がプレイヤーに自然に理解できるか。
+- 先攻補正なしでFirst Player Advantageが許容範囲か。
+- Setup Energy 2が後攻Playerの初回Reaction能力として適切か。
 - Energyを自分Operationと相手Turn中のReactionへどう配分するかが意味のある判断になるか。
 - 毎Turn全回復するEnergyのCost差が十分な意思決定になるか。
 - Momentumが一方へ固定されず往復するか。
@@ -103,6 +117,7 @@ Block、Reaction、追加AbilityでMomentum用途が競合することも含め�
 - Reactionが戦略性を増やしつつ進行を過剰に停止させないか。
 - BlockがCore Damageを完全に抑制しすぎないか。
 - Support Zoneの継続価値とReaction準備の競合が有効な選択になるか。
+- Hand Limit到達後のDraw処理が過度な不利益にならないか。
 
 ## Future baseline
 

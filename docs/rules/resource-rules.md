@@ -14,17 +14,22 @@ EnergyはCardやAbilityの基本利用に使用する。
 
 | Parameter | Value |
 | --- | ---: |
-| Initial Energy Capacity | 3 |
+| Setup Energy Capacity | 2 |
+| Setup Energy | 2 |
 | Maximum Energy Capacity | 7 |
 
-各Playerの最初のTurnではCapacity 3を使用する。
+Game Setup時に各PlayerのEnergy CapacityとEnergyを2で初期化する。
 
-2回目以降の自分Turn開始時:
+すべての自分Turn Startで以下を処理する。
 
 1. Energy Capacityを1増加する。最大7。
 2. Energyを現在Capacityまで回復する。
 
 Capacity増加はEnergy Refreshより先に行う。
+
+したがって各Playerの最初の自分TurnではCapacity 3 / Energy 3となる。
+
+自分の最初のTurnより前であっても、Game Setup時のEnergy 2はReaction Cost等に使用できる。
 
 Energyは、**自分のTurn Startから次の自分Turn Startまで** Card / Abilityの基本Costに利用できる予算である。
 

@@ -1,10 +1,11 @@
 # Deck Rules
 
-## Provisional parameters
+## Parameters
 
 | Parameter | Value |
 | --- | ---: |
 | Deck Size | 30 |
+| Copies per Card Name | 3 |
 | Opening Hand | 5 |
 | Hand Limit | 7 |
 | Unit Zone Capacity | 5 |
@@ -14,18 +15,28 @@
 
 Deckは現在のFormatおよびAccess Ruleを満たすCardから構築する。
 
-Pool Identity、Access Rule、同名Card上限等の具体方式はCard Pool設計で定義する。
+同一NameのCardは1 Deckにつき最大3枚まで採用できる。
+
+Pool Identity、Access Rule等の具体方式はCard Pool設計で定義する。
 
 参照: ../design/card-pool.md
+
+## First Player
+
+First Playerはコイントスで決定する。
+
+先攻・後攻に対する追加補正は設けない。
 
 ## Game setup
 
 1. 各PlayerがDeckを準備する。
-2. First Playerを決定する。
+2. コイントスでFirst Playerを決定する。
 3. 各PlayerがOpening Handとして5枚Drawする。
 4. Mulliganを行う。
-5. Core HP、Energy Capacity、Energy、Momentumを初期化する。
-6. Gameを開始する。
+5. Core HPを初期化する。
+6. Energy CapacityとEnergyを2に初期化する。
+7. Momentumを各Player 3に初期化する。
+8. Gameを開始する。
 
 ## Mulligan
 
@@ -40,9 +51,25 @@ Pool Identity、Access Rule、同名Card上限等の具体方式はCard Pool設�
 
 交換Cardを同じMulligan中に再び引くことはない。
 
-## Draw and Deck Out
+## Draw and Hand Limit
+
+Drawは1枚ずつ処理する。
 
 Drawを要求された時点でDeckにCardが存在しない場合、そのPlayerは敗北する。
+
+CardをDrawした結果Hand Limit 7を超えた場合、**そのDrawで得たCardを直ちにDiscardする**。
+
+Hand内の別Cardを選択してDiscardすることはできない。
+
+## Zone Capacity
+
+Unit ZoneがCapacity 5に達している場合、追加のUnit Deployはできない。
+
+Support ZoneがCapacity 3に達している場合、追加のSupport DeployおよびSetはできない。
+
+Playerは基本ルールによって自分のUnit / Supportを任意にDiscardしてZoneを空けることはできない。
+
+Card Effect等による移動・Destroyは可能である。
 
 ## Information
 
