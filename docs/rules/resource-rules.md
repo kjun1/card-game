@@ -63,18 +63,22 @@ Momentumを単純なEnergy代替としては扱わない。
 ## Cost timing
 
 ### Non-Action Operation Cost
+
 合法性とCost支払い可能性を検証した後、Costを支払ってOperationを解決する。
 不正なOperationではCostを消費せず、Operationを完了しない。
 
 ### Action Cost
+
 Action Declaration時にはAction本体のEnergy Costを消費しない。
 Reactionがなかった場合にCostを支払う。
 ReactionされたActionの未払いEnergy Costは消費しない。
 
 ### Reaction Cost
+
 Reactionを使用する場合はReaction Costを支払い、そのCostは戻らない。
 
 ### Block Cost
+
 Block Abilityに設定されたCostをBlock Stepで支払う。
 
 例:

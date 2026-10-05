@@ -198,7 +198,7 @@ SchemaにはPlayerの処理順、Game終了後の処理継続、勝敗判定を�
 | --- | --- |
 | `damage` | Primitive。正の整数`amount`、直接Core参照または選択対象へのDamage |
 | `draw` | Primitive。正の整数`count`、Player参照へのDraw |
-| `move_card` | Primitive。Source / 選択Card / 宣言されたTacticを`destination: { player: target_owner, zone: hand | discard }`へ移動 |
+| `move_card` | Primitive。Source / 選択Card / 宣言されたTacticを`destination: { player: target_owner, zone: hand \| discard }`へ移動 |
 | `destroy` | Primitive。Source / 選択されたBoard UnitのDestroy。定義上の対象適合性はstatic、実際の種類・所在はruntime validationで確認 |
 | `ready` / `exhaust` | Primitive。Source / 選択Board Unitの活動状態変更。定義上の対象適合性はstatic、実際の状態はruntime validationで確認 |
 | `reveal` | Primitive。Source / 選択Set CardのReveal。現在のSet状態からの公開に限定し、任意Zoneの情報閲覧を定義しない |
@@ -244,6 +244,7 @@ Node.js 24系を使用する。
 
 ~~~sh
 npm ci
+npm run check:markdown
 npm test
 npm run check:spec
 npm run check:cards

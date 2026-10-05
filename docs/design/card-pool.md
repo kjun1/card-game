@@ -26,6 +26,7 @@ Deck
 Card Poolを大きく分類する上位属性。
 
 表現候補:
+
 - Class
 - Faction
 - Color
@@ -44,6 +45,7 @@ AvailableCards(Deck) ⊆ CardPool
 ~~~
 
 方式候補:
+
 - 使用可能 / 使用不可
 - 条件付き使用
 - 採用枚数制限

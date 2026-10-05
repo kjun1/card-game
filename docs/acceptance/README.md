@@ -79,6 +79,7 @@ Scenario: Cancel後の手札保持を確認する
 nvm install
 nvm use
 npm ci
+npm run check:markdown
 npm test
 npm run check:spec
 npm run check:cards
@@ -90,7 +91,7 @@ npm run check:cards
 
 `npm run check:cards`は[Card Definition Schema](../model/card-definition-schema.md)の自己検証と構造fixtureを確認した後、Card定義集合の静的意味を検証する。Scope内の参照、ID一意性、対象条件とEffectの静的な適合性を確認し、意味検証用のvalid / invalid fixtureも照合する。既存AcceptanceのCardを静的定義として表す範囲は[Fixture mapping](../../test/fixtures/cards/README.md)で追跡する。Gherkinの初期状態や結果をSchemaへ埋め込まず、Scenarioごとの指定値を保つ。
 
-GitHub Actionsはpush / pull_requestで`npm ci`、`npm test`、`npm run check:spec`、`npm run check:cards`を実行する。依存は`package-lock.json`で固定する。
+GitHub Actionsはpush / pull_requestで`npm ci`、`npm run check:markdown`、`npm test`、`npm run check:spec`、`npm run check:cards`を実行する。Markdownの書式はエディタと共通の[設定](../../.markdownlint.json)で検証する。依存は`package-lock.json`で固定する。
 
 **CI成功は仕様検証の成功を意味する。** 日本語の意味、計算結果、ルール同士の整合性は自動判定しない。Example Mappingと規範文書を照合するレビューを併用する。BPMN・文書リンクの継続的CI、要求対応表の自動生成は今回の範囲に含めない。
 
