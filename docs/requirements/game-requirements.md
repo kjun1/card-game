@@ -44,6 +44,7 @@ Victory / Defeat
 | GR-018 | 勝敗条件が成立した時点でGameの結果を確定し、残りのEffectを解決してはならない。適用済みのCost・Effectと確定した結果を保持し、同時に成立した双方の敗北条件だけをDrawとして扱わなければならない。 |
 | GR-019 | 同じEffectを複数Playerへ逐次適用する場合、対象のActive Playerから処理し、Gameが継続する場合だけOpponentへ進まなければならない。このPlayer orderはSourceの所有者によらず、明示された同時適用とは区別しなければならない。 |
 | GR-020 | 現在の情報閲覧権限とPlayerが過去の観測から得た知識を区別しなければならない。非公開領域への移動によって観測済みの事実を失わせず、未観測の内容への閲覧権限や知識も与えてはならない。 |
+| GR-021 | Zone移動に伴うCardのZone依存Runtime Stateの生成・保持・破棄を明確にしなければならない。Boardを離れたCardは以前の配置に属する状態を破棄し、通常のDeploy / Setでは初回・再配置とも新しい配置の初期状態を生成しなければならない。 |
 
 ## Traceability
 
@@ -61,3 +62,4 @@ Victory / Defeat
 | GR-018 | ../rules/core-rules.md, ../process/turn-flow.md |
 | GR-019 | ../rules/core-rules.md, ../model/effect-resolution-model.md |
 | GR-020 | ../rules/core-rules.md, ../model/information-model.md |
+| GR-021 | ../rules/core-rules.md, ../rules/combat-rules.md, ../model/state-model.md, ../acceptance/board-zone.feature |

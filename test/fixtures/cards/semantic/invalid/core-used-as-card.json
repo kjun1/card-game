@@ -1,0 +1,41 @@
+[
+  {
+    "id": "action-tactic",
+    "name": "火矢",
+    "cardType": "tactic",
+    "poolIdentity": null,
+    "tags": [],
+    "parameters": {},
+    "operations": {
+      "play": {
+        "cost": {
+          "energy": 2
+        },
+        "action": true,
+        "targets": {
+          "enemy-core": {
+            "type": "core",
+            "player": "opponent"
+          }
+        },
+        "resolution": [
+          {
+            "type": "effect",
+            "effect": {
+              "type": "move_card",
+              "target": {
+                "type": "selected",
+                "selection": "enemy-core"
+              },
+              "destination": {
+                "player": "target_owner",
+                "zone": "discard"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "abilities": []
+  }
+]

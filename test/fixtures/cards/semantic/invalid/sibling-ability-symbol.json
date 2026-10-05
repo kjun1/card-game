@@ -1,0 +1,73 @@
+[
+  {
+    "id": "reaction-support",
+    "name": "迎撃装置",
+    "cardType": "support",
+    "poolIdentity": null,
+    "tags": [],
+    "parameters": {},
+    "operations": {
+      "deploy": {
+        "cost": {
+          "energy": 2
+        }
+      }
+    },
+    "abilities": [
+      {
+        "id": "ability",
+        "name": "検証用Ability",
+        "activation": {
+          "type": "operation",
+          "source": "face_up_support"
+        },
+        "cost": {
+          "energy": 0
+        },
+        "resolution": [
+          {
+            "type": "effect",
+            "effect": {
+              "type": "draw",
+              "target": {
+                "type": "player",
+                "player": "self"
+              },
+              "count": 1
+            }
+          }
+        ],
+        "targets": {
+          "victim": {
+            "type": "core",
+            "player": "opponent"
+          }
+        }
+      },
+      {
+        "id": "other",
+        "name": "検証用Ability",
+        "activation": {
+          "type": "operation",
+          "source": "face_up_support"
+        },
+        "cost": {
+          "energy": 0
+        },
+        "resolution": [
+          {
+            "type": "effect",
+            "effect": {
+              "type": "damage",
+              "target": {
+                "type": "selected",
+                "selection": "victim"
+              },
+              "amount": 1
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -172,24 +172,28 @@ Feature: Attackの宣言とBlockを経たCombatの解決
     And 「標的」のDamageは4でCurrent HPは2になる
     And 両UnitはUnit Zoneに残る
 
-  @IR-011 @AC-ATK-013
+  @GR-021 @IR-011 @AC-ATK-013
   Scenario: 双方が致死Damageを受けても同時にDamageを与えて双方Destroyする
     Given AのUnit「剣士」はATK 4でMax HP 3かつDamage 0でReadyかつAttack制限がない
     And BのUnit「標的」はATK 3でMax HP 4かつDamage 0である
     When Aが「剣士」から「標的」へAttackしBがReactionとBlockを辞退する
-    Then 「剣士」は3 Damageを受けCurrent HPが0になりAのDiscardへ移動する
-    And 「標的」は4 Damageを受けCurrent HPが0になりBのDiscardへ移動する
+    Then 同時Damage適用後、Discardへの移動前の「剣士」のDamageは3でCurrent HPは0である
+    And 同時Damage適用後、Discardへの移動前の「標的」のDamageは4でCurrent HPは0である
+    And 両UnitはDestroyされ「剣士」はAのDiscardへ「標的」はBのDiscardへ移動する
+    And Discardへの移動後は両Unitの以前の配置のDamageとReady / ExhaustedとAttack制限を保持しない
     And 両PlayerのCore HPは10のままである
     And AttackのOperationは完了する
 
-  @IR-011 @AC-ATK-014
+  @GR-021 @IR-011 @AC-ATK-014
   Scenario: UnitへのOverkillをCoreや別Unitへ移動しない
     Given AのUnit「大剣士」はATK 7でMax HP 6かつDamage 0でReadyかつAttack制限がない
     And BのUnit「標的」はATK 1でMax HP 3かつDamage 1である
     And Bの別Unit「予備兵」はMax HP 4でDamage 0である
     And 「大剣士」は余剰Damageを移動させるAbilityを持たない
     When Aが「大剣士」から「標的」へAttackしBがReactionとBlockを辞退する
-    Then 「標的」のDamageは8でCurrent HPは-5になりBのDiscardへ移動する
+    Then Damage適用後、Discardへの移動前の「標的」のDamageは8でCurrent HPは-5である
+    And 「標的」はDestroyされBのDiscardへ移動する
+    And Discardへの移動後の「標的」は以前の配置のDamageとReady / ExhaustedとAttack制限を保持しない
     And 「大剣士」のDamageは1になる
     And BのCore HPは10で「予備兵」のDamageは0のままである
     And AttackのOperationは完了する

@@ -1,0 +1,64 @@
+{
+  "unresolved-selection.json": {
+    "keyword": "semantic/unresolved-selection",
+    "instancePath": "/0/operations/play/resolution/0/effect/target/selection",
+    "params": {
+      "selection": "constructor"
+    }
+  },
+  "operation-symbol-in-ability.json": {
+    "keyword": "semantic/unresolved-selection",
+    "instancePath": "/0/abilities/0/resolution/0/effect/target/selection"
+  },
+  "sibling-ability-symbol.json": {
+    "keyword": "semantic/unresolved-selection",
+    "instancePath": "/0/abilities/1/resolution/0/effect/target/selection"
+  },
+  "duplicate-ability-id.json": {
+    "keyword": "semantic/duplicate-ability-id",
+    "instancePath": "/0/abilities/1/id"
+  },
+  "duplicate-card-id.json": {
+    "keyword": "semantic/duplicate-card-id",
+    "instancePath": "/1/id",
+    "params": {
+      "firstInstancePath": "/0/id"
+    }
+  },
+  "core-used-as-card.json": {
+    "keyword": "semantic/effect-target-type",
+    "instancePath": "/0/operations/play/resolution/0/effect/target",
+    "params": {
+      "effect": "move_card"
+    }
+  },
+  "support-source-as-unit.json": {
+    "keyword": "semantic/effect-target-type",
+    "instancePath": "/0/abilities/0/resolution/0/effect/target",
+    "params": {
+      "effect": "ready"
+    }
+  },
+  "hand-unit-destroy.json": {
+    "keyword": "semantic/effect-target-type",
+    "instancePath": "/0/abilities/0/resolution/0/effect/target",
+    "params": {
+      "effect": "destroy"
+    }
+  },
+  "reveal-face-up-selection.json": {
+    "keyword": "semantic/effect-target-type",
+    "instancePath": "/0/abilities/0/resolution/0/effect/target",
+    "params": {
+      "effect": "reveal"
+    }
+  },
+  "impossible-selection.json": {
+    "keyword": "semantic/impossible-selection",
+    "instancePath": "/0/abilities/0/targets/victim"
+  },
+  "declared-source-outside-reaction.json": {
+    "keyword": "semantic/reference-scope",
+    "instancePath": "/0/abilities/0/resolution/0/effect/target"
+  }
+}

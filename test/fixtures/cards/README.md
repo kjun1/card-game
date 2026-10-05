@@ -1,8 +1,8 @@
 # Card Definition fixtures
 
-このディレクトリは[Card Definition Schema](../../../schemas/card.schema.json)の構造契約を検証するための入力集であり、製品Card PoolやBalance案ではない。Schemaを書く前にA〜Jの代表定義を作り、必要な構造を抽出した。
+このディレクトリは[Card Definition Schema](../../../schemas/card.schema.json)の構造契約と静的意味を検証するための入力集であり、製品Card PoolやBalance案ではない。Schemaを書く前にA〜Jの代表定義を作り、必要な構造を抽出した。
 
-`valid`は構造検証の成功を、`invalid`は意図した構造エラーを確認する。実際の支払い、Target選択、Reaction、勝敗などを実行するものではない。仕様に未記載のDeploy CostやUnit Parameterは、fixtureを完全な静的定義にするための例示値であり、Acceptanceへの新しい前提ではない。
+`valid`は構造検証の成功を、`invalid`は意図した構造エラーを確認する。`valid`全件は1つの定義集合として静的意味検証も行う。`semantic`は静的意味の正例・負例を分けて保持する。実際の支払い、Target選択、Reaction、勝敗などを実行するものではない。仕様に未記載のDeploy CostやUnit Parameterは、fixtureを完全な静的定義にするための例示値であり、Acceptanceへの新しい前提ではない。
 
 ## 最初に設計したA〜J
 
@@ -66,4 +66,19 @@ Acceptanceの原文は[Action / Reaction](../../../docs/acceptance/action-reacti
 npm run check:cards
 ```
 
-このコマンドは[Schema文書](../../../docs/model/card-definition-schema.md)に定める構造契約だけを検証する。対象参照の解決、可視性、対象の型・Zoneの意味的な整合、支払い可能性、Timing、勝敗はDomain Engine側のsemantic validation / 実行で確認する。
+このコマンドは[Schema文書](../../../docs/model/card-definition-schema.md#structural-validation-and-semantic-validation)に定める構造契約と静的意味を検証する。実際の個体や状態、可視性、支払い可能性、Timing、勝敗はDomain Engine側のRuntime semantic validation / 実行で確認する。
+
+## Static semantic fixtures
+
+`semantic/valid/`と`semantic/invalid/`の各JSONファイルはCard Definitionの非空配列であり、各ファイルを独立した入力集合として検証する。配列は検証用の容器で、Card Schemaに集合形式を追加するものではない。同じtechnical IDでも別fixture集合への登場は許可し、同じ集合内の重複を拒否する。
+
+| 正例 | 確認する境界 |
+| --- | --- |
+| [broad-selections.json](semantic/valid/broad-selections.json) | 型・状態を省略しても互換候補が残るSelection、未使用の有効なSelection |
+| [local-symbols-and-ids.json](semantic/valid/local-symbols-and-ids.json) | Operation / Abilityごとの独立した選択名、別Card間の同じAbility IDとName、明示された`constructor`という選択名 |
+| [runtime-boundaries.json](semantic/valid/runtime-boundaries.json) | Reaction内の宣言Source参照、Source移動後の状態やSet Card使用時のRevealを静的に実行・保証しない境界 |
+| [revealed-tactic.json](semantic/valid/revealed-tactic.json) | Support ZoneのFace-up TacticはReveal後のCardを表し得る |
+
+負例は未解決選択名、他Scopeの選択名、Card / Ability ID重複、CoreへのCard移動、Support SourceへのReady、Hand UnitのDestroy、Face-up限定選択へのReveal、成立しないSelection条件、Reaction外の宣言Source参照を含む。[semantic/invalid-expectations.json](semantic/invalid-expectations.json)に`semantic/`から始まる診断種別、配列内の位置を含むJSON Pointer、必要なparamsを記録する。構造エラー、JSON破損、空集合を意味検証での意図した拒否として数えない。期待漏れ、存在しないfixtureへの期待、異なる診断での失敗も検出する。
+
+静的正例は実際のGame Stateでの合法性を保証しない。例えば`reveal(source)`を持つSet Card由来Reactionは型として扱えるが、使用時に既にRevealされたSourceへEffectを適用できるかは現在状態を見て判断する。先行Effectによる状態変化を静的検証が模擬することもない。

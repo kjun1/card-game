@@ -1,0 +1,40 @@
+[
+  {
+    "id": "vanilla-unit",
+    "name": "歩兵",
+    "cardType": "unit",
+    "poolIdentity": null,
+    "tags": [],
+    "parameters": {
+      "atk": 2,
+      "maxHp": 3
+    },
+    "operations": {
+      "deploy": {
+        "cost": {
+          "energy": 2
+        }
+      }
+    },
+    "abilities": []
+  },
+  {
+    "id": "vanilla-unit",
+    "name": "異なる表示名",
+    "cardType": "unit",
+    "poolIdentity": null,
+    "tags": [],
+    "parameters": {
+      "atk": 2,
+      "maxHp": 3
+    },
+    "operations": {
+      "deploy": {
+        "cost": {
+          "energy": 2
+        }
+      }
+    },
+    "abilities": []
+  }
+]

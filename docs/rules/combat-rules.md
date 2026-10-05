@@ -2,7 +2,7 @@
 
 ## Unit state
 
-Unitは少なくともReady / Exhausted、Deploy直後Attack制限、Accumulated Damageを持つ。
+Unit ZoneにあるUnitは少なくともReady / Exhausted、Deploy直後Attack制限、Accumulated Damageを持つ。通常Deployは初回・再DeployともReady、Accumulated Damage 0、Deploy直後Attack制限ありで開始する。Unit ZoneからHand / Discardへ移動したらこれらの配置状態を破棄する。[Zone transitions](core-rules.md#zone-transitions)に従う。
 
 ### Ready / Exhausted
 
@@ -11,6 +11,8 @@ Ready UnitはAttack等の能動行為を行える。
 Attack Commit時にAttackerをExhaustする。
 
 Turn Startに自分のUnitをReadyにする。
+
+Ready化だけではAccumulated Damageを取り除かない。
 
 ### Deploy restriction
 
@@ -84,6 +86,8 @@ Current HP = Max HP - Accumulated Damage
 Current HPが0以下になったUnitをDestroyし、Discardへ移動する。
 
 双方が同時に0以下なら双方Destroyする。
+
+致死DamageとCurrent HPはDiscardへ移動する前のDestroy判定に使う。移動時にその配置のAccumulated Damageを破棄し、DiscardにあるCardにはCurrent HPを適用しない。双方Destroyの場合も、双方へDamageを適用してDestroy対象を決めてから、それぞれの移動と状態の破棄を扱う。
 
 ## Overkill
 

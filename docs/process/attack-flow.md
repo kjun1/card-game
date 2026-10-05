@@ -98,6 +98,8 @@ Attack Commit時にAttackerをExhaustする。
 
 Unit Damageは蓄積し、Current HPが0以下ならDestroyする。
 
+Destroy対象はUnit Zoneにある時点のDamageとCurrent HPで決める。Discardへの移動時に[Zone transitions](../rules/core-rules.md#zone-transitions)に従ってその配置の状態を破棄する。状態の破棄をDamage適用やDestroy対象の判定より先に行わない。
+
 CoreへのDamageで勝敗条件が成立したら、[Game end](../model/effect-resolution-model.md#game-end)に従って結果を固定して返し、後続処理へ進まない。Gameが継続する場合はDestroy Checkを行ってAttack解決を完了する。Unit同士のDamageはSimultaneousGroup全体を適用してからDestroy Checkを行い、Active Playerを先にDamage処理する逐次Effectへ変更しない。
 
 DestroyによるDiscard移動後の閲覧権は[Current visibility](../model/information-model.md#current-visibility)に従う。OpponentはDiscard内容を自由に確認できないが、UnitがPublicだった時点の観測は[Player knowledge](../model/information-model.md#player-knowledge)として別に扱う。

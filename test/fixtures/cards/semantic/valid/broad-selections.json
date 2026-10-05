@@ -1,0 +1,87 @@
+[
+  {
+    "id": "broad-targets",
+    "name": "迎撃装置",
+    "cardType": "support",
+    "poolIdentity": null,
+    "tags": [],
+    "parameters": {},
+    "operations": {
+      "deploy": {
+        "cost": {
+          "energy": 2
+        }
+      }
+    },
+    "abilities": [
+      {
+        "id": "ability",
+        "name": "検証用Ability",
+        "activation": {
+          "type": "operation",
+          "source": "face_up_support"
+        },
+        "cost": {
+          "energy": 0
+        },
+        "resolution": [
+          {
+            "type": "effect",
+            "effect": {
+              "type": "destroy",
+              "target": {
+                "type": "selected",
+                "selection": "unit"
+              }
+            }
+          },
+          {
+            "type": "effect",
+            "effect": {
+              "type": "reveal",
+              "target": {
+                "type": "selected",
+                "selection": "set-card"
+              }
+            }
+          },
+          {
+            "type": "effect",
+            "effect": {
+              "type": "move_card",
+              "target": {
+                "type": "selected",
+                "selection": "hand-card"
+              },
+              "destination": {
+                "player": "target_owner",
+                "zone": "discard"
+              }
+            }
+          }
+        ],
+        "targets": {
+          "unit": {
+            "type": "card",
+            "player": "self",
+            "zone": "unit_zone"
+          },
+          "set-card": {
+            "type": "card",
+            "player": "self",
+            "zone": "support_zone"
+          },
+          "hand-card": {
+            "type": "card",
+            "player": "self",
+            "zone": "hand"
+          },
+          "unused": {
+            "type": "core",
+            "player": "opponent"
+          }
+        }
+      }
+    ]
+  }
+]
