@@ -94,6 +94,10 @@ Discardは各Playerが所有するZoneである。所有Playerは全Cardの内�
 
 Gameの終了結果はEffectの途中でも確定し、その後は変更しない。逐次Effect・SimultaneousGroupの判定境界と複数Playerへの適用順は[Effect Resolution Model](effect-resolution-model.md)を参照する。AbilityだけでなくCombatの解決にも同じ概念を使う。
 
+静的Card DefinitionとRuntime Card Instanceは[Card Model](card-model.md#definition-and-runtime-responsibility)で分離する。Target Constraint / Effect Requirement / Runtime Eligibility / Selected Targetは[Target semantics](card-model.md#target-semantics)の責任とする。State変更Effectとは別に[Rule Interference](card-model.md#rule-interference)を評価し、Base RuleからEffective Ruleを求められることを要求する。
+
+これらを実行するGameState / Command / Event / Result、Rule Evaluation、BPMN・Effect Resolutionとの接続は[Domain Engine Architecture](domain-engine-architecture.md)を参照する。これは概念上の実行責任であり、Runtime classや新しいMechanicを追加するものではない。
+
 ## Turn / Operation cardinality
 
 Gameが継続する通常のTurn終了では、1 Turnはcompleted Operationを1つだけ持つ。Game終了をOperation完了判定より優先するため、Turn StartのDraw不能や致死Reactionによってcompleted Operationが0のまま終了する場合もある。

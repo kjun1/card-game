@@ -7,8 +7,8 @@
 | 責務 | 内容 | 正本 |
 | --- | --- | --- |
 | Card Definition | Name、Card Type、静的Parameter、Operation、Ability、Cost、Target条件、Resolution | [Card Model](card-model.md)、本書、Schema |
-| Runtime Card Instance | 所在Zone、Ready / Exhausted、Accumulated Damage、Set / Revealed、Deploy直後Attack制限、実際に選択した対象 | [State Model](state-model.md#zone-transition-state)と将来のEngine |
-| Game State | Core HP、各PlayerのResource、Zone内の個体、Active Player、Turn、Operation lifecycle | [Domain Model](domain-model.md)、[Core Rules](../rules/core-rules.md)と将来のEngine |
+| Runtime Card Instance | 所在Zone、Ready / Exhausted、Accumulated Damage、Set / Revealed、Deploy直後Attack制限 | [State Model](state-model.md#zone-transition-state)と将来のEngine |
+| Game State | Core HP、各PlayerのResource、Zone内の個体、Active Player、Turn、Operation lifecycleと選択した対象の束縛 | [Domain Model](domain-model.md)、[Core Rules](../rules/core-rules.md)と将来のEngine |
 
 `id`は定義を参照する技術識別子、`name`はゲーム上のCard Nameである。[同名3枚制限](../rules/deck-rules.md#deck-construction)は`name`に適用する。同名でも異なる技術IDを付ければ枚数制限を回避できる、という意味にはならない。Abilityの`id`とTarget選択のキーも定義内の参照名であり、対戦中の個体IDではない。
 
@@ -144,7 +144,7 @@ Costは`energy` / `momentum`の少なくとも1つを持つclosed objectであ�
 
 ### Selection definitions
 
-`targets`は選択名から条件へのmapである。選択がなければFieldを省略し、指定するときは1つ以上の選択を定義する。例えば次の定義は、`victim`という選択が相手Coreを対象とすることを表す。
+`targets`は選択名からDefinition Target Constraintへのmapであり、完全な合法対象集合ではない。[Target semantics](card-model.md#target-semantics)に従い、Effect Target RequirementとRuntime Eligibilityを合成して現在の合法対象を求める。選択がなければFieldを省略し、指定するときは1つ以上の選択を定義する。例えば次の定義は、`victim`という選択が相手Coreを対象とすることを表す。
 
 ~~~json
 {
@@ -167,6 +167,10 @@ Costは`energy` / `momentum`の少なくとも1つを持つclosed objectであ�
 Coreの選択条件は`type: core`と`player: self | opponent`。Cardの選択条件は`type: card`、`player: self | opponent | each`、`zone: hand | unit_zone | support_zone`に、必要なら`cardType`と`state: face_up | set`を付ける。これらは対象条件であり、Runtime状態の埋め込みではない。
 
 通常のCard選択は条件に合う1枚、`each`は各Playerの条件に合う1枚ずつを表す。[Action / Reaction Flow](../process/action-reaction-flow.md#selection-and-validation)に従い、操作するPlayerが対象を選び、Engineが現在存在する個体・閲覧権・選択の合法性を検証する。AC-RESOLUTION-004の`each`は指定済みの対象を表し、相手のHidden Cardをどう選ばせるかという未確定の仕組みは追加しない。Source・Target・Costの検証後に支払う既存手順に接続し、Hidden Cardの内容を自由に検索できる権利は追加しない。
+
+例えば`{ "type": "card", "player": "opponent", "zone": "support_zone" }`と`reveal`の組合せは、Set Tacticが存在し得るので静的にvalidである。Runtimeでは相手の現在のSet Cardだけを候補とし、Face-up SupportとRevealed Tacticを除く。`state: set`を明記して制約を狭めてもよいが、Revealの対象要件を全Cardで重複記述する義務はない。候補が空の状態や不適合な選択では、現在のOperation / Action / Reactionの検証失敗経路へ戻る。
+
+UI向けの候補は[EngineのTarget Evaluation](domain-engine-architecture.md#target-evaluation)から得る。Selected TargetはRuntime文脈の束縛であり、Card DefinitionやSchemaには実個体IDを保存しない。候補の識別・説明も[Information Model](information-model.md)の閲覧権限を超えない。
 
 ### Effect references
 
@@ -225,18 +229,20 @@ Card Definition collection
 | 層 | 確認する内容 | 実装 |
 | --- | --- | --- |
 | Structural | Schemaの自己検証・strict compilation、既知のType・Effect・参照形式、必須Field、数値、操作・Activationの形、Runtime情報の混入禁止 | [Schema](../../schemas/card.schema.json)、[check-cards.mjs](../../scripts/check-cards.mjs)の`createCardValidator` |
-| Static semantic | 同じOperation / Ability内の選択名解決、Card内のAbility IDと入力定義集合内の技術IDの一意性、EffectとTarget条件の型互換性、参照Scope、成立しないTarget条件 | [card-semantics.mjs](../../scripts/card-semantics.mjs)。構造検証後だけ実行 |
-| Runtime semantic | 実際のSource・Target・Zone・状態・Timing・Visibility、Zone Capacity、支払い可能性、Effectの実行、Player order、Game終了と適用済み結果の保持 | 将来のDomain Engine |
+| Static semantic | 同じOperation / Ability内の選択名解決、Card内のAbility IDと入力定義集合内の技術IDの一意性、Effect参照ごとの互換候補種別の存在、参照Scope、成立しないTarget条件 | [card-semantics.mjs](../../scripts/card-semantics.mjs)。構造検証後だけ実行 |
+| Runtime semantic | 実際のSource・Target・Zone・状態・Timing・Visibility、Effective Ruleによる合法集合、Zone Capacity、全Costの支払い可能性 | 将来の[Domain Engine](domain-engine-architecture.md#validation-layers)。Effect実行・Player order・終了判定は検証とは別の実行責任 |
 
 `createCardDefinitionValidator`は`{ file, card, instancePath? }`の配列を1つの定義集合として検証する入口である。全件の構造検証が成功した場合だけ静的意味検証へ進む。入力を変更せず、ファイル名・JSON Pointer・診断種別を返す。技術IDの一意性は渡された集合内で判定し、別CardでのAbility ID再利用や異なる技術IDでの同じNameを禁止しない。Deckの同名枚数制限はこの検証の範囲外である。
 
 選択名はそのOperation / Abilityの`targets`だけから解決する。別のOperation、隣のAbility、別CardやJavaScriptのprototypeへScopeを広げない。同じ選択名を別Scopeで独立して使うことや、未使用の有効な選択条件は認める。
 
-型互換性は条件に合う候補が存在し得るかで判定する。`damage`はCoreまたはBoard Unit、`destroy` / `ready` / `exhaust`はBoard Unit、`move_card`はCard、`reveal`はSet Cardに適合する。例えばCore選択へのCard移動、HandのUnitへのDestroy、Face-up限定選択へのRevealは拒否する。`unit_zone`のSupport / Tactic / Set、`support_zone`のUnit、Handの配置状態、Set状態のSupportといった条件同士の矛盾も拒否する。これらは現版のCard Type / OperationとState Modelから導く。
+型互換性は各Effect参照について、Definition Target ConstraintとEffect Target Requirementに合う候補種別が存在し得るかで判定する。selectorの全候補への適合は要求しない。この意味は[Q-TARGET-001〜003](../acceptance/example-mapping.md#target-decisions)の具体例から決定し、現在の実装を根拠にはしない。`damage`はCoreまたはBoard Unit、`destroy` / `ready` / `exhaust`はBoard Unit、`move_card`はCard、`reveal`はSet Cardに適合する。例えばCore選択へのCard移動、HandのUnitへのDestroy、Face-up限定選択へのRevealは拒否する。`unit_zone`のSupport / Tactic / Set、`support_zone`のUnit、Handの配置状態、Set状態のSupportといった条件同士の矛盾も拒否する。これらは現版のCard Type / OperationとState Modelから導く。
 
 `cardType`や`state`の省略だけでは拒否しない。`unit_zone`だけの選択はUnit Effectに、`support_zone`だけの選択はRevealに適合する候補を持つ。Support ZoneのFace-up TacticはReveal済みCardを表せるため、選択条件として有効である。実際に合法な対象を選べるかはRuntimeで確認する。
 
 `source`の型はCard TypeとActivation / Operationから判断するが、先行Effectによる移動や状態変更を実行しない。`set_card`由来のReactionに`reveal(source)`があっても、静的検証の成功は現在Setであることを保証しない。使用時の自動RevealやEffect適用時の現在状態はEngineの責務である。`declared_action_source`もReaction内というScopeだけを確認し、実際の宣言対象やTimingを推測しない。静的検証の成功は、利用可能なCardや合法な対戦操作であることの証明ではない。
+
+同じ選択名を複数Effectで参照しても、各参照の型適合性だけを検証する。Resolution全体の合同充足性、対象寿命、先行Effect後の再検証や不適合時の処理は保証しない。[Q-ENGINE-001](domain-engine-architecture.md#open-questions)とQ-SCHEMA-004を参照する。Rule Interferenceによる将来のTarget条件変更も、現版の未合意DSLやEffectの対象型変更を静的に受理する理由にはしない。
 
 ## Local validation and CI
 

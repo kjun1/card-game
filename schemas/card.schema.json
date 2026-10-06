@@ -146,7 +146,7 @@
         "zone"
       ],
       "additionalProperties": false,
-      "description": "Select one Card, or one per Player for each. These are requirements on runtime choices, not stored runtime state. Visibility, type/zone compatibility and selection legality require semantic validation."
+      "description": "Definition Target Constraint: select one Card, or one per Player for each. Not the complete legal target set or stored runtime state. Combine with Effect Target Requirement and Runtime Eligibility under docs/model/card-model.md."
     },
     "Selection": {
       "oneOf": [
@@ -167,7 +167,7 @@
       "additionalProperties": {
         "$ref": "#/$defs/Selection"
       },
-      "description": "Keys are local definition symbols. Actual choices and object IDs live in runtime state."
+      "description": "Keys are local definition symbols for card-specific constraints. Static validation checks possible compatible kinds per Effect reference; the Engine derives current legal targets. Actual choices and object IDs live in runtime context."
     },
     "CoreTarget": {
       "type": "object",

@@ -52,6 +52,7 @@
 - [Board / Zone](acceptance/board-zone.feature)
 - [Deck / Draw / Hand](acceptance/deck.feature)
 - [Effect Resolution](acceptance/effect-resolution.feature)
+- [Target Selection](acceptance/target-selection.feature)
 
 ## Process
 
@@ -71,6 +72,7 @@
 ## Model
 
 - [Domain model](model/domain-model.md)
+- [Domain Engine Architecture](model/domain-engine-architecture.md)
 - [Card model](model/card-model.md)
 - [Card Definition Schema](model/card-definition-schema.md) / [JSON Schema](../schemas/card.schema.json) / [Fixture mapping](../test/fixtures/cards/README.md)
 - [State model](model/state-model.md)
@@ -107,6 +109,7 @@ docs/
 │  └─ deck-rules.md
 ├─ model/
 │  ├─ domain-model.md
+│  ├─ domain-engine-architecture.md
 │  ├─ card-model.md
 │  ├─ card-definition-schema.md
 │  ├─ state-model.md
@@ -125,5 +128,6 @@ docs/
    ├─ resource.feature
    ├─ board-zone.feature
    ├─ deck.feature
-   └─ effect-resolution.feature
+   ├─ effect-resolution.feature
+   └─ target-selection.feature
 ~~~
