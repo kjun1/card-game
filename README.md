@@ -2,7 +2,7 @@
 
 1対1の対戦型カードゲームの要求・ルール・モデル・設計・受入仕様を管理するリポジトリ。
 
-現在は仕様とその検証環境を整備している。ゲーム実装と、ゲーム動作を実行する受入テストは未実装。
+現在はSpecification & FormalizationからAutomation & Executable Verificationへ移る境界にある。ゲーム実装とExecutable Acceptanceは未実装。開発フェーズと検証責任は[Verification Strategy](docs/verification-strategy.md)を参照する。
 
 ## Core concept
 
@@ -24,6 +24,7 @@
 
 | 読む目的 | 入口 |
 | --- | --- |
+| 開発フェーズとCheck / Test / Validationの責任を知る | [Verification Strategy](docs/verification-strategy.md) |
 | ゲームが満たす要求を知る | [Game requirements](docs/requirements/game-requirements.md) |
 | 現在のルールを読む | [Core rules](docs/rules/core-rules.md) |
 | 処理順と制御権の移動を確認する | [BPMN processes](docs/process/bpmn/README.md) |
@@ -50,7 +51,7 @@ npm run check:spec
 npm run check:cards
 ~~~
 
-`npm test`は仕様・Card検証器をテストする。`check:spec`はGherkin構文・要求参照・Scenario IDを、`check:cards`はCardの構造契約と静的意味（参照Scope、ID一意性、EffectとTargetの型互換性）を検証する。実際の対象・Resource・Timingなどを扱うDomain Engineと、ゲーム動作を実行する受入テストは後続で接続する。
+`check:*`は静的ArtifactのCheck、現在の`npm test`は仕様・Card検証器自身のTooling testsである。各コマンドの対象とCI成功の保証範囲は[Verification Strategy](docs/verification-strategy.md#ci-responsibilities)を参照する。
 
 任意のCard定義集合は`npm run check:cards -- --cards first-card.json --cards second-card.json`で検証できる。入力ファイルは変更しない。検証範囲とfixtureの構成は[Card Definition Schema](docs/model/card-definition-schema.md#structural-validation-and-semantic-validation)を参照する。
 

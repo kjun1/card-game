@@ -1,6 +1,6 @@
 # Acceptance specifications
 
-要求・変更案を具体例で検討し、実装前に仕様の疑問を解消するためのExample MappingとGherkinを管理する。現在はGherkinの構文・要求参照・Scenario IDを検証する。ゲーム動作を実行する受入テストはまだない。
+要求・変更案を具体例で検討し、実装前に仕様の疑問を解消するためのExample MappingとGherkinを管理する。現在のFeatureは合意済みのAcceptance Specificationであり、ゲーム動作を実行するExecutable Acceptanceは未実装。両者の区別と検証責任は[Verification Strategy](../verification-strategy.md#acceptance-specification-and-executable-acceptance)を参照する。
 
 ## Files
 
@@ -88,18 +88,14 @@ npm run check:cards
 
 `nvm`以外のバージョン管理を使う場合もNode.js 24系へ切り替えてからnpmのコマンドを実行する。
 
-`npm test`はNode標準テスト機能による**仕様・Card検証器のテスト**。`npm run check:spec`は公式の`@cucumber/gherkin`と`@cucumber/messages`で全Featureを解析・展開し、構文、空のFeature、Thenの有無、Outlineの実例、要求タグの形式・存在・欠落、Scenario IDの形式・欠落・重複、要求定義の重複を検証する。違反はファイルと行番号付きで報告し非ゼロで終了する。
+`npm test`はNode標準テスト機能による**仕様・Card検証器自身のTooling tests**。`npm run check:spec`はAcceptance Specificationの静的Checkとして、公式の`@cucumber/gherkin`と`@cucumber/messages`で全Featureを解析・展開し、構文、空のFeature、Thenの有無、Outlineの実例、要求タグの形式・存在・欠落、Scenario IDの形式・欠落・重複、要求定義の重複を確認する。違反はファイルと行番号付きで報告し非ゼロで終了する。
 
 `npm run check:cards`は[Card Definition Schema](../model/card-definition-schema.md)の自己検証と構造fixtureを確認した後、Card定義集合の静的意味を検証する。Scope内の参照、ID一意性、対象条件とEffectの静的な適合性を確認し、意味検証用のvalid / invalid fixtureも照合する。既存AcceptanceのCardを静的定義として表す範囲は[Fixture mapping](../../test/fixtures/cards/README.md)で追跡する。Gherkinの初期状態や結果をSchemaへ埋め込まず、Scenarioごとの指定値を保つ。
 
-GitHub Actionsはpush / pull_requestで`npm ci`、`npm run check:markdown`、`npm test`、`npm run check:spec`、`npm run check:cards`を実行する。Markdownの書式はエディタと共通の[設定](../../.markdownlint.json)で検証する。依存は`package-lock.json`で固定する。
-
-**CI成功は仕様検証の成功を意味する。** 日本語の意味、計算結果、ルール同士の整合性は自動判定しない。Example Mappingと規範文書を照合するレビューを併用する。BPMN・文書リンクの継続的CI、要求対応表の自動生成は今回の範囲に含めない。
+GitHub Actionsはpush / pull_requestで上記のインストール・Check・Tooling testsを実行する。各コマンドの保証と制限は[CI responsibilities](../verification-strategy.md#ci-responsibilities)を参照する。Example Mappingと規範文書を照合するレビューを併用する。
 
 ## Future execution
 
-ゲーム実装時にCucumber RunnerとStep Definitionsを追加し、同じFeatureをDomain Engineへ直接接続する。`Given`でfixture Stateを構成し、`When`でドメイン操作を渡し、`Then`でState・利用可能な選択・発生イベントを検証する。UI操作を経由せずにルールを検証できる形にする。
-
-静的なCard Definitionは[JSON Schema](../../schemas/card.schema.json)で構造を検証し、その後で定義内の参照解決・ID一意性・静的な対象適合性を検証する。実装のAPI、実際のStateへの束縛、Timing・Resource・Visibility等のRuntime意味検証は後続で定義する。現段階ではRunner・Step Definitions・ゲーム実装を追加せず、仕様とCardの構造・静的意味の検証を、将来のゲーム動作の受入テストとコマンド・出力上も区別する。
+ゲーム実装時に同じFeatureとScenario IDを再利用し、Cucumber RunnerとStep DefinitionsからDomain Engineへ接続してExecutable Acceptanceとする。接続条件と部分実行の扱いは[Verification Strategy](../verification-strategy.md#acceptance-specification-and-executable-acceptance)を参照する。
 
 概念上の入出力と接続責任は[Domain Engine Architecture](../model/domain-engine-architecture.md#acceptance-integration)を参照する。最初の実装は[AC-BOARD-013の非Action Unit Deploy](../model/domain-engine-architecture.md#first-vertical-slice)を入口とし、State / Event / Resultを解決直後に観測する。Rule Interferenceの例は将来の表現可能性の要求であり、未合意の競合・Replacement等に依存する期待結果をFeatureへ追加しない。
