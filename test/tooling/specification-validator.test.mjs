@@ -21,7 +21,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { validateSpecifications } from '../scripts/check-spec.mjs';
+import { validateSpecifications } from '../../scripts/check-spec.mjs';
 
 // 共通の検証用データ。バッククォートで囲むと、改行を含む文字列を書ける。
 // 定義表には 3 件の要求があり、その下の対応表は同じ要求を参照している。
@@ -308,7 +308,7 @@ test('CLI が下位フォルダも読み、終了コードと違反の位置を�
 
   // import.meta.url はこのテストファイルの URL。そこを基準に検証器を見つけ、
   // fileURLToPath で Node.js の起動に渡せるファイルパスへ変換する。
-  const script = fileURLToPath(new URL('../scripts/check-spec.mjs', import.meta.url));
+  const script = fileURLToPath(new URL('../../scripts/check-spec.mjs', import.meta.url));
   const run = () => {
     // process.execPath はテストを実行している Node.js 本体のパス。
     // 同じ Node.js で別プロセスを起動し、spawnSync は終了まで待つ。

@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { checkCardFixtures, createCardValidator, formatValidationErrors } from '../scripts/check-cards.mjs';
+import { checkCardFixtures, createCardValidator, formatValidationErrors } from '../../scripts/check-cards.mjs';
 
 const schema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -20,7 +20,7 @@ const schema = {
 };
 const card = { name: 'Fixture', energy: 1 };
 const expectation = { instancePath: '/energy', keyword: 'minimum', params: { limit: 0 } };
-const cliPath = fileURLToPath(new URL('../scripts/check-cards.mjs', import.meta.url));
+const cliPath = fileURLToPath(new URL('../../scripts/check-cards.mjs', import.meta.url));
 
 async function writeJson(file, value) {
   await mkdir(path.dirname(file), { recursive: true });
@@ -227,12 +227,19 @@ test('エラーの出力順序をファイル名で安定させる', async (t) =
 
 test('CLI は成功時に件数を表示し、ゲーム動作の検証とは区別する', async (t) => {
   const tree = await fixtureTree(t);
-  const result = spawnSync(process.execPath, [cliPath], { encoding: 'utf8', cwd: tree.root });
-  assert.equal(result.status, 0, result.stderr);
-  assert.equal(result.stderr, '');
-  assert.match(result.stdout, /構造 valid \d+ 件 \/ invalid \d+ 件/);
-  assert.match(result.stdout, /静的意味 valid \d+ 集合 \/ invalid \d+ 集合/);
-  assert.match(result.stdout, /ゲーム動作は未検証/);
+  const fixturesRoot = fileURLToPath(new URL('../fixtures/card-definitions', import.meta.url));
+  const schemaPath = fileURLToPath(new URL('../../schemas/card.schema.json', import.meta.url));
+  let defaultOutput;
+  for (const args of [[], ['--fixtures', fixturesRoot], ['--fixtures', fixturesRoot, '--schema', schemaPath]]) {
+    const result = spawnSync(process.execPath, [cliPath, ...args], { encoding: 'utf8', cwd: tree.root });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stderr, '');
+    assert.match(result.stdout, /構造 valid \d+ 件 \/ invalid \d+ 件/);
+    assert.match(result.stdout, /静的意味 valid \d+ 集合 \/ invalid \d+ 集合/);
+    assert.match(result.stdout, /ゲーム動作は未検証/);
+    defaultOutput ??= result.stdout;
+    assert.equal(result.stdout, defaultOutput);
+  }
 });
 
 test('CLI は違反をファイル・JSON Pointer とともに stderr へ出し、非 0 で終了する', async (t) => {
@@ -260,11 +267,11 @@ test('repository の実際の Schema と全 fixture が構造契約を満たす'
 });
 
 async function repositoryValidator() {
-  return createCardValidator(JSON.parse(await readFile(new URL('../schemas/card.schema.json', import.meta.url), 'utf8')));
+  return createCardValidator(JSON.parse(await readFile(new URL('../../schemas/card.schema.json', import.meta.url), 'utf8')));
 }
 
 async function repositoryFixture(name) {
-  return JSON.parse(await readFile(new URL(`./fixtures/cards/valid/${name}.json`, import.meta.url), 'utf8'));
+  return JSON.parse(await readFile(new URL(`../fixtures/card-definitions/structural/valid/${name}.json`, import.meta.url), 'utf8'));
 }
 
 test('Action Tag・別 Operation・別 Ability から Action 指定を補完しない', async () => {

@@ -31,7 +31,7 @@ Schemaはsyntax / structural contractを定める。Effectの順序・同時適�
 | I | Card移動 → Damage → Draw | 順序付きEffectStep配列で逐次処理を表す |
 | J | 両Coreへの同時Damage → Draw | 明示されたSimultaneousGroupを1つのStepとして保持する |
 
-さらに、Actionという分類Tag、同じCardの複数Ability、宣言されたTacticの移動、両Playerへの逐次Damage / Draw / Card移動をfixtureで確認する。各ファイル、数値、Scenario IDと対応の範囲は[Fixture mapping](../../test/fixtures/cards/README.md)を参照する。
+さらに、Actionという分類Tag、同じCardの複数Ability、宣言されたTacticの移動、両Playerへの逐次Damage / Draw / Card移動をfixtureで確認する。各ファイル、数値、Scenario IDと対応の範囲は[Fixture mapping](../../test/fixtures/card-definitions/README.md)を参照する。
 
 ## Card structure
 
@@ -229,7 +229,7 @@ Card Definition collection
 | 層 | 確認する内容 | 実装 |
 | --- | --- | --- |
 | Structural | Schemaの自己検証・strict compilation、既知のType・Effect・参照形式、必須Field、数値、操作・Activationの形、Runtime情報の混入禁止 | [Schema](../../schemas/card.schema.json)、[check-cards.mjs](../../scripts/check-cards.mjs)の`createCardValidator` |
-| Static semantic | 同じOperation / Ability内の選択名解決、Card内のAbility IDと入力定義集合内の技術IDの一意性、Effect参照ごとの互換候補種別の存在、参照Scope、成立しないTarget条件 | [card-semantics.mjs](../../scripts/card-semantics.mjs)。構造検証後だけ実行 |
+| Static semantic | 同じOperation / Ability内の選択名解決、Card内のAbility IDと入力定義集合内の技術IDの一意性、Effect参照ごとの互換候補種別の存在、参照Scope、成立しないTarget条件 | [card-static-semantics.mjs](../../scripts/card-static-semantics.mjs)。構造検証後だけ実行 |
 | Runtime semantic | 実際のSource・Target・Zone・状態・Timing・Visibility、Effective Ruleによる合法集合、Zone Capacity、全Costの支払い可能性 | 将来の[Domain Engine](domain-engine-architecture.md#validation-layers)。Effect実行・Player order・終了判定は検証とは別の実行責任 |
 
 `createCardDefinitionValidator`は`{ file, card, instancePath? }`の配列を1つの定義集合として検証する入口である。全件の構造検証が成功した場合だけ静的意味検証へ進む。入力を変更せず、ファイル名・JSON Pointer・診断種別を返す。技術IDの一意性は渡された集合内で判定し、別CardでのAbility ID再利用や異なる技術IDでの同じNameを禁止しない。Deckの同名枚数制限はこの検証の範囲外である。
@@ -256,7 +256,7 @@ npm run check:spec
 npm run check:cards
 ~~~
 
-`check:spec`は既存Gherkinの構文と参照を確認する。`check:cards`は構造fixtureを検証した後、既存の`valid/`全件を1つの定義集合として静的に検証する。さらに`semantic/valid/`と`semantic/invalid/`の各JSON配列を独立した集合として検証する。配列はfixture用の容器であり、Card Schemaの変更ではない。意味検証の負例も構造検証には成功し、manifestの診断種別・JSON Pointerに一致する必要がある。JSON破損、fixture不足、構造エラーを意味検証の成功として扱わない。`npm test`はこれらの検証器のunit testである。
+`check:spec`は既存Gherkinの構文と参照を確認する。`check:cards`は`test/fixtures/card-definitions/structural/`の構造fixtureを検証した後、その`valid/`全件を1つの定義集合として静的に検証する。さらに`static-semantic/valid/`と`static-semantic/invalid/`の各JSON配列を独立した集合として検証する。配列はfixture用の容器であり、Card Schemaの変更ではない。Static Semanticの負例も構造検証には成功し、manifestの診断種別・JSON Pointerに一致する必要がある。JSON破損、fixture不足、構造エラーをStatic Semantic Checkの成功として扱わない。`npm test`は`test/tooling/`にあるこれらの検証器のTooling testsを実行する。
 
 任意のCard JSONファイルも`--cards`を繰り返して1つの集合として検証できる。
 
@@ -266,9 +266,11 @@ npm run check:cards -- --cards path/to/first-card.json --cards path/to/second-ca
 
 `--fixtures PATH`は構造・静的意味の両fixture階層を含むルートを指定する。`--cards`との併用はできない。`--schema PATH`は構造fixtureに使用するSchemaを指定するが、静的意味検証へ渡す定義は常に現版Card Schemaも満たす必要がある。カスタムSchemaで現在の契約を緩めたり、静的意味検証を省略したりしない。
 
+デフォルトのfixtureルートは`test/fixtures/card-definitions/`であり、`--fixtures test/fixtures/card-definitions`でも同じ階層を検証する。任意ルートを指定する既存CLIとの互換性のため、従来の`valid/`・`invalid/`・`invalid-expectations.json`と`semantic/`を持つ配置も引き続き受け付ける。新配置に`structural/`がある場合は、その構造fixtureと`static-semantic/`を使用する。診断keywordの`semantic/`はStatic Semanticを表す既存契約として維持する。
+
 構造検証は[AjvのDraft 2020-12対応](https://ajv.js.org/json-schema.html#draft-2020-12)と[strict mode](https://ajv.js.org/strict-mode.html)を用いる。依存はlockfileで固定し、Specification CIの`check:cards`で構造と静的意味の両方を確認する。CI成功はこれらの契約をfixtureが満たすことを示し、ゲーム挙動は検証しない。
 
-Acceptance fixture → Card Definition fixture → Schema validationの対応は[Fixture mapping](../../test/fixtures/cards/README.md)で追跡する。同じNameでもScenarioごとの指定値が異なる場合は別定義として示す。Schemaへ合わせるための既存Gherkin変更や、Runner / Step Definitionsの追加は行わない。
+Acceptance fixture → Card Definition fixture → Schema validationの対応は[Fixture mapping](../../test/fixtures/card-definitions/README.md)で追跡する。同じNameでもScenarioごとの指定値が異なる場合は別定義として示す。Schemaへ合わせるための既存Gherkin変更や、Runner / Step Definitionsの追加は行わない。
 
 ## Unsupported concepts and open questions
 

@@ -5,13 +5,13 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { checkSemanticFixtures, createCardDefinitionValidator, createCardValidator } from '../scripts/check-cards.mjs';
+import { checkSemanticFixtures, createCardDefinitionValidator, createCardValidator } from '../../scripts/check-cards.mjs';
 
-const schema = JSON.parse(await readFile(new URL('../schemas/card.schema.json', import.meta.url), 'utf8'));
+const schema = JSON.parse(await readFile(new URL('../../schemas/card.schema.json', import.meta.url), 'utf8'));
 const structural = createCardValidator(schema);
 const validate = createCardDefinitionValidator(schema);
-const cli = fileURLToPath(new URL('../scripts/check-cards.mjs', import.meta.url));
-const fixture = async (name) => JSON.parse(await readFile(new URL(`./fixtures/cards/valid/${name}.json`, import.meta.url), 'utf8'));
+const cli = fileURLToPath(new URL('../../scripts/check-cards.mjs', import.meta.url));
+const fixture = async (name) => JSON.parse(await readFile(new URL(`../fixtures/card-definitions/structural/valid/${name}.json`, import.meta.url), 'utf8'));
 const support = await fixture('reaction-support');
 const tactic = await fixture('action-tactic');
 const unit = await fixture('ready-unit');
@@ -194,9 +194,10 @@ async function writeJson(file, value) {
 }
 
 async function fixtureTree(t) {
-  const root = await mkdtemp(path.join(tmpdir(), 'card-semantics-'));
+  const root = await mkdtemp(path.join(tmpdir(), 'card-static-semantics-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const bad = selectedCard({ type: 'core', player: 'self' });
+  // 任意の --fixtures ルートでは従来の配置との互換性も確認する。
   await writeJson(path.join(root, 'valid/base.json'), support);
   await writeJson(path.join(root, 'semantic/valid/card.json'), [support]);
   await writeJson(path.join(root, 'semantic/invalid/card.json'), [bad]);
@@ -251,6 +252,16 @@ test('CLI は指定ファイルを 1 定義集合として扱い重複 ID を検
   const root = await fixtureTree(t);
   const file = path.join(root, 'valid/base.json');
   const run = (...args) => spawnSync(process.execPath, [cli, ...args], { encoding: 'utf8' });
+  const invalid = structuredClone(support);
+  invalid.operations.deploy.cost.energy = -1;
+  await writeJson(path.join(root, 'invalid/cost.json'), invalid);
+  await writeJson(path.join(root, 'invalid-expectations.json'), {
+    'cost.json': { keyword: 'minimum', instancePath: '/operations/deploy/cost/energy' },
+  });
+  const fixtures = run('--fixtures', root);
+  assert.equal(fixtures.status, 0, fixtures.stderr);
+  assert.equal(fixtures.stderr, '');
+  assert.match(fixtures.stdout, /構造 valid 1 件 \/ invalid 1 件、静的意味 valid 2 集合 \/ invalid 1 集合/);
   const success = run('--cards', file);
   assert.equal(success.status, 0, success.stderr);
   assert.match(success.stdout, /1 定義（構造契約・静的意味を検証。ゲーム動作は未検証）/);

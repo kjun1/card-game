@@ -3,15 +3,27 @@
  * invalid fixture は、外部 manifest に記録した keyword / JSON Pointer でも照合する。
  */
 import { readdir, readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv2020 from 'ajv/dist/2020.js';
 import cardSchema from '../schemas/card.schema.json' with { type: 'json' };
-import { validateCardSemantics } from './card-semantics.mjs';
+import { validateCardSemantics } from './card-static-semantics.mjs';
 
 const dialect = 'https://json-schema.org/draft/2020-12/schema';
 const repositoryRoot = fileURLToPath(new URL('../', import.meta.url));
+const defaultFixturesRoot = path.join(repositoryRoot, 'test/fixtures/card-definitions');
 const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+
+/** 新しい責任別配置と、--fixtures で指定する従来の配置を解決する。 */
+function fixtureDirectories(fixturesRoot) {
+  const structuralRoot = path.join(fixturesRoot, 'structural');
+  if (fixturesRoot === defaultFixturesRoot || existsSync(structuralRoot)) {
+    return { structuralRoot, staticSemanticRoot: path.join(fixturesRoot, 'static-semantic') };
+  }
+  // 従来の任意ルートは valid/・invalid/・semantic/ の契約を維持する。
+  return { structuralRoot: fixturesRoot, staticSemanticRoot: path.join(fixturesRoot, 'semantic') };
+}
 
 /** Ajv のエラーを、ファイル名と JSON Pointer を含む診断へ変換する。 */
 export function formatValidationErrors(file, errors) {
@@ -141,14 +153,15 @@ function includesSubset(actual, expected) {
 }
 
 /**
- * valid / invalid を再帰的に検証する。返り値の件数は成功した fixture の件数。
+ * Structural valid / invalid を再帰的に検証する。件数は成功した fixture の件数。
  * JSON parse / read error は「期待どおりの invalid」には数えない。
  * manifest のキーは invalid/ からの相対パス（区切りは /）。
  */
 export async function checkCardFixtures({
   schemaPath = path.join(repositoryRoot, 'schemas/card.schema.json'),
-  fixturesRoot = path.join(repositoryRoot, 'test/fixtures/cards'),
+  fixturesRoot = defaultFixturesRoot,
 } = {}) {
+  const { structuralRoot } = fixtureDirectories(fixturesRoot);
   const result = { validFiles: 0, invalidFiles: 0, errors: [] };
   let validate;
   try {
@@ -158,7 +171,7 @@ export async function checkCardFixtures({
     return result;
   }
 
-  const manifest = path.join(fixturesRoot, 'invalid-expectations.json');
+  const manifest = path.join(structuralRoot, 'invalid-expectations.json');
   let expectations;
   try {
     expectations = await readJson(manifest);
@@ -168,8 +181,8 @@ export async function checkCardFixtures({
     return result;
   }
 
-  const validFiles = await discoverJson(path.join(fixturesRoot, 'valid'), result.errors);
-  const invalidRoot = path.join(fixturesRoot, 'invalid');
+  const validFiles = await discoverJson(path.join(structuralRoot, 'valid'), result.errors);
+  const invalidRoot = path.join(structuralRoot, 'invalid');
   const invalidFiles = await discoverJson(invalidRoot, result.errors);
   const invalidNames = new Set(invalidFiles.map((file) => path.relative(invalidRoot, file).split(path.sep).join('/')));
   for (const name of Object.keys(expectations).sort()) {
@@ -220,17 +233,18 @@ export async function checkCardFixtures({
 }
 
 /**
- * 既存 valid/ 全体を 1 定義集合として検証し、semantic/ の各 JSON 配列を
- * 独立した集合として検証する。意味 invalid は構造検証を通る必要がある。
+ * Structural valid 全体を 1 定義集合として検証し、Static Semantic の各 JSON
+ * 配列を独立した集合として検証する。静的意味 invalid は構造検証を通る必要がある。
  */
 export async function checkSemanticFixtures({
   schemaPath = path.join(repositoryRoot, 'schemas/card.schema.json'),
-  fixturesRoot = path.join(repositoryRoot, 'test/fixtures/cards'),
+  fixturesRoot = defaultFixturesRoot,
 } = {}) {
+  const { structuralRoot, staticSemanticRoot } = fixtureDirectories(fixturesRoot);
   const result = { validCollections: 0, invalidCollections: 0, errors: [] };
   const validate = createCardDefinitionValidator(await readJson(schemaPath));
   const documents = [];
-  for (const file of await discoverJson(path.join(fixturesRoot, 'valid'), result.errors)) {
+  for (const file of await discoverJson(path.join(structuralRoot, 'valid'), result.errors)) {
     try {
       documents.push({ file, card: await readJson(file) });
     } catch (error) {
@@ -241,8 +255,7 @@ export async function checkSemanticFixtures({
   result.errors.push(...formatDefinitionErrors(existingErrors));
   if (documents.length > 0 && result.errors.length === 0) result.validCollections += 1;
 
-  const semanticRoot = path.join(fixturesRoot, 'semantic');
-  const manifest = path.join(semanticRoot, 'invalid-expectations.json');
+  const manifest = path.join(staticSemanticRoot, 'invalid-expectations.json');
   let expectations;
   try {
     expectations = await readJson(manifest);
@@ -254,8 +267,8 @@ export async function checkSemanticFixtures({
     result.errors.push(error.message);
     return result;
   }
-  const validFiles = await discoverJson(path.join(semanticRoot, 'valid'), result.errors);
-  const invalidRoot = path.join(semanticRoot, 'invalid');
+  const validFiles = await discoverJson(path.join(staticSemanticRoot, 'valid'), result.errors);
+  const invalidRoot = path.join(staticSemanticRoot, 'invalid');
   const invalidFiles = await discoverJson(invalidRoot, result.errors);
   const invalidNames = new Set(invalidFiles.map((file) => path.relative(invalidRoot, file).split(path.sep).join('/')));
   for (const name of Object.keys(expectations).sort()) {
