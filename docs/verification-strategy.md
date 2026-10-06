@@ -4,7 +4,7 @@
 
 開発フェーズ、静的ArtifactのCheck、実行可能なSoftwareのTest、ゲーム設計のValidationの責任を定める。[Issue #19](https://github.com/kjun1/card-game/issues/19)以降の開発・CI・命名・自動化状態の共通基準とする。
 
-本書は検証活動の正本である。ゲームの要求は[Requirements](README.md#requirements)、規範的ルールは[Rules](README.md#rules)、処理順・制御移譲は[BPMN](process/bpmn/README.md)、概念・状態・構造は[Model](README.md#model)を正本とする。Cardの静的保証の詳細は[Card Definition Schema](model/card-definition-schema.md#structural-validation-and-semantic-validation)、実行責任は[Domain Engine Architecture](model/domain-engine-architecture.md)を参照し、本書でゲーム仕様を追加しない。
+本書は検証活動の正本である。ゲームの要求は[Requirements](README.md#requirements)、規範的ルールは[Rules](README.md#rules)、処理順・制御移譲は[BPMN](process/bpmn/README.md)、概念・状態・構造は[Model](README.md#model)、Runtime判断のID・Inputs / Outputs・責任・Traceabilityは[Decision Catalog](decisions/README.md)を正本とする。Cardの静的保証の詳細は[Card Definition Schema](model/card-definition-schema.md#structural-validation-and-semantic-validation)、実行責任は[Domain Engine Architecture](model/domain-engine-architecture.md)を参照し、本書でゲーム仕様を追加しない。
 
 ## Development phases
 
@@ -258,7 +258,7 @@ test/
 
 ## Current state and future state
 
-現在は**Specification & Formalizationから、対象SliceのAutomation & Executable Verificationへ移る境界**にある。Requirements、Example Mapping、Acceptance Specification、Rules / BPMN / Model、Card Schema、Structural / Static Semantic Check、Tooling testsがある。Engine Architectureは合意済み責任の設計であり、実行可能なEngineではない。
+現在は**Specification & Formalizationから、対象SliceのAutomation & Executable Verificationへ移る境界**にある。Requirements、Example Mapping、Acceptance Specification、Rules / BPMN / Model、Decision Catalog、Card Schema、Structural / Static Semantic Check、Tooling testsがある。Engine Architectureは合意済み責任の設計であり、実行可能なEngineではない。
 
 Domain Engine、Runtime Semantic Validation、Domain tests、Runner / Step Definitions / Executable Acceptanceは未実装である。全要求・Mechanicの形式化完了や、Playtest / Balance Validationの完了も宣言しない。
 
@@ -278,9 +278,9 @@ Featureの存在だけでExecutable Verifiedとはしない。部分実装や未
 | --- | --- |
 | [#20 Test / Fixture structure](https://github.com/kjun1/card-game/issues/20) | 完了済み。Tooling testsとStructural / Static Semantic fixturesの責任別配置、validator・参照・CLI / CIの命名整合をfilesystemへ反映した |
 | [#17 Markdown checker tests](https://github.com/kjun1/card-game/issues/17) | 実装済み。`test/tooling/markdown-validator.test.mjs`でCheckerの成功・失敗条件と診断・探索除外・CLIを確認し、書式CheckとTooling testの責任を維持した |
-| [#21 Decision Catalog](https://github.com/kjun1/card-game/issues/21) | Rule Evaluation / Runtime Validationで使う判断のInputs / Outputs、規範・BPMN・Acceptance参照と自動化状態を整理する |
+| [#21 Decision Catalog](https://github.com/kjun1/card-game/issues/21) | [Decision Catalog](decisions/README.md)にRuntime判断のID・Inputs / Outputs・責任と規範・BPMN・Acceptance参照を定義済み。各判断のAutomationはNot implementedであり、文書・関連ArtifactのCheck成功をDecision自体のStatically Verifiedとは扱わない |
 | [#22 Capability / Process Catalog](https://github.com/kjun1/card-game/issues/22) | ゲーム上の仕事のActor / Trigger / OutcomeをProcess・要求・Acceptanceへ対応付け、対象範囲を定める |
 | [#23 Automation Coverage](https://github.com/kjun1/card-game/issues/23) | #21 / #22を基に、Requirement → Decision / Rule → Process → Scenario → Engine → Executable Verificationを追跡し、仕様済み・未実装と実装済み・未接続を区別する |
 | [#24 First Domain Automation Slice](https://github.com/kjun1/card-game/issues/24) | #19〜#23を踏まえ、[AC-BOARD-013の非Action Unit Deploy](model/domain-engine-architecture.md#first-vertical-slice)を最初に実Engineへ接続する。Cost・Zone・配置State・Operation完了・Event / Resultを観測し、対象範囲のCoverageを更新する |
 
-検証責任の分類は#19、filesystemへの反映は#20で完了し、#17のMarkdown checkerのunit testも実装済みである。Engine、Runner、Step Definitions、Executable Acceptance、Catalog / Coverageは後続で実装・作成する。構造整理とTooling test追加によってCard SchemaやStatic Semanticの判定、ゲーム仕様、Card Pool / Balance / Playtest、Rule Interferenceの詳細設計は変更していない。
+検証責任の分類は#19、filesystemへの反映は#20で完了し、#17のMarkdown checkerのunit testも実装済みである。#21のDecision Catalogは定義済みであり、Engine、Runner、Step Definitions、Executable Acceptance、#22のCapability Catalog / #23のCoverageは後続で実装・作成する。構造整理、Tooling test追加、Decisionの責任・参照の整理によってCard SchemaやStatic Semanticの判定、ゲーム仕様、Card Pool / Balance / Playtest、Rule Interferenceの詳細設計は変更していない。
