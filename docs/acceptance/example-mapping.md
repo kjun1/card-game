@@ -342,3 +342,65 @@ UnitのCombatによるDestroyと通常のTurn Startは、既存の[AC-ATK-013〜
 | 仕様CIが通ればゲーム動作も検証済みか | 現段階では構文・参照の検証のみ。ゲーム実装とRunner導入後に同じ例を実行する | [検証方針](README.md#local-validation-and-ci) |
 
 対象の6 Questionはユーザー合意により解決済みであり、上記のRule・Scenarioと規範文書へ反映した。Turn / Action / Attackの既存例は、真に同時の処理によるDrawと、結果確定後の追加Effectを伴わない完了・取消の記録を維持する。将来のゲームAPI、詳細Card Schema、Runnerへの接続実装は後続範囲であり、今回の具体例に未確定の振る舞いを持ち込まない。
+
+## Capability: Targetの制約から現在の合法対象を求める
+
+[Issue #16](https://github.com/kjun1/card-game/issues/16)の判断根拠を、具体例 → Question → Decision → Requirementの順で残す。以下のEX IDは設計・静的検証の例であり、FeatureのScenario IDとは区別する。
+
+| Example ID | Concrete example | Question |
+| --- | --- | --- |
+| EX-TARGET-001 | `support_zone`だけを指定した`victim`への`reveal`。盤面にはSet Tactic・Face-up Support・Revealed Tacticが1枚ずつある | selector全体を合法対象とするか、Reveal可能なSetだけに絞るか |
+| EX-TARGET-002 | 同じ定義で、盤面にはFace-up SupportとRevealed Tacticしかない | 定義がvalidでも現在の合法対象は空になり得るか |
+| EX-TARGET-003 | `support_zone`かつ`state: set`への`reveal` | Card固有の狭い制約も引き続き記述できるか |
+| EX-TARGET-004 | `support_zone`かつ`state: face_up`への`reveal`、またはHandのUnitへの`destroy` | Runtimeで候補を探す前に、不可能な型の組合せを拒否すべきか |
+| EX-TARGET-005 | `opponent`・`unit_zone`への`destroy`。自Unitと相手のHand Unitも存在する | Effect適合性だけでCard固有の所有者・Zone制約を広げてよいか |
+| EX-TARGET-006 | 相手Set Cardの存在はPublic、内容はHidden。`support_zone`への`reveal` | 合法対象の提示が未公開のNameやAbilityを明かしてよいか |
+| EX-TARGET-007 | 同じ選択参照を`move_card`と後続の`destroy`で使用する | 静的な各参照の型適合性だけで、Step間の対象寿命も保証できるか |
+
+| Example | 完全な合法集合をselectorに要求する案（依頼文の案A） | 積集合で導出する案（依頼文の案B） |
+| --- | --- | --- |
+| EX-TARGET-001 | 広い定義は静的に拒否し、`state: set`等の絞り込みを定義へ要求する | 広い定義は静的にvalid。現在の候補はSetだけ |
+| EX-TARGET-002 | 適合する狭い定義でも現在の候補が0枚なら選択できない | 広い定義はvalidでも現在の候補が0枚なら選択できない |
+| EX-TARGET-003〜004 | Set限定はvalid、Face-up限定へのReveal等はinvalid | 同じ。互換候補がない組合せは拒否する |
+| EX-TARGET-005〜006 | 所有者・Zone制約とVisibilityのRuntime検証は引き続き必要 | 同じ。Effect要件から制約を広げず、候補表示でHidden内容を公開しない |
+
+### Target: decisions
+
+| Question ID | Decision and reason | Requirement / downstream |
+| --- | --- | --- |
+| Q-TARGET-001 | selectorはDefinition Target Constraintとする。EX-TARGET-001でCardの「Support Zoneに限定」とEffectの「SetだけReveal可能」は別の責任を持つ。完全な合法対象集合をselectorへ要求する案では、Effect要件をCardごとに再記述する必要があり、どちらの案でもEX-TARGET-002の現在の存在判定はRuntimeへ残る。Card固有制約とEffect契約を分離する案を採用する。依頼文の案B、Issue本文の案Aに相当する | GR-022、[Target semantics](../model/card-model.md#target-semantics)、AC-TARGET-001〜004 |
+| Q-TARGET-002 | `Legal Target Set = Definition Target Constraint ∩ Effect Target Requirement ∩ Runtime Eligibility`。EX-TARGET-005では相手のUnit Zoneだけ、EX-TARGET-001では現在のSetだけを残す。Selected Targetはこの集合から選ばれたRuntimeの束縛であり、定義へ保存しない | GR-022、AC-TARGET-001・005、[Target Evaluation](../model/domain-engine-architecture.md#target-evaluation) |
+| Q-TARGET-003 | EX-TARGET-001・003は候補種別に互換性があるため静的にvalid、EX-TARGET-004は互換候補がないためinvalid。静的保証は各参照の存在し得る種別までであり、EX-TARGET-002の存在・Cost・Timing・現在状態は保証しない。現在のvalidatorはこの決定と整合するため動作変更は不要 | GR-022、[Static semantic validation](../model/card-definition-schema.md#structural-validation-and-semantic-validation)、既存[broad-selections](../../test/fixtures/cards/semantic/valid/broad-selections.json)・[負例](../../test/fixtures/cards/semantic/invalid/reveal-face-up-selection.json) |
+| Q-TARGET-004 | EX-TARGET-006の候補は公開されている存在・配置を示し、未公開の内容を含めない。内容がHiddenであるだけで存在の選択まで禁止せず、任意の相手Handの内容検索や個体追跡を新たに認めない | GR-015・020・022、AC-TARGET-001、[Information Model](../model/information-model.md) |
+
+| Rule | Agreed meaning | Acceptance |
+| --- | --- | --- |
+| TG1 | 広いselectorとEffect要件を合成し、Card固有制約を満たさない対象は加えない。GR-022 | [AC-TARGET-001・004・005](target-selection.feature) |
+| TG2 | Selected Targetが現在の合法集合に含まれなければ、既存の非Action検証失敗と同様にCost・移動・Effectなしで未完了とする。GR-022、[Selection and validation](../process/action-reaction-flow.md#selection-and-validation) | [AC-TARGET-002〜003](target-selection.feature) |
+| TG3 | 合法候補の観測は現在の閲覧権限を超えない。GR-015・020 | [AC-TARGET-001](target-selection.feature) |
+
+EX-TARGET-007はQ-ENGINE-001として[Open questions](../model/domain-engine-architecture.md#open-questions)へ残す。参照を共有する複数Stepの合同充足性、先行Effect後の再検証時点・失敗時の処理は未確定であり、全Stepの初期状態への単純な積集合も、対象不適合時のskip / 再選択 / rollbackも決めない。上記FeatureはこのQuestionに依存しない単独Effectの例に限る。
+
+## Capability: Card固有のRule Interferenceを追加可能にする
+
+[Issue #13](https://github.com/kjun1/card-game/issues/13)は拡張可能性の要求を確定する。以下は将来Cardの要求例であり、現版Schemaで使用可能なCardや、既に合意済みのMechanicではない。
+
+| Example ID | Concrete example | Question / responsibility found |
+| --- | --- | --- |
+| EX-RI-001 | 相手UnitのEnergy Cost +1、ATK +2、Hand Limit -1、Zone Capacity +1 | Cost支払いでEnergy残量を減らすことと、支払い・Combat・上限判定に使う値を変えることは同じか |
+| EX-RI-002 | このTurnこのUnitはAttack不可、特定ActionにはReaction不可 | ExhaustやAction Cancelで代用できるか。ReadyかつAttackLocked解除済みでも禁止を評価する必要がある |
+| EX-RI-003 | 通常HandからReaction不可だが、このCardだけ許可 | 全HandやCore Ruleを変更せず、特定Sourceへの例外を識別できるか |
+| EX-RI-004 | Destroyされる代わりにHandへ戻す | Destroy後にHandへ移すEffect列では、Discard移動・Destroyの出来事が一度成立してしまう。予定処理への介入が必要か |
+| EX-RI-005 | 最初のDamageを0にする | Damage適用後の回復とは別。Damage量の評価か予定Damageの置換かは、同じ最終値だけで決められるか |
+| EX-RI-006 | 同じCostに+1と別の干渉、同じDestroyに異なる置換が適用可能 | 固定したCore判定だけで将来の一意な競合解決を追加できるか |
+
+### Rule Interference: decisions
+
+| Question ID | Decision and reason | Requirement / downstream |
+| --- | --- | --- |
+| Q-RI-001 | EX-RI-001〜005は通常のState変更Effectと別の責任を持つ。Core RuleをCardへ複製せず、Base RuleからCard固有の干渉を評価してEffective Ruleを求められることを要求する。`cannot_attack` / `ignore_rule`等のPrimitive追加で代用しない | GR-023、[Rule Evaluation](../model/domain-engine-architecture.md#rule-evaluation)、[Card Model](../model/card-model.md#rule-interference) |
+| Q-RI-002 | 値を評価するModifier、可否・例外を評価するPermission / Prohibition、適用前の予定処理へ介入するReplacementには、例から責任の違いがある。拡張の分類として採用するが、網羅的なType体系・Schemaではない。EX-RI-005の0 DamageがどちらのMechanicかは保留する | GR-024、[分類と評価境界](../model/domain-engine-architecture.md#rule-evaluation) |
+| Q-RI-003 | EX-RI-002・003ではSubject / Rule / Scope / Durationを区別できる必要がある。特定Unit・Card・Action・Player・Zone等の対象、どのRuleへの変更か、適用範囲と有効期間を識別し、一時的なGame中の干渉でCoreの正本を永続的に変更しない | GR-025、[Card Model](../model/card-model.md#rule-interference) |
+| Q-RI-004 | EX-RI-006を将来一意に解決できるよう、複数干渉を評価する境界を保証する。順序やPlayer選択の具体方式を今回選ばず、未対応の干渉を無視してBase Ruleだけで確定しない | GR-026、[Rule Evaluation](../model/domain-engine-architecture.md#rule-evaluation) |
+
+Priority / Stack、Trigger queue、ContinuousのLayer、Timestamp / Active Player precedence、affected Playerの選択、Replacement競合・再帰・Infinite loop、Replacement / ContinuousのSchema、具体クラスは未決のまま[Open questions](../model/domain-engine-architecture.md#open-questions)へ接続する。これらに依存するゲーム動作のGherkinは今回追加しない。現在のCore Rule・BPMN経路・Schema受理範囲は、この将来要件だけでは変更しない。

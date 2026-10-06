@@ -15,6 +15,7 @@
 | [Board / Zone](board-zone.feature) | Zone Capacity、SupportとSetの共有、任意Discard禁止、離脱時の状態破棄と再配置時の初期化、公開範囲と観測済みの情報 |
 | [Deck / Draw / Hand](deck.feature) | Deck構築の枚数制限、逐次Draw、Hand超過、Deck切れでの即時終了、両者Drawの先後、Hidden情報 |
 | [Effect Resolution](effect-resolution.feature) | 順序付きEffectStep、SimultaneousGroup、勝敗確定後の停止、複数Playerへの共通の逐次適用順 |
+| [Target Selection](target-selection.feature) | Card固有制約とEffect要件の合成、現在の候補とSelected Target、空集合・不適合な選択、候補の閲覧権限 |
 
 要求定義は[Game](../requirements/game-requirements.md)、[Interaction](../requirements/interaction-requirements.md)、[Play-experience](../requirements/play-experience-requirements.md)を参照する。Gherkinは規範文書を具体例で表すものであり、新しいルールやCard Poolを独立して定義しない。
 
@@ -100,3 +101,5 @@ GitHub Actionsはpush / pull_requestで`npm ci`、`npm run check:markdown`、`np
 ゲーム実装時にCucumber RunnerとStep Definitionsを追加し、同じFeatureをDomain Engineへ直接接続する。`Given`でfixture Stateを構成し、`When`でドメイン操作を渡し、`Then`でState・利用可能な選択・発生イベントを検証する。UI操作を経由せずにルールを検証できる形にする。
 
 静的なCard Definitionは[JSON Schema](../../schemas/card.schema.json)で構造を検証し、その後で定義内の参照解決・ID一意性・静的な対象適合性を検証する。実装のAPI、実際のStateへの束縛、Timing・Resource・Visibility等のRuntime意味検証は後続で定義する。現段階ではRunner・Step Definitions・ゲーム実装を追加せず、仕様とCardの構造・静的意味の検証を、将来のゲーム動作の受入テストとコマンド・出力上も区別する。
+
+概念上の入出力と接続責任は[Domain Engine Architecture](../model/domain-engine-architecture.md#acceptance-integration)を参照する。最初の実装は[AC-BOARD-013の非Action Unit Deploy](../model/domain-engine-architecture.md#first-vertical-slice)を入口とし、State / Event / Resultを解決直後に観測する。Rule Interferenceの例は将来の表現可能性の要求であり、未合意の競合・Replacement等に依存する期待結果をFeatureへ追加しない。
