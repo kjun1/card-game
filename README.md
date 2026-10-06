@@ -44,6 +44,7 @@
 
 ~~~sh
 npm ci
+npm run check:markdown
 npm test
 npm run check:spec
 npm run check:cards
@@ -52,6 +53,8 @@ npm run check:cards
 `npm test`は仕様・Card検証器をテストする。`check:spec`はGherkin構文・要求参照・Scenario IDを、`check:cards`はCardの構造契約と静的意味（参照Scope、ID一意性、EffectとTargetの型互換性）を検証する。実際の対象・Resource・Timingなどを扱うDomain Engineと、ゲーム動作を実行する受入テストは後続で接続する。
 
 任意のCard定義集合は`npm run check:cards -- --cards first-card.json --cards second-card.json`で検証できる。入力ファイルは変更しない。検証範囲とfixtureの構成は[Card Definition Schema](docs/model/card-definition-schema.md#structural-validation-and-semantic-validation)を参照する。
+
+`check:markdown`は全Markdownの書式を検証する。VSCodeのmarkdownlint拡張とCLI / CIは[共通設定](.markdownlint.json)を使用する。日本語の段落・要求表を1行で記述するため固定文字数の制限だけを外し、見出し・リスト・表などの検証は行う。
 
 ## License
 

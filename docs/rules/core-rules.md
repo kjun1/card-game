@@ -166,6 +166,7 @@ Handから直接Reactionすることは基本ルールでは認めない。
 この節は現在の情報閲覧権限を定める。Playerが過去の観測から得た知識とは区別する。概念の責務は[Information Model](../model/information-model.md)を参照する。
 
 ### Public
+
 - Core HP
 - Energy
 - Momentum
@@ -179,6 +180,7 @@ Handから直接Reactionすることは基本ルールでは認めない。
 - Discard枚数
 
 ### Hidden
+
 - Deck内容
 - Hand
 - Set Cardの内容
