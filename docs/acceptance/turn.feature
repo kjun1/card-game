@@ -7,14 +7,15 @@ Feature: Turnごとの更新とOperation完了による制御権移転
     And 両PlayerのCore HPは10である
     And 次にTurnを開始するPlayerはAである
 
-  @GR-009 @AC-TURN-001
-  Scenario: 自分のUnitだけをReadyにしてDeploy直後のAttack制限を解除する
-    Given AのUnit「先遣隊」はExhaustedでDeploy直後のAttack制限がある
-    And BのUnit「守備隊」はExhaustedでDeploy直後のAttack制限がある
+  @GR-009 @GR-021 @AC-TURN-001
+  Scenario: Turn StartではDamageを保持して自分のUnitだけReady化とAttack制限解除を行う
+    Given AのUnit「先遣隊」はMax HP 6でDamage 2かつExhaustedでDeploy直後のAttack制限がある
+    And BのUnit「守備隊」はMax HP 5でDamage 1かつExhaustedでDeploy直後のAttack制限がある
     And AのDeckは10枚でHandは3枚である
     When AのTurnを開始する
     Then 「先遣隊」はReadyになりAttack制限が解除される
     And 「守備隊」はExhaustedのままでAttack制限も残る
+    And 「先遣隊」のDamageは2で「守備隊」のDamageは1のままである
     And AのDeckは9枚でHandは4枚になる
 
   @GR-009 @GR-010 @PER-004 @AC-TURN-002

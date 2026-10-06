@@ -24,6 +24,8 @@ Current visibilityが変わっても、過去に観測した事実は失われ�
 
 観測したのがSet Cardの存在・移動・Discard枚数の変化だけなら、そのCardの未公開の内容をPlayer Knowledgeへ加えない。公開された情報と、そのPlayerに閲覧が許可された情報だけを観測の根拠とする。
 
+[Zone transition state](state-model.md#zone-transition-state)で破棄する配置状態は、観測済みの事実とは別である。以前のUnitのDamageやTacticのRevealを観測した事実は残るが、再DeployしたUnitに以前のDamageを適用したり、再SetしたCardを現在もRevealedとして扱ったりしない。再Setは裏向きの新しい配置であり、過去の知識だけで現在のHidden内容を自由に閲覧することはできない。
+
 ## Example
 
 | 状態 / 出来事 | Bの現在の閲覧範囲 | Bの観測済みの情報 |

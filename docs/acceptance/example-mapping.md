@@ -10,7 +10,7 @@
 
 | Rule | 内容と根拠 |
 | --- | --- |
-| T1 | 自分のUnitのReady化・Attack制限解除、Capacity増加後のEnergy回復を行う。[Turn Start order](../rules/core-rules.md#turn-start-order)、[Energy](../rules/resource-rules.md#energy)、[Turn Flow](../process/turn-flow.md#semantics) |
+| T1 | 自分のUnitのReady化・Attack制限解除、Capacity増加後のEnergy回復を行う。Turn StartだけではUnitのDamageを消去しない。[Turn Start order](../rules/core-rules.md#turn-start-order)、[Zone transition state](../model/state-model.md#zone-transition-state)、[Energy](../rules/resource-rules.md#energy)、[Turn Flow](../process/turn-flow.md#semantics) |
 | T2 | 必要なDrawを1枚行い、Hand Limit 7超過なら引いたCardをDiscardする。Draw要求時にDeckが空なら敗北する。[Draw and Hand Limit](../rules/deck-rules.md#draw-and-hand-limit)、[Game objective](../rules/core-rules.md#game-objective) |
 | T3 | Game継続中に1 Operation完了でTurnを終える。取消では未完了で再選択しTurn Startを繰り返さない。[Turn / Operation](../rules/core-rules.md#turn)、[Turn Flow](../process/turn-flow.md#semantics) |
 | T4 | Game終了はOperation完了・再選択・Player切替より優先する。勝敗条件成立時に結果を固定して残りのEffectを打ち切る。同時に成立した双方敗北だけがDrawであり、同じEffectでも逐次処理の後半は解決しない。GR-018、[Game objective](../rules/core-rules.md#game-objective)、[Turn Flow](../process/turn-flow.md#semantics)、[Turn cardinality](../model/domain-model.md#turn--operation-cardinality) |
@@ -19,7 +19,7 @@
 
 | Scenario ID | Rule | 具体例と期待結果 | Requirements |
 | --- | --- | --- | --- |
-| AC-TURN-001 | T1, T2 | AのUnitだけReady・制限解除。相手のUnitは変わらず、Deck 10→9・Hand 3→4 | GR-009 |
+| AC-TURN-001 | T1, T2 | AのUnitだけReady・制限解除。両UnitのDamage 2・1を保持し、相手のUnit状態は変わらず、Deck 10→9・Hand 3→4 | GR-009, GR-021 |
 | AC-TURN-002 | T1 | Capacity 2→3 / 6→7 / 7→7、Energy 1から更新後Capacityへ回復 | GR-009, GR-010, PER-004 |
 | AC-TURN-003 | T2 | Hand 6→7で引いたCardを保持 | GR-009 |
 | AC-TURN-004 | T2 | Hand 7からDrawしたCardだけDiscardし元の7枚を保持 | GR-009 |
@@ -75,7 +75,7 @@
 | C2 | ReactionありならAttack取消、Block・Combatなし。ReactionなしならBlock後にCommitしAttackerをExhaustする。[Reaction](../rules/combat-rules.md#reaction)、[Attack Commit](../rules/combat-rules.md#attack-commit)、[Attack Flow](../process/attack-flow.md#review-preview) |
 | C3 | Blockは最大1体、Core / Unit両方へのAttackに使え、Final Targetを変える。Ready / Exhausted・Deploy直後に依存せず、BlockでExhaust・Window発生なし。[Block](../rules/combat-rules.md#block)、[Block step](../process/attack-flow.md#block-step) |
 | C4 | Block AbilityとCostを検証する。不正ならCost・Target・Attacker状態を変えず再選択。Momentumは支払った分だけ相手へ移転。[Block step](../process/attack-flow.md#block-step)、[Momentum](../rules/resource-rules.md#momentum)、[Block Cost](../rules/resource-rules.md#block-cost) |
-| C5 | CoreへATK分、Unit同士は互いのATK分を同時に与える。Damageは蓄積しCurrent HP ≤ 0ならDestroy。余剰Damageの通常移転なし。[Combat resolution](../rules/combat-rules.md#combat-resolution)、[Damage and Destroy](../rules/combat-rules.md#damage-and-destroy)、[Overkill](../rules/combat-rules.md#overkill) |
+| C5 | CoreへATK分、Unit同士は互いのATK分を同時に与える。Damageは蓄積しCurrent HP ≤ 0ならDestroy。致死DamageとCurrent HPはDiscardへの移動前に観測し、移動後は以前の配置の状態を破棄する。余剰Damageの通常移転なし。[Combat resolution](../rules/combat-rules.md#combat-resolution)、[Damage and Destroy](../rules/combat-rules.md#damage-and-destroy)、[Overkill](../rules/combat-rules.md#overkill)、[Zone transitions](../rules/core-rules.md#zone-transitions) |
 | C6 | Core HP ≤ 0でGameを終了する。致死Damage時点で勝敗を固定し、残るEffectや次Turnへ進まない。[Game objective](../rules/core-rules.md#game-objective)、[Combat](../process/attack-flow.md#combat)、[Turn Flow](../process/turn-flow.md#semantics) |
 
 [attack.feature](attack.feature)のExamples:
@@ -94,8 +94,8 @@
 | AC-ATK-010 | C4 | 不正な一般兵から合法な護衛へ選び直し、Costは1回分だけ移転 | IR-013 |
 | AC-ATK-011 | C5 | ATK 3対2で双方Damageを同時適用し双方生存 | IR-011 |
 | AC-ATK-012 | C5 | 既存Damage 1と2へ2ずつ加算し3と4になる | IR-011 |
-| AC-ATK-013 | C5 | ATK 4 / HP 3対ATK 3 / HP 4で双方Current HP 0、双方Discard | IR-011 |
-| AC-ATK-014 | C5 | ATK 7を残HP 2のUnitへ与えCurrent HP -5、余剰5は他へ移らない | IR-011 |
+| AC-ATK-013 | C5 | ATK 4 / HP 3対ATK 3 / HP 4で移動前の双方Current HP 0。双方DestroyでDiscardへ移動し以前の配置の状態を破棄 | GR-021, IR-011 |
+| AC-ATK-014 | C5 | ATK 7を残HP 2のUnitへ与え移動前のCurrent HP -5。Discardへ移動後は以前の配置の状態を破棄し、余剰5は他へ移らない | GR-021, IR-011 |
 | AC-ATK-015 | C2, C5, C6 | ATK 3でCore HP 2→-1、Attack完了・勝利で次Turn開始なし | GR-002, GR-007, IR-011 |
 
 `IR-011`はAttackをActionとする上位要求であり、ATK・Damage・Destroyの計算そのものを記した要求ではない。AC-ATK-011〜014の詳細な期待結果はC5で示したCombat Rulesに基づく。要求タグだけで細則の根拠まで表したとみなさない。
@@ -193,7 +193,7 @@
 | --- | --- | --- |
 | Q-RESOURCE-001 | ユーザー合意: Setup Energy 2は存在するが、通常SetupにはReaction Sourceがなく最初の自Turn前にReactionできない。即時対応用Cardや事前配置を追加しない。R1・R3へ反映 | AC-RESOURCE-011 |
 
-## Capability: BoardのZoneと公開情報を管理する
+## Capability: BoardのZoneと配置状態と公開情報を管理する
 
 | Rule | 内容と根拠 |
 | --- | --- |
@@ -204,22 +204,37 @@
 | Z5 | Unit・Face-up Support・Zone使用数はPublic。Set Cardは存在とSlot使用がPublic、内容はHiddenであり、HandからSetしても内容はOpponentへ公開されない。[Information visibility](../rules/core-rules.md#information-visibility)、[Information](../rules/deck-rules.md#information)、[Set state](../model/state-model.md#set-state) |
 | Z6 | DiscardはOpponentへ枚数だけを公開し、所有Playerは全Cardの内容を確認できる。未RevealのSet CardもDiscard移動によってOpponentへ内容を公開しない。[Information visibility](../rules/core-rules.md#information-visibility)、[Information](../rules/deck-rules.md#information)、[Zoneの責務](../model/domain-model.md#responsibilities) |
 | Z7 | Current visibilityは現在の閲覧権限、Player KnowledgeはPlayerが観測して得た情報を扱う。PublicだったUnitがDiscardへ移っても公開時の観測事実は失われず、それによってDiscard全体の閲覧権限を得ることもない。未観測のCard内容は移動だけでは知識に加わらない。GR-020、[Information Model](../model/information-model.md#player-knowledge)、[Information visibility](../rules/core-rules.md#information-visibility) |
+| Z8 | Unit Zoneを離れたUnitはその配置のDamage・Ready / Exhausted・Deploy直後のAttack制限を破棄する。Card Definitionと観測済み事実は保持する。初回も再Deployも、通常のUnit DeployでDamage 0・Ready・AttackLockedを生成する。GR-021、[Zone transitions](../rules/core-rules.md#zone-transitions)、[Zone transition state](../model/state-model.md#zone-transition-state) |
+| Z9 | Supportは通常Deployで初回・再配置ともFace-up Supportになる。SetしたTacticはSupport Zone離脱時にその配置のSet / Revealed状態を破棄する。通常Setは初回・再配置とも裏向きのSet状態を生成し、以前の観測事実は消さず未公開の内容も公開しない。同じSupport Zone内でのRevealは離脱ではなくSetからRevealedへの遷移である。GR-021、[Zone transitions](../rules/core-rules.md#zone-transitions)、[Set state](../model/state-model.md#set-state)、[Zone transition state](../model/state-model.md#zone-transition-state) |
+| Z10 | 不正操作やCancelだけではZoneは変わらず、以前の配置の状態を破棄・初期化しない。Reactionによる実際のZone移動とそれに伴う状態破棄は、元ActionのCancelで巻き戻さない。GR-021、[Zone transitions](../rules/core-rules.md#zone-transitions)、[Operation](../rules/core-rules.md#operation)、[Reactionあり](../rules/core-rules.md#reactionあり) |
 
 [board-zone.feature](board-zone.feature)のExamples:
 
 | Scenario ID | Rule | 具体例と期待結果 | Requirements |
 | --- | --- | --- | --- |
 | AC-BOARD-001 | Z1, Z2 | 自分のSupport Zoneと相手のUnit Zoneが満杯でも、自分のUnit Zone 4→5へDeployできる。Energy 3→1、CardはHandから自分のUnit Zoneへ移動 | GR-006, GR-012, GR-013, GR-016 |
-| AC-BOARD-002 | Z1, Z2 | 自分のUnit Zoneが満杯でも、Face-up / Setが2:0・1:1・0:2のSupport ZoneへSupport DeployまたはSetを行い、最後の1 Slotを使える | GR-006, GR-012, GR-016, IR-017 |
+| AC-BOARD-002 | Z1, Z2, Z9 | 自分のUnit Zoneが満杯でも、Face-up / Setが2:0・1:1・0:2のSupport Zoneへ初回のSupport DeployまたはSetを行い、表向き / 裏向きで最後の1 Slotを使える | GR-006, GR-012, GR-016, GR-021, IR-017 |
 | AC-BOARD-003 | Z2, Z3 | Unit Zone 5体への非Action Deployを拒否。Energy 3・Hand・Boardを保ち、Operation未完了で同じTurnの再選択へ戻る | GR-007, GR-010, GR-016 |
 | AC-BOARD-004 | Z2, Z3 | Face-up / Setが3:0・2:1・1:2・0:3のSupport Zoneでは非Action Support DeployとSetをどちらも拒否。Cost・Card・既存の占有を維持 | GR-007, GR-010, GR-016, IR-017 |
 | AC-BOARD-005 | Z2, Z3 | Action指定のUnit Deploy / Support Deploy / Setも、配置先が満杯なら宣言を拒否。Cost・Cardを維持しReaction Windowを開かない | GR-010, GR-016, IR-002, IR-017 |
 | AC-BOARD-006 | Z4 | 自分のUnit / Face-up Support / Set Cardを基本ルールだけで任意Discardしようとしても拒否され、満杯のZoneに空きはできない | GR-007, GR-017 |
 | AC-BOARD-007 | Z4 | fixture AbilityによるUnit / Face-up Support / Set CardのHandへの移動、またはUnitのDestroyによるDiscard移動は成立し、元のZoneに1 Slotの空きができる | GR-013, GR-017 |
-| AC-BOARD-008 | Z1, Z2, Z5 | HandのCardをSetするとSupport Zoneの使用数は1→2。Unit・Face-up Support・Setの存在・Slot使用はPublicだがSet Cardの内容はOpponentへ公開されない | GR-013, GR-015, IR-017, IR-018 |
+| AC-BOARD-008 | Z1, Z2, Z5, Z9 | HandのCardを裏向きのSet状態で配置するとSupport Zoneの使用数は1→2。Unit・Face-up Support・Setの存在・Slot使用はPublicだがSet Cardの内容はOpponentへ公開されない | GR-013, GR-015, GR-021, IR-017, IR-018 |
 | AC-BOARD-009 | Z4, Z6 | 未RevealのSet Cardを合法なEffectでDiscardへ移す。Discardは2→3枚でOpponentは枚数だけを確認でき、所有Playerは3枚すべての内容を確認できる | GR-015, GR-017, IR-018 |
 | AC-BOARD-010 | Z6, Z7 | Bが公開中に観測したAのUnitがDestroyされDiscard 2→3枚になっても、観測したName・ParameterとDestroyの事実は保持する。BはDiscard全体を閲覧できず、他の2枚の内容も新たに得ない | GR-015, GR-020 |
 | AC-BOARD-011 | Z5, Z6, Z7 | Bが内容を見ていないSet CardのDiscard移動では、公開された存在・移動・枚数変化だけを観測し、未公開のCard内容を知識に加えない | GR-015, GR-020, IR-018 |
+| AC-BOARD-012 | Z4, Z8 | Damage 2のUnitをHand / Discardへ移動またはDestroy。Ready / Exhausted・Attack制限の異なる配置で以前の状態を破棄し、Card DefinitionのMax HP 5を保持 | GR-013, GR-017, GR-021 |
+| AC-BOARD-013 | Z8 | 初回のUnit DeployはDamage 0・Ready・Attack制限ありで配置。Max HP 5とCurrent HP 5、Energy 3→1 | GR-013, GR-021 |
+| AC-BOARD-014 | Z8 | Damage 2・Exhausted・Attack制限なしのUnitをHandへ戻す。BのTurn後の次のAのTurnで再Deployし、Damage 0・Ready・Attack制限あり、Energy 4→2 | GR-013, GR-021 |
+| AC-BOARD-015 | Z5, Z6, Z7, Z9 | Set / RevealedのCardをHand / Discardへ移して配置状態を破棄。未観測の内容は未観測のまま、観測済みの内容は既知のまま、現在の閲覧権限は移動先に従う | GR-013, GR-015, GR-020, GR-021, IR-018 |
+| AC-BOARD-016 | Z5, Z7, Z9 | Set / RevealedのCardをHandへ戻し、BのTurn後の次のAのTurnで裏向きに再Set。過去の観測状態を保持し現在の内容はHidden、Energy 4→3 | GR-013, GR-015, GR-020, GR-021, IR-018 |
+| AC-BOARD-017 | Z10 | Energy 0でCost 1の移動Abilityを拒否。UnitはZoneとDamage 2・Exhausted・Attack制限なしを保ちOperation未完了 | GR-007, GR-010, GR-021 |
+| AC-BOARD-018 | Z10 | UnitをHandへ戻すActionをCore DamageだけのReactionでCancel。対象UnitのZone・配置状態を保持し、ReactionのEnergy支払いとCore Damageは残る | GR-021, IR-005, IR-006, IR-007, IR-008 |
+| AC-BOARD-019 | Z8, Z10 | AttackへのReactionでDamage 2のAttackerをHandへ戻し状態破棄。取消で復元せず、同じTurnの再DeployはDamage 0・Ready・Attack制限あり | GR-013, GR-021, IR-005, IR-007, IR-008, IR-012 |
+| AC-BOARD-020 | Z5, Z7, Z9 | 別CardのAbilityでSet Cardをその場でReveal。Support Zoneの使用数1を保ちRevealedで内容を公開し、離脱や再Setの初期化は行わない | GR-015, GR-020, GR-021, IR-018 |
+| AC-BOARD-021 | Z1, Z5, Z9 | Face-up SupportをHandへ戻し、BのTurn後の次のAのTurnで再Deployすると再びFace-up Supportとして配置。UnitやSet Tacticの状態は適用せず、Energy 4→2 | GR-013, GR-015, GR-021 |
+
+UnitのCombatによるDestroyと通常のTurn Startは、既存の[AC-ATK-013〜014](attack.feature)・[AC-TURN-001](turn.feature)でも確認する。Effectによる直接のDeploy / Set、Board内のZone間移動、Runtime IDの採番・再利用、Hidden領域の個体追跡はこれらの例で定義しない。
 
 ### Board / ZoneのQuestion
 
@@ -231,6 +246,9 @@
 | HiddenなSet Cardは占有SlotもOpponentに見せないか | 解決済み。内容だけがHiddenであり、存在とSlot使用はPublic。Z5 | AC-BOARD-008 |
 | Q-BOARD-001: Discardへ移動したCardの内容はPublicか。Set CardがRevealを経ずに移動した場合も同じか | ユーザー合意により解決済み。相手には枚数のみ公開し、所有Playerは全Cardの内容を確認できる。未RevealのSet Cardも同じ扱い。Z6 | AC-BOARD-009、AC-DECK-012 |
 | 現在HiddenになったCardについて、以前の公開時に観測した情報も失われるか | レビュー対応として確定。現在のinspectionと観測済み事実を別責務とする。Discardの枚数のみ公開という規則は現在の閲覧権限を定め、Playerの過去の観測を消すものではない。[レビュー](https://github.com/kjun1/card-game/pull/9#issuecomment-5981379206)、Z7 | AC-BOARD-010〜011 |
+| Q-BOARD-002: Unit ZoneからHand / Discardへ移動したUnitは、Damage・Ready / Exhausted・Deploy直後Attack制限を保持するか | ユーザー合意により解決済み。[Issue #11](https://github.com/kjun1/card-game/issues/11): その配置に属する3種類の状態を離脱時に破棄し、盤面外では適用しない。Card Definitionと観測済みの事実は保持する。実際に移動しない拒否・取消では破棄せず、Reactionによる移動は巻き戻さない。Z8・Z10 | AC-BOARD-012・017〜019、AC-ATK-013〜014、AC-TURN-001 |
+| Q-BOARD-003: 手札へ戻ったUnitを再Deployするとき、以前の状態を引き継ぐか | ユーザー合意により解決済み。[Issue #11](https://github.com/kjun1/card-game/issues/11): 通常のUnit Deployは初回も再DeployもDamage 0・Ready・Deploy直後Attack制限ありで新しい配置を開始する。Z8 | AC-BOARD-013〜014・019 |
+| Q-BOARD-004: Set / RevealedのCardがSupport Zoneを離れた場合と、再Setした場合の状態をどう扱うか | ユーザー合意により解決済み。[Issue #11](https://github.com/kjun1/card-game/issues/11): 離脱時にその配置のSet / Revealed状態を破棄し、通常の再Setは裏向きで開始する。未公開の内容は公開せず、観測済みの内容は知識として保持する。Zoneを変えないRevealは離脱として扱わない。Z7・Z9 | AC-BOARD-015〜016・020 |
 
 ## Capability: Deckを構築しDrawとHandを管理する
 

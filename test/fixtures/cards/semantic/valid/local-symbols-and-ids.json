@@ -1,0 +1,152 @@
+[
+  {
+    "id": "local-symbols",
+    "name": "火矢",
+    "cardType": "tactic",
+    "poolIdentity": null,
+    "tags": [],
+    "parameters": {},
+    "operations": {
+      "play": {
+        "cost": {
+          "energy": 2
+        },
+        "action": true,
+        "targets": {
+          "enemy-core": {
+            "type": "core",
+            "player": "opponent"
+          }
+        },
+        "resolution": [
+          {
+            "type": "effect",
+            "effect": {
+              "type": "damage",
+              "target": {
+                "type": "selected",
+                "selection": "enemy-core"
+              },
+              "amount": 2
+            }
+          }
+        ]
+      },
+      "set": {
+        "cost": {
+          "energy": 0
+        }
+      }
+    },
+    "abilities": [
+      {
+        "id": "ability",
+        "name": "検証用Ability",
+        "activation": {
+          "type": "reaction",
+          "source": "set_card"
+        },
+        "cost": {
+          "energy": 0
+        },
+        "resolution": [
+          {
+            "type": "effect",
+            "effect": {
+              "type": "reveal",
+              "target": {
+                "type": "selected",
+                "selection": "enemy-core"
+              }
+            }
+          }
+        ],
+        "targets": {
+          "enemy-core": {
+            "type": "card",
+            "player": "self",
+            "zone": "support_zone",
+            "state": "set"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "other-card",
+    "name": "火矢",
+    "cardType": "support",
+    "poolIdentity": null,
+    "tags": [],
+    "parameters": {},
+    "operations": {
+      "deploy": {
+        "cost": {
+          "energy": 2
+        }
+      }
+    },
+    "abilities": [
+      {
+        "id": "ability",
+        "name": "検証用Ability",
+        "activation": {
+          "type": "operation",
+          "source": "face_up_support"
+        },
+        "cost": {
+          "energy": 0
+        },
+        "resolution": [
+          {
+            "type": "effect",
+            "effect": {
+              "type": "damage",
+              "target": {
+                "type": "selected",
+                "selection": "constructor"
+              },
+              "amount": 1
+            }
+          }
+        ],
+        "targets": {
+          "constructor": {
+            "type": "core",
+            "player": "opponent"
+          }
+        }
+      },
+      {
+        "id": "second-ability",
+        "name": "検証用Ability",
+        "activation": {
+          "type": "operation",
+          "source": "face_up_support"
+        },
+        "cost": {
+          "energy": 0
+        },
+        "resolution": [
+          {
+            "type": "effect",
+            "effect": {
+              "type": "exhaust",
+              "target": {
+                "type": "selected",
+                "selection": "constructor"
+              }
+            }
+          }
+        ],
+        "targets": {
+          "constructor": {
+            "type": "card",
+            "player": "self",
+            "zone": "unit_zone"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -151,7 +151,7 @@
       <bpmn:outgoing>AT_18</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_DestroyCheck" name="Destroy Units with Current HP &#60;= 0">
-      <bpmn:documentation>Destroy Units whose Current HP is zero or below and move them to their owners' Discards. Current visibility follows ../../model/information-model.md: owners may inspect their Discard contents, opponents may inspect only the count. Past observations of a Public Unit belong to Player knowledge and are not erased by this visibility change.</bpmn:documentation>
+      <bpmn:documentation>Determine all Units to destroy from their Damage and Current HP in the Unit Zone, then move those Units to their owners' Discards. On departure, discard their placement-dependent Damage, activity state and deploy attack lock under ../../rules/core-rules.md#zone-transitions and ../../model/state-model.md#zone-transition-state. Discard Cards do not retain Current HP. Current visibility follows ../../model/information-model.md: owners may inspect their Discard contents, opponents may inspect only the count. Past observations of a Public Unit belong to Player knowledge and are not erased by this visibility change.</bpmn:documentation>
       <bpmn:incoming>AT_34</bpmn:incoming>
       <bpmn:incoming>AT_18</bpmn:incoming>
       <bpmn:outgoing>AT_19</bpmn:outgoing>

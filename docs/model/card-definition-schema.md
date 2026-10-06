@@ -7,7 +7,7 @@
 | 責務 | 内容 | 正本 |
 | --- | --- | --- |
 | Card Definition | Name、Card Type、静的Parameter、Operation、Ability、Cost、Target条件、Resolution | [Card Model](card-model.md)、本書、Schema |
-| Runtime Card Instance | 所在Zone、Ready / Exhausted、Accumulated Damage、Set / Revealed、Deploy直後Attack制限、実際に選択した対象 | [State Model](state-model.md)と将来のEngine |
+| Runtime Card Instance | 所在Zone、Ready / Exhausted、Accumulated Damage、Set / Revealed、Deploy直後Attack制限、実際に選択した対象 | [State Model](state-model.md#zone-transition-state)と将来のEngine |
 | Game State | Core HP、各PlayerのResource、Zone内の個体、Active Player、Turn、Operation lifecycle | [Domain Model](domain-model.md)、[Core Rules](../rules/core-rules.md)と将来のEngine |
 
 `id`は定義を参照する技術識別子、`name`はゲーム上のCard Nameである。[同名3枚制限](../rules/deck-rules.md#deck-construction)は`name`に適用する。同名でも異なる技術IDを付ければ枚数制限を回避できる、という意味にはならない。Abilityの`id`とTarget選択のキーも定義内の参照名であり、対戦中の個体IDではない。
@@ -180,7 +180,7 @@ Coreの選択条件は`type: core`と`player: self | opponent`。Cardの選択�
 
 `both`や`each`は同時適用の指定ではない。複数Playerへの1つのEffectは[Player order](effect-resolution-model.md#player-order)に従う。AC-RESOLUTION-004では、`each`で事前に選択したCardを1つの`move_card`で各所有者のHand / Discardへ移動する。Source所有者向けと相手向けの2 Stepへ分解すると明示順序が変わるため、その代用にはしない。
 
-`declared_action_source`はCard固有の移動Effectを記述するための参照であり、元Actionの取消Effectではない。該当するAction / Tacticが存在するか、TimingやHand条件を満たすかはEngineで検証する。
+`declared_action_source`はCard固有の移動Effectを記述するための参照であり、元Actionの取消Effectではない。Reaction Ability内であることは静的に検証する。該当するAction / Tacticが存在するか、TimingやHand条件を満たすかはEngineで検証する。
 
 ## Resolution and EffectStep
 
@@ -198,9 +198,9 @@ SchemaにはPlayerの処理順、Game終了後の処理継続、勝敗判定を�
 | --- | --- |
 | `damage` | Primitive。正の整数`amount`、直接Core参照または選択対象へのDamage |
 | `draw` | Primitive。正の整数`count`、Player参照へのDraw |
-| `move_card` | Primitive。Source / 選択Card / 宣言されたTacticを`destination: { player: target_owner, zone: hand | discard }`へ移動 |
-| `destroy` | Primitive。Source / 選択されたUnitのDestroy。対象の種類や所在はsemantic validationで確認 |
-| `ready` / `exhaust` | Primitive。Source / 選択Unitの活動状態変更。対象適合性はsemantic validationで確認 |
+| `move_card` | Primitive。Source / 選択Card / 宣言されたTacticを`destination: { player: target_owner, zone: hand \| discard }`へ移動 |
+| `destroy` | Primitive。Source / 選択されたBoard UnitのDestroy。定義上の対象適合性はstatic、実際の種類・所在はruntime validationで確認 |
+| `ready` / `exhaust` | Primitive。Source / 選択Board Unitの活動状態変更。定義上の対象適合性はstatic、実際の状態はruntime validationで確認 |
 | `reveal` | Primitive。Source / 選択Set CardのReveal。現在のSet状態からの公開に限定し、任意Zoneの情報閲覧を定義しない |
 | `change_final_target` | Primitive。Block StepでFinal TargetをSource Unitへ変更する単独Stepのみ |
 | Card移動 → Damage → Draw | 複数Primitiveを順序付きStepにしたResolution |
@@ -211,20 +211,32 @@ SchemaにはPlayerの処理順、Game終了後の処理継続、勝敗判定を�
 
 `move_card`はDiscard移動によるRevealや知識消去を行わない。[Current visibility](information-model.md#current-visibility)と[Player knowledge](information-model.md#player-knowledge)をそのまま利用する。Destroyや通常のTactic解決後のDiscardを記述するために、追加の公開設定は要らない。
 
+移動・Destroy時の盤面用状態の終了と、Core ProcedureによるDeploy / Set時の初期化は[Zone transition state](state-model.md#zone-transition-state)に従う。これらのRuntime状態や初期化設定をCard Definitionへ追加しない。
+
 ## Structural validation and semantic validation
 
-| 今回のSchema / validatorで拒否・確認するもの | 将来のsemantic validation / Engineで確認するもの |
-| --- | --- |
-| Schema自体の妥当性とstrict compilation | Card Definitionを使うゲーム全体の意味整合性 |
-| 不明なCard Type / Effect / Target参照の形、必須Field不足、typo | `selected.selection`が同じScopeで定義され、Effectに適合する対象型を指すか |
-| Unit Parameter欠落、負や小数のCost / Parameter | 同じCard内のAbility ID一意性、定義集合の技術ID一意性、NameによるDeck枚数制限 |
-| Card直下のAction、Reaction / BlockのAction指定 | Source / Timing / Targetの合法性、Zone Capacity、Resource支払い可能性 |
-| Typeに合わないOperation / Activation Source | Source参照の実際の種類、Destroy / Ready / Exhaust対象がUnitか、Reveal対象がSet Cardか |
-| Runtime Card / Game State / Knowledgeの混入 | 宣言されたAction Sourceを参照できる文脈か、Hidden情報を参照できるか |
-| Stepの混在、空Group、対応範囲外のSimultaneousGroup | EffectStepの実行、Player order、途中のGame終了、Costと適用済みEffectの保持 |
-| valid fixture全件の成功、invalid fixture全件の想定した拒否 | 具体的なGame StateでのOutcomeとGherkin受入仕様の実行 |
+~~~text
+Card Definition collection
+  → Structural validation
+  → Static semantic validation
+  → Runtime semantic validation / Domain Engine（未実装）
+~~~
 
-定義内の参照解決や一意性も意味検証であり、Runtime Game Stateがなくても将来のloaderで検証できる。今回はそこまで実装しない。JSON Schemaの型と構造を満たすことは、利用可能なCardや合法な対戦操作であることの証明ではない。
+| 層 | 確認する内容 | 実装 |
+| --- | --- | --- |
+| Structural | Schemaの自己検証・strict compilation、既知のType・Effect・参照形式、必須Field、数値、操作・Activationの形、Runtime情報の混入禁止 | [Schema](../../schemas/card.schema.json)、[check-cards.mjs](../../scripts/check-cards.mjs)の`createCardValidator` |
+| Static semantic | 同じOperation / Ability内の選択名解決、Card内のAbility IDと入力定義集合内の技術IDの一意性、EffectとTarget条件の型互換性、参照Scope、成立しないTarget条件 | [card-semantics.mjs](../../scripts/card-semantics.mjs)。構造検証後だけ実行 |
+| Runtime semantic | 実際のSource・Target・Zone・状態・Timing・Visibility、Zone Capacity、支払い可能性、Effectの実行、Player order、Game終了と適用済み結果の保持 | 将来のDomain Engine |
+
+`createCardDefinitionValidator`は`{ file, card, instancePath? }`の配列を1つの定義集合として検証する入口である。全件の構造検証が成功した場合だけ静的意味検証へ進む。入力を変更せず、ファイル名・JSON Pointer・診断種別を返す。技術IDの一意性は渡された集合内で判定し、別CardでのAbility ID再利用や異なる技術IDでの同じNameを禁止しない。Deckの同名枚数制限はこの検証の範囲外である。
+
+選択名はそのOperation / Abilityの`targets`だけから解決する。別のOperation、隣のAbility、別CardやJavaScriptのprototypeへScopeを広げない。同じ選択名を別Scopeで独立して使うことや、未使用の有効な選択条件は認める。
+
+型互換性は条件に合う候補が存在し得るかで判定する。`damage`はCoreまたはBoard Unit、`destroy` / `ready` / `exhaust`はBoard Unit、`move_card`はCard、`reveal`はSet Cardに適合する。例えばCore選択へのCard移動、HandのUnitへのDestroy、Face-up限定選択へのRevealは拒否する。`unit_zone`のSupport / Tactic / Set、`support_zone`のUnit、Handの配置状態、Set状態のSupportといった条件同士の矛盾も拒否する。これらは現版のCard Type / OperationとState Modelから導く。
+
+`cardType`や`state`の省略だけでは拒否しない。`unit_zone`だけの選択はUnit Effectに、`support_zone`だけの選択はRevealに適合する候補を持つ。Support ZoneのFace-up TacticはReveal済みCardを表せるため、選択条件として有効である。実際に合法な対象を選べるかはRuntimeで確認する。
+
+`source`の型はCard TypeとActivation / Operationから判断するが、先行Effectによる移動や状態変更を実行しない。`set_card`由来のReactionに`reveal(source)`があっても、静的検証の成功は現在Setであることを保証しない。使用時の自動RevealやEffect適用時の現在状態はEngineの責務である。`declared_action_source`もReaction内というScopeだけを確認し、実際の宣言対象やTimingを推測しない。静的検証の成功は、利用可能なCardや合法な対戦操作であることの証明ではない。
 
 ## Local validation and CI
 
@@ -232,14 +244,23 @@ Node.js 24系を使用する。
 
 ~~~sh
 npm ci
+npm run check:markdown
 npm test
 npm run check:spec
 npm run check:cards
 ~~~
 
-`check:spec`は既存Gherkinの構文と参照を確認する。`check:cards`はSchemaの自己検証とstrict compilation、valid fixture全件の成功、invalid fixture全件の想定した失敗を確認する。JSON破損やfixture不足を正常な拒否として扱わず、検証環境自体の不備として失敗させる。`npm test`はこれらの検証器のunit testである。
+`check:spec`は既存Gherkinの構文と参照を確認する。`check:cards`は構造fixtureを検証した後、既存の`valid/`全件を1つの定義集合として静的に検証する。さらに`semantic/valid/`と`semantic/invalid/`の各JSON配列を独立した集合として検証する。配列はfixture用の容器であり、Card Schemaの変更ではない。意味検証の負例も構造検証には成功し、manifestの診断種別・JSON Pointerに一致する必要がある。JSON破損、fixture不足、構造エラーを意味検証の成功として扱わない。`npm test`はこれらの検証器のunit testである。
 
-Card検証は[AjvのDraft 2020-12対応](https://ajv.js.org/json-schema.html#draft-2020-12)と[strict mode](https://ajv.js.org/strict-mode.html)を用いる。依存はlockfileで固定し、既存のSpecification CIに独立した`check:cards`を追加する。CI成功が示すのは定義された構造契約をfixtureが満たすことまでであり、ゲーム挙動は検証しない。
+任意のCard JSONファイルも`--cards`を繰り返して1つの集合として検証できる。
+
+~~~sh
+npm run check:cards -- --cards path/to/first-card.json --cards path/to/second-card.json
+~~~
+
+`--fixtures PATH`は構造・静的意味の両fixture階層を含むルートを指定する。`--cards`との併用はできない。`--schema PATH`は構造fixtureに使用するSchemaを指定するが、静的意味検証へ渡す定義は常に現版Card Schemaも満たす必要がある。カスタムSchemaで現在の契約を緩めたり、静的意味検証を省略したりしない。
+
+構造検証は[AjvのDraft 2020-12対応](https://ajv.js.org/json-schema.html#draft-2020-12)と[strict mode](https://ajv.js.org/strict-mode.html)を用いる。依存はlockfileで固定し、Specification CIの`check:cards`で構造と静的意味の両方を確認する。CI成功はこれらの契約をfixtureが満たすことを示し、ゲーム挙動は検証しない。
 
 Acceptance fixture → Card Definition fixture → Schema validationの対応は[Fixture mapping](../../test/fixtures/cards/README.md)で追跡する。同じNameでもScenarioごとの指定値が異なる場合は別定義として示す。Schemaへ合わせるための既存Gherkin変更や、Runner / Step Definitionsの追加は行わない。
 

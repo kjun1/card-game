@@ -41,6 +41,23 @@ Zone Capacityを超えるDeploy / Setは実行できない。
 
 Playerは基本ルールによって自分のBoard Card（Unit / Face-up Support / Set Card）を任意にDiscardして空きを作ることはできない。Card Effect等による移動・Destroyはこの制約の対象外である。
 
+## Zone transitions
+
+CardのZone依存Runtime Stateは、そのBoard上の配置に属する。合法な移動によってBoardを離れる際に以前の配置の状態を破棄し、移動先のZoneに従って現在の閲覧権限を判定する。[GR-021](../requirements/game-requirements.md#requirements)の状態別の対応は[Zone transition state](../model/state-model.md#zone-transition-state)を参照する。
+
+- UnitがUnit ZoneからHand / Discardへ移動したら、Accumulated Damage、Ready / Exhausted、Deploy直後Attack制限を破棄する。DestroyによるDiscard移動にも同じ規則を適用する。盤面外ではこれらの状態とCurrent HPを適用せず、Damage 0やReadyのUnitとして扱わない。
+- Unitの通常Deployでは、初回・再DeployともAccumulated Damage 0、Ready、Deploy直後Attack制限ありでUnit Zoneへ配置する。以前のDamageや活動状態・攻撃資格を引き継がず、Attack制限はその所有Playerの次のTurn Startで解除する。
+- Supportの通常DeployではFace-up Supportとして配置する。Set可能なTacticの通常Setでは、初回・再Setとも裏向きのSetとして配置する。
+- Set / RevealedのTacticがSupport ZoneからHand / Discardへ移動したら、その配置のSet / Revealed状態を破棄する。未RevealのCardを移動すること自体では内容を公開しない。以前Revealされていても、再Setは新しい裏向きの配置になる。
+
+状態の破棄・初期化は実際に成立した移動・配置に伴って行う。不正な操作やCancelそのものでは移動も初期化も行わない。Reactionが実際に行ったCard移動と状態の破棄は、元ActionのCancelによって巻き戻さない。
+
+同じZone内でのReady / Exhaust、Turn Startの更新、Set CardのRevealはZone離脱ではない。各処理が指定する状態だけを変更し、配置全体を初期化しない。特にTurn StartのReady化とAttack制限解除ではAccumulated Damageを保持する。
+
+Card Definitionはこれらの移動・初期化では変更しない。過去の配置でPlayerが観測した事実は知識として残るが、現在のCardの状態や閲覧権限を復元するものではない。[Information Model](../model/information-model.md)に従い、未観測の内容の公開やHidden領域内の個体追跡を追加しない。
+
+この規則は通常のDeploy / Setと、現在定義済みのBoardからHand / Discardへの移動を扱う。EffectによるDeploy / Set、BoardのZone間の移動、Runtime個体IDの採番・再利用、将来のModifier / Limitの持続期間はここで定めない。
+
 ## Card types
 
 - Unit
@@ -149,6 +166,7 @@ Handから直接Reactionすることは基本ルールでは認めない。
 この節は現在の情報閲覧権限を定める。Playerが過去の観測から得た知識とは区別する。概念の責務は[Information Model](../model/information-model.md)を参照する。
 
 ### Public
+
 - Core HP
 - Energy
 - Momentum
@@ -162,6 +180,7 @@ Handから直接Reactionすることは基本ルールでは認めない。
 - Discard枚数
 
 ### Hidden
+
 - Deck内容
 - Hand
 - Set Cardの内容

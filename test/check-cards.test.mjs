@@ -227,11 +227,12 @@ test('エラーの出力順序をファイル名で安定させる', async (t) =
 
 test('CLI は成功時に件数を表示し、ゲーム動作の検証とは区別する', async (t) => {
   const tree = await fixtureTree(t);
-  const result = spawnSync(process.execPath, [cliPath, '--schema', tree.schemaPath, '--fixtures', tree.fixturesRoot], { encoding: 'utf8', cwd: tree.root });
+  const result = spawnSync(process.execPath, [cliPath], { encoding: 'utf8', cwd: tree.root });
   assert.equal(result.status, 0, result.stderr);
   assert.equal(result.stderr, '');
-  assert.match(result.stdout, /valid 1 件 \/ invalid 1 件/);
-  assert.match(result.stdout, /構造契約のみ。ゲーム動作は未検証/);
+  assert.match(result.stdout, /構造 valid \d+ 件 \/ invalid \d+ 件/);
+  assert.match(result.stdout, /静的意味 valid \d+ 集合 \/ invalid \d+ 集合/);
+  assert.match(result.stdout, /ゲーム動作は未検証/);
 });
 
 test('CLI は違反をファイル・JSON Pointer とともに stderr へ出し、非 0 で終了する', async (t) => {
@@ -343,7 +344,7 @@ test('SimultaneousGroup は両 Core への Damage 1 件ずつを順序に依存�
     && error.keyword === 'maxItems'));
 });
 
-test('selected の未解決 symbol は構造検証を通過し、参照解決は将来の semantic validation に残る', async () => {
+test('selected の未解決 symbol は構造検証を通過し、別層の static semantic validation が参照を解決する', async () => {
   const validate = await repositoryValidator();
   const input = await repositoryFixture('action-tactic');
   const target = input.operations.play.resolution[0].effect.target;

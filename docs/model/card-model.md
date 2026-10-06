@@ -28,9 +28,11 @@ Card
 ## Card types
 
 ### Unit
+
 Unit ZoneへDeployされる戦闘主体。
 
 基本Parameter:
+
 - Energy Cost
 - ATK
 - Max HP
@@ -38,9 +40,11 @@ Unit ZoneへDeployされる戦闘主体。
 機械表現ではEnergy CostをDeploy OperationのCostに置き、ATK / Max HPをParametersに置く。Costを両方へ重複定義しない。通常UnitのAttackはCore Ruleから提供されるため、CardへAttack Abilityを記述する必要はない。
 
 ### Support
+
 Support ZoneへDeployされ、継続Effect、Ability、Reaction等を提供する。
 
 ### Tactic
+
 一時的なEffectを解決するCard。通常は解決後Discardへ移動する。Set可能なTacticはSupport Zoneへ事前配置できる。
 
 ## Tag
@@ -48,6 +52,7 @@ Support ZoneへDeployされ、継続Effect、Ability、Reaction等を提供す�
 TagはCardの意味分類である。
 
 例:
+
 - Machine
 - Human
 - Soldier
@@ -102,6 +107,7 @@ Condition / Limitは概念として保持する。現在のSchemaではTurn条�
 EffectはGame Stateへ実際に発生させる変更である。
 
 現在の基本語彙:
+
 - Damage
 - Draw
 - Destroy

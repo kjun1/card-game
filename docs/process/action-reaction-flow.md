@@ -58,6 +58,8 @@ Gameが継続する場合、`Operation Complete`は`operationCompleted = true`�
 
 両Playerへ逐次適用するEffectは、[Player order](../model/effect-resolution-model.md#player-order)に従ってActive Playerから処理し、Gameが継続する場合だけOpponentへ進む。Draw・Discard・Card移動にも同じ順序を使うが、個別のEffectStepの並び順やTarget選択を変更せず、非対象Playerを処理へ追加しない。Drawは従来通り1枚ずつ処理し、失敗時にはその場で敗北を固定する。
 
+成立したCard移動と通常Deploy / Setの解決内で、[Zone transitions](../rules/core-rules.md#zone-transitions)に従って配置状態を破棄・初期化する。検証やCancel自体では初期化せず、Reactionの移動で破棄した状態は元ActionのCancel後も復元しない。
+
 すべてのEffectを解決済みなら従来のOperation完了記録を保持する。終了結果の返却に残りのEffect解決や新しいOperation完了判定を要求しない。ReactionによるCancelは報告上の記録であり、終了後の追加Effectや固定した勝敗の変更を伴わない。
 
 ## Selection and validation

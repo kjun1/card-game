@@ -1,0 +1,143 @@
+[
+  {
+    "id": "source-reveal",
+    "name": "迎撃札",
+    "cardType": "tactic",
+    "poolIdentity": null,
+    "tags": [],
+    "parameters": {},
+    "operations": {
+      "set": {
+        "cost": {
+          "energy": 1
+        }
+      }
+    },
+    "abilities": [
+      {
+        "id": "intercept",
+        "name": "迎撃",
+        "activation": {
+          "type": "reaction",
+          "source": "set_card"
+        },
+        "cost": {
+          "energy": 1
+        },
+        "resolution": [
+          {
+            "type": "effect",
+            "effect": {
+              "type": "reveal",
+              "target": {
+                "type": "source"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "source-after-move",
+    "name": "再起兵",
+    "cardType": "unit",
+    "poolIdentity": null,
+    "tags": [],
+    "parameters": {
+      "atk": 2,
+      "maxHp": 3
+    },
+    "operations": {
+      "deploy": {
+        "cost": {
+          "energy": 2
+        }
+      }
+    },
+    "abilities": [
+      {
+        "id": "ready-self",
+        "name": "再起",
+        "activation": {
+          "type": "operation",
+          "source": "unit"
+        },
+        "cost": {
+          "energy": 0
+        },
+        "resolution": [
+          {
+            "type": "effect",
+            "effect": {
+              "type": "move_card",
+              "target": {
+                "type": "source"
+              },
+              "destination": {
+                "player": "target_owner",
+                "zone": "hand"
+              }
+            }
+          },
+          {
+            "type": "effect",
+            "effect": {
+              "type": "ready",
+              "target": {
+                "type": "source"
+              }
+            }
+          }
+        ],
+        "condition": null,
+        "limit": null
+      }
+    ]
+  },
+  {
+    "name": "没収装置",
+    "cardType": "support",
+    "poolIdentity": null,
+    "tags": [],
+    "parameters": {},
+    "operations": {
+      "deploy": {
+        "cost": {
+          "energy": 2
+        }
+      }
+    },
+    "abilities": [
+      {
+        "id": "confiscate",
+        "name": "没収",
+        "activation": {
+          "type": "reaction",
+          "source": "face_up_support"
+        },
+        "cost": {
+          "energy": 1
+        },
+        "resolution": [
+          {
+            "type": "effect",
+            "effect": {
+              "type": "move_card",
+              "target": {
+                "type": "declared_action_source",
+                "cardType": "tactic",
+                "zone": "hand"
+              },
+              "destination": {
+                "player": "target_owner",
+                "zone": "discard"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "id": "confiscation-support"
+  }
+]

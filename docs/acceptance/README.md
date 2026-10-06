@@ -12,7 +12,7 @@
 | [Attack](attack.feature) | 攻撃資格、Reaction、Block、Commit、Damage・Destroy |
 | [Setup / Mulligan](setup-mulligan.feature) | 先攻決定、Opening前のShuffle、交換対象の退避、両者完了後の返却・Shuffle、交換枚数の公開 |
 | [Resource](resource.feature) | SetupとTurn StartのEnergy、Operation / Reactionの共通予算、Momentum移転とCost不足 |
-| [Board / Zone](board-zone.feature) | Zone Capacity、SupportとSetの共有、任意Discard禁止、公開範囲と観測済みの情報 |
+| [Board / Zone](board-zone.feature) | Zone Capacity、SupportとSetの共有、任意Discard禁止、離脱時の状態破棄と再配置時の初期化、公開範囲と観測済みの情報 |
 | [Deck / Draw / Hand](deck.feature) | Deck構築の枚数制限、逐次Draw、Hand超過、Deck切れでの即時終了、両者Drawの先後、Hidden情報 |
 | [Effect Resolution](effect-resolution.feature) | 順序付きEffectStep、SimultaneousGroup、勝敗確定後の停止、複数Playerへの共通の逐次適用順 |
 
@@ -41,6 +41,8 @@ Gherkinのキーワードは英語、説明・本文は日本語とする。`Giv
 観測時点は宣言後・選択待ち・解決直後の各段階で区切る。Operation解決後のCost・Unit状態・Damageは、**次のPlayerのTurn Start更新が入る前**の結果として確認する。Game終了判定・Operation完了・制御権移転もそれぞれの記述に従って確認し、次のTurn StartによるReady化・Attack制限解除・Energy回復・Drawへは、Scenarioでその開始を明示した場合に進む。これは例が観測する境界の約束であり、ゲームに新しい停止操作やPassを追加するものではない。
 
 複数部分からなるEffectでは中間結果も観測する。勝敗条件が成立した時点で結果を固定し、残りのEffectへ進まない。真に同時の処理によるDrawと、逐次処理の途中での勝敗確定を区別する。既存例の解決済みOperationの完了・Reactionによる取消の記録は、その後のEffect実行を意味しない。
+
+Unitの致死DamageとCurrent HPは、Damage適用後かつDiscardへの移動前に観測する。Board離脱後に以前の配置の状態を保持しているとは扱わない。再Deploy / 再Setを別Turnで行う例は、中間のTurnとTurn Startを明示する。状態の破棄・初期化の根拠は[Zone transitions](../rules/core-rules.md#zone-transitions)と[Zone transition state](../model/state-model.md#zone-transition-state)を参照する。
 
 `Scenario Outline`の各行は独立した初期状態から実行する例として読む。例えばAction分類の表では、選んだCard Typeと操作に適合したSource・Zone・Targetを用意する。まだStep Definitionsはなく、文言は実装言語やゲームAPIを規定しない。
 
@@ -77,6 +79,7 @@ Scenario: Cancel後の手札保持を確認する
 nvm install
 nvm use
 npm ci
+npm run check:markdown
 npm test
 npm run check:spec
 npm run check:cards
@@ -86,9 +89,9 @@ npm run check:cards
 
 `npm test`はNode標準テスト機能による**仕様・Card検証器のテスト**。`npm run check:spec`は公式の`@cucumber/gherkin`と`@cucumber/messages`で全Featureを解析・展開し、構文、空のFeature、Thenの有無、Outlineの実例、要求タグの形式・存在・欠落、Scenario IDの形式・欠落・重複、要求定義の重複を検証する。違反はファイルと行番号付きで報告し非ゼロで終了する。
 
-`npm run check:cards`は[Card Definition Schema](../model/card-definition-schema.md)の自己検証、valid fixtureの成功、invalid fixtureの想定した拒否を確認する。既存AcceptanceのCardを静的定義として表す範囲は[Fixture mapping](../../test/fixtures/cards/README.md)で追跡する。Gherkinの初期状態や結果をSchemaへ埋め込まず、Scenarioごとの指定値を保つ。
+`npm run check:cards`は[Card Definition Schema](../model/card-definition-schema.md)の自己検証と構造fixtureを確認した後、Card定義集合の静的意味を検証する。Scope内の参照、ID一意性、対象条件とEffectの静的な適合性を確認し、意味検証用のvalid / invalid fixtureも照合する。既存AcceptanceのCardを静的定義として表す範囲は[Fixture mapping](../../test/fixtures/cards/README.md)で追跡する。Gherkinの初期状態や結果をSchemaへ埋め込まず、Scenarioごとの指定値を保つ。
 
-GitHub Actionsはpush / pull_requestで`npm ci`、`npm test`、`npm run check:spec`、`npm run check:cards`を実行する。依存は`package-lock.json`で固定する。
+GitHub Actionsはpush / pull_requestで`npm ci`、`npm run check:markdown`、`npm test`、`npm run check:spec`、`npm run check:cards`を実行する。Markdownの書式はエディタと共通の[設定](../../.markdownlint.json)で検証する。依存は`package-lock.json`で固定する。
 
 **CI成功は仕様検証の成功を意味する。** 日本語の意味、計算結果、ルール同士の整合性は自動判定しない。Example Mappingと規範文書を照合するレビューを併用する。BPMN・文書リンクの継続的CI、要求対応表の自動生成は今回の範囲に含めない。
 
@@ -96,4 +99,4 @@ GitHub Actionsはpush / pull_requestで`npm ci`、`npm test`、`npm run check:sp
 
 ゲーム実装時にCucumber RunnerとStep Definitionsを追加し、同じFeatureをDomain Engineへ直接接続する。`Given`でfixture Stateを構成し、`When`でドメイン操作を渡し、`Then`でState・利用可能な選択・発生イベントを検証する。UI操作を経由せずにルールを検証できる形にする。
 
-静的なCard Definitionは[JSON Schema](../../schemas/card.schema.json)で先に構造化する。実装のAPI、定義内の参照解決、Stateへの束縛と意味検証は後続で定義する。現段階ではRunner・Step Definitions・ゲーム実装を追加せず、仕様とCardの構造検証を、将来のゲーム動作の受入テストとコマンド・出力上も区別する。
+静的なCard Definitionは[JSON Schema](../../schemas/card.schema.json)で構造を検証し、その後で定義内の参照解決・ID一意性・静的な対象適合性を検証する。実装のAPI、実際のStateへの束縛、Timing・Resource・Visibility等のRuntime意味検証は後続で定義する。現段階ではRunner・Step Definitions・ゲーム実装を追加せず、仕様とCardの構造・静的意味の検証を、将来のゲーム動作の受入テストとコマンド・出力上も区別する。

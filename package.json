@@ -8,6 +8,7 @@
     "node": "24.x"
   },
   "scripts": {
+    "check:markdown": "node scripts/check-markdown.mjs",
     "check:spec": "node scripts/check-spec.mjs",
     "check:cards": "node scripts/check-cards.mjs",
     "test": "node --test"
@@ -15,6 +16,7 @@
   "devDependencies": {
     "@cucumber/gherkin": "42.0.1",
     "@cucumber/messages": "34.2.1",
-    "ajv": "8.20.0"
+    "ajv": "8.20.0",
+    "markdownlint": "0.41.1"
   }
 }

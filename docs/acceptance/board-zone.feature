@@ -1,6 +1,7 @@
-Feature: BoardのZone Capacityと公開情報
+Feature: BoardのZone Capacityと配置状態と公開情報
   Playerとして、自分のZoneの空きと公開されたBoard情報から合法なDeploy / Setを判断したい。
   基本ルールによる任意DiscardとCard Effectによる移動を区別する。
+  Zoneを離れた配置の状態と新しい配置の初期状態を区別する。
 
   Background:
     Given AがActive PlayerでTurn Startが完了している
@@ -18,11 +19,12 @@ Feature: BoardのZone Capacityと公開情報
     And AのSupport Zoneは元の3枚、BのUnit Zoneは元の5体のままである
     And DeployのOperationは完了する
 
-  @GR-006 @GR-012 @GR-016 @IR-017 @AC-BOARD-002
+  @GR-006 @GR-012 @GR-016 @GR-021 @IR-017 @AC-BOARD-002
   Scenario Outline: SupportとSetが共有する最後のSlotへ配置する
     Given AのUnit Zoneには5体のUnitがいる
     And AのSupport ZoneにはFace-up Supportが<開始Support数>枚とSet Cardが<開始Set数>枚ある
     And AのHandの<種類>「追加Card」の<操作>にはAction指定がなくCostはEnergy 2である
+    And 「追加Card」は一度もBoardへ配置されていない
     When Aが「追加Card」の<操作>を選択する
     Then 「追加Card」はAのHandからSupport Zoneへ<配置状態>で移動する
     And AのSupport ZoneにはFace-up Supportが<終了Support数>枚とSet Cardが<終了Set数>枚ある
@@ -126,14 +128,14 @@ Feature: BoardのZone Capacityと公開情報
       | Support Zone | 3        | Set済みTactic   | Handへの移動   | Hand    | 2        |
       | Unit Zone    | 5        | Unit            | Destroy        | Discard | 4        |
 
-  @GR-013 @GR-015 @IR-017 @IR-018 @AC-BOARD-008
+  @GR-013 @GR-015 @GR-021 @IR-017 @IR-018 @AC-BOARD-008
   Scenario: Setすると存在とSlot使用を公開し内容はHiddenに保つ
     Given AのUnit ZoneにはUnit「守備兵」がいる
     And AのSupport ZoneにはFace-up Support「砲台」だけがある
     And AのHandにはSet可能なTactic「伏せ札」がありその内容はBに公開されていない
     And 「伏せ札」のSetにはAction指定がなくCostはEnergy 1である
     When Aが「伏せ札」をSetする
-    Then 「伏せ札」はAのHandからSupport Zoneへ裏向きで移動する
+    Then 「伏せ札」はAのHandからSupport Zoneへ裏向きのSet状態で移動する
     And AのSupport Zoneの使用数2とSet Cardが1枚存在することは両PlayerにPublicである
     And 「伏せ札」の内容はHiddenのままでBに公開されない
     And 「守備兵」とFace-up Support「砲台」は両PlayerにPublicのままである
@@ -178,3 +180,161 @@ Feature: BoardのZone Capacityと公開情報
     And Support Zoneの使用数0とDiscardの枚数3はBにPublicである
     And Bにとって移動したCardの内容は未観測のままであり今回の移動によって既知にならない
     And BはAのDiscardの内容を自由に閲覧できない
+
+  @GR-013 @GR-017 @GR-021 @AC-BOARD-012
+  Scenario Outline: Unit Zoneを離れたUnitはその配置の状態を破棄する
+    Given AのUnit ZoneにはMax HP 5でDamage 2のUnit「帰還兵」がいる
+    And 「帰還兵」は<活動状態>でDeploy直後のAttack制限が<制限>である
+    And AのBoardのSupport「帰還設備」のAbility「回収」にはAction指定がなくCostはEnergy 1である
+    And 「回収」は指定した自分のUnitに<Effect>だけを行う
+    When Aが「帰還兵」をTargetとして「回収」を使用する
+    Then 「帰還兵」はAの<移動先>にある
+    And 「帰還兵」の以前の配置のDamageとReady / ExhaustedとDeploy直後のAttack制限は破棄される
+    And <移動先>の「帰還兵」にこれらのUnit Zoneの状態は適用されない
+    And <移動先>の「帰還兵」のCurrent HPは計算しない
+    And 「帰還兵」のCard DefinitionのMax HPは5のままである
+    And AのEnergyは2になり「回収」のOperationは完了する
+
+    Examples:
+      | 活動状態  | 制限 | Effect        | 移動先  |
+      | Exhausted | なし | Handへの移動  | Hand    |
+      | Ready     | あり | Handへの移動  | Hand    |
+      | Exhausted | あり | Discardへ移動 | Discard |
+      | Ready     | なし | Discardへ移動 | Discard |
+      | Exhausted | なし | Destroy       | Discard |
+      | Ready     | あり | Destroy       | Discard |
+
+  @GR-013 @GR-021 @AC-BOARD-013
+  Scenario: 初めてDeployするUnitの配置状態を生成する
+    Given AのHandには一度もDeployしていないMax HP 5のUnit「新兵」がある
+    And AのUnit Zoneには空きがある
+    And 「新兵」のDeployにはAction指定がなくCostはEnergy 2である
+    When Aが「新兵」をDeployする
+    Then 「新兵」はAのUnit ZoneにDamage 0でReadyかつDeploy直後のAttack制限ありで配置される
+    And 「新兵」のCurrent HPは5でありこの時点ではAttackできない
+    And AのEnergyは1になりDeployのOperationは完了する
+
+  @GR-013 @GR-021 @AC-BOARD-014
+  Scenario: 手札へ戻ったUnitを再Deployすると以前の配置の状態を引き継がない
+    Given AのUnit ZoneにはMax HP 5でDamage 2かつExhaustedでAttack制限のないUnit「帰還兵」がいる
+    And 「帰還兵」のDeployにはAction指定がなくCostはEnergy 2である
+    And AのBoardのSupport「帰還設備」のAbility「回収」にはAction指定がなくCostはEnergy 1である
+    And 「回収」は指定した自分のUnitを自分のHandへ戻すEffectだけを持つ
+    And 両PlayerのDeckは10枚、Handは2枚でEnergy Capacityは3である
+    When Aが「帰還兵」をTargetとして「回収」を使用する
+    Then 「帰還兵」はAのHandにあり以前の配置のDamageとReady / ExhaustedとAttack制限は破棄される
+    When BのTurnが開始しBが「何もしない」を選択して次のAのTurn Startが完了する
+    And Aが「帰還兵」を再Deployする
+    Then 「帰還兵」はAのUnit ZoneにDamage 0でReadyかつDeploy直後のAttack制限ありで配置される
+    And 「帰還兵」のCard DefinitionのMax HPとCurrent HPはともに5である
+    And AのEnergyは2になりDeployのOperationは完了する
+
+  @GR-013 @GR-015 @GR-020 @GR-021 @IR-018 @AC-BOARD-015
+  Scenario Outline: SetまたはRevealedのCardがSupport Zoneを離れるとその配置状態を破棄する
+    Given AのSupport Zoneには<開始状態>状態のTactic「伏せ札」が1枚だけある
+    And Bにとって「伏せ札」の内容は<観測状態>である
+    And AのBoardのUnit「回収係」のAbility「回収」にはAction指定がなくCostはEnergy 1である
+    And 「回収」は指定した自分のSupport ZoneのCardを追加のRevealなしで自分の<移動先>へ移すEffectだけを持つ
+    When Aが「伏せ札」をTargetとして「回収」を使用する
+    Then 「伏せ札」はAの<移動先>にあり以前の配置のSet / Revealed状態は破棄される
+    And AのSupport Zoneの使用数は0になる
+    And Bは<移動先>の「伏せ札」の内容を現在の閲覧権限では確認できない
+    And Bにとって「伏せ札」の内容は<観測状態>のままである
+    And AのEnergyは2になり「回収」のOperationは完了する
+
+    Examples:
+      | 開始状態 | 観測状態 | 移動先  |
+      | Set      | 未観測   | Hand    |
+      | Set      | 未観測   | Discard |
+      | Revealed | 観測済み | Hand    |
+      | Revealed | 観測済み | Discard |
+
+  @GR-013 @GR-015 @GR-020 @GR-021 @IR-018 @AC-BOARD-016
+  Scenario Outline: 手札へ戻ったCardを再Setすると裏向きで新しい配置を開始する
+    Given AのSupport Zoneには<開始状態>状態のTactic「伏せ札」が1枚だけある
+    And Bにとって「伏せ札」の内容は<観測状態>である
+    And 「伏せ札」のSetにはAction指定がなくCostはEnergy 1である
+    And AのBoardのUnit「回収係」のAbility「回収」にはAction指定がなくCostはEnergy 1である
+    And 「回収」は指定した自分のSupport ZoneのCardを追加のRevealなしで自分のHandへ戻すEffectだけを持つ
+    And 両PlayerのDeckは10枚、Handは2枚でEnergy Capacityは3である
+    When Aが「伏せ札」をTargetとして「回収」を使用する
+    Then 「伏せ札」はAのHandにあり以前の配置のSet / Revealed状態は破棄される
+    When BのTurnが開始しBが「何もしない」を選択して次のAのTurn Startが完了する
+    And Aが「伏せ札」を再Setする
+    Then 「伏せ札」はAのSupport Zoneに裏向きのSet状態で配置される
+    And AのSupport Zoneの使用数は1になりSet Cardの存在とSlot使用は両PlayerにPublicである
+    And 「伏せ札」の現在の内容はHiddenでありBは自由に閲覧できない
+    And Bにとって以前の配置で得た「伏せ札」の内容の知識は<観測状態>のままである
+    And AのEnergyは3になりSetのOperationは完了する
+
+    Examples:
+      | 開始状態 | 観測状態 |
+      | Set      | 未観測   |
+      | Revealed | 観測済み |
+
+  @GR-007 @GR-010 @GR-021 @AC-BOARD-017
+  Scenario: 不正な移動操作ではUnitの配置状態を破棄しない
+    Given AのEnergyは0である
+    And AのUnit ZoneにはMax HP 5でDamage 2かつExhaustedでAttack制限のないUnit「帰還兵」がいる
+    And AのBoardのSupport「帰還設備」のAbility「回収」にはAction指定がなくCostはEnergy 1である
+    And 「回収」は指定した自分のUnitを自分のHandへ戻すEffectだけを持つ
+    When Aが「帰還兵」をTargetとして「回収」を使用しようとする
+    Then 「回収」はEnergy不足のため拒否される
+    And 「帰還兵」はAのUnit ZoneにDamage 2かつExhaustedでAttack制限なしのまま残る
+    And AのEnergyは0でOperationは未完了のままである
+    And Aは同じTurnでOperationを選択し直せる
+
+  @GR-021 @IR-005 @IR-006 @IR-007 @IR-008 @AC-BOARD-018
+  Scenario: 移動ActionがCancelされ実際に移動しなければ配置状態を保持する
+    Given AのUnit ZoneにはMax HP 5でDamage 2かつExhaustedでAttack制限のないUnit「帰還兵」がいる
+    And AのBoardのSupport「帰還設備」のAbility「回収」にはAction指定がありCostはEnergy 1である
+    And 「回収」は指定した自分のUnitを自分のHandへ戻すEffectだけを持つ
+    And BのBoardのSupport「砲台」のReaction「牽制」はCostがEnergy 1でAのCoreに1 Damageだけを与える
+    When Aが「帰還兵」をTargetとして「回収」を宣言しBが「牽制」でReactionする
+    Then 「回収」はCancelされ「帰還兵」はAのUnit Zoneに残る
+    And 「帰還兵」はDamage 2かつExhaustedでAttack制限なしのままである
+    And AのEnergyは3のままでBのEnergyは2になりAのCore HPは9になる
+    And Operationは未完了でAは同じTurnでOperationを選択し直せる
+
+  @GR-013 @GR-021 @IR-005 @IR-007 @IR-008 @IR-012 @AC-BOARD-019
+  Scenario: ReactionによるUnitの離脱と状態破棄をAttack取消で巻き戻さない
+    Given AのUnit ZoneにはMax HP 5でDamage 2かつReadyでAttack制限のないUnit「帰還兵」がいる
+    And 「帰還兵」のDeployにはAction指定がなくCostはEnergy 2である
+    And BのBoardのSupport「送還設備」のReaction「送還」はCostがEnergy 1で指定した敵Unitを所有PlayerのHandへ戻すEffectだけを持つ
+    When Aが「帰還兵」でBのCoreへのAttackを宣言しBが「帰還兵」をTargetに「送還」でReactionする
+    Then AttackはCancelされ「帰還兵」はAのHandにある
+    And 「帰還兵」の以前の配置のDamageとReady / ExhaustedとAttack制限は破棄されたままである
+    And BのEnergyは2になり両PlayerのCore HPは10のままである
+    And Operationは未完了でAは同じTurnでOperationを選択し直せる
+    When Aが同じTurnで「帰還兵」を再Deployする
+    Then 「帰還兵」はAのUnit ZoneにDamage 0でReadyかつDeploy直後のAttack制限ありで配置される
+    And AのEnergyは1になりDeployのOperationは完了する
+
+  @GR-015 @GR-020 @GR-021 @IR-018 @AC-BOARD-020
+  Scenario: Support Zoneに残るCardのRevealは配置の離脱として扱わない
+    Given AのSupport ZoneにはSet状態のTactic「伏せ札」が1枚だけある
+    And Bは「伏せ札」の内容をまだ観測していない
+    And AのBoardのUnit「照明係」のAbility「照明」にはAction指定がなくCostはEnergy 1である
+    And 「照明」は指定した自分のSet Cardをその場でRevealするEffectだけを持つ
+    When Aが「伏せ札」をTargetとして「照明」を使用する
+    Then 「伏せ札」はAのSupport Zoneに残ったままSetからRevealed状態になる
+    And AのSupport Zoneの使用数は1のままである
+    And 「伏せ札」の内容は両Playerに公開されBはその内容を観測できる
+    And 「伏せ札」はHandやDiscardへ移動せず裏向きのSet状態へ初期化されない
+    And AのEnergyは2になり「照明」のOperationは完了する
+
+  @GR-013 @GR-015 @GR-021 @AC-BOARD-021
+  Scenario: 手札へ戻ったSupportを再Deployすると表向きで配置する
+    Given AのSupport ZoneにはFace-up Support「砲台」が1枚だけある
+    And 「砲台」のDeployにはAction指定がなくCostはEnergy 2である
+    And AのBoardのUnit「回収係」のAbility「回収」にはAction指定がなくCostはEnergy 1である
+    And 「回収」は指定した自分のSupportを自分のHandへ戻すEffectだけを持つ
+    And 両PlayerのDeckは10枚、Handは2枚でEnergy Capacityは3である
+    When Aが「砲台」をTargetとして「回収」を使用する
+    Then 「砲台」はAのHandにありAのSupport Zoneの使用数は0になる
+    When BのTurnが開始しBが「何もしない」を選択して次のAのTurn Startが完了する
+    And Aが「砲台」を再Deployする
+    Then 「砲台」はAのSupport ZoneにFace-up Supportとして配置される
+    And 「砲台」の内容は両PlayerにPublicである
+    And 「砲台」にUnitのDamageとReady / ExhaustedとAttack制限およびTacticのSet / Revealed状態は適用されない
+    And AのEnergyは2になりDeployのOperationは完了する
