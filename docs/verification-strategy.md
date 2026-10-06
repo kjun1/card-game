@@ -98,7 +98,8 @@ Check / Testの成功は、面白さや良いBalanceの評価を代替しない�
 | `npm run check:spec` / [check-spec.mjs](../scripts/check-spec.mjs) | Check: Acceptance Specification conformance | Gherkinの解析・例への展開、Feature / Scenario / Outline構造、要求表・要求タグ・Scenario IDの規約を確認する。ゲーム処理を実行しない |
 | `npm run check:cards` / [check-cards.mjs](../scripts/check-cards.mjs) | Check: Structural / Static Semantic | Schema自己検証・strict compilation、構造fixtureと静的意味fixtureの適合・期待診断を確認する。`--cards`では渡したCard定義集合を検証する |
 | [card-static-semantics.mjs](../scripts/card-static-semantics.mjs) | Static Semantic Checkの実装 | 構造検証後の定義集合に対してID一意性、symbol Scope、Target条件とEffect参照の静的互換性を確認する |
-| `npm test` | Test: Tooling testsの現行aggregate | `node --test`で現在の3 testファイルを実行する。EngineやAcceptance Runnerは含まない |
+| `npm test` | Test: Tooling testsの現行aggregate | `node --test`で現在の4 testファイルを実行する。EngineやAcceptance Runnerは含まない |
+| [markdown-validator.test.mjs](../test/tooling/markdown-validator.test.mjs) | Tooling test | Markdown checkerの正常・異常入力、設定不正、対象0件、探索除外、診断・終了コード・CLIをassertする |
 | [specification-validator.test.mjs](../test/tooling/specification-validator.test.mjs) | Tooling test | Specification checkerの正常・異常入力、診断、CLIの振る舞いをassertする |
 | [card-definition-validator.test.mjs](../test/tooling/card-definition-validator.test.mjs) | Tooling test | Schema checkerの自己検証、受理・拒否、入力不変、fixture manifest判定、CLIをassertする |
 | [card-static-semantics.test.mjs](../test/tooling/card-static-semantics.test.mjs) | Tooling test | Static Semantic checkerのScope・一意性・型互換性、構造検証との境界、診断・CLIをassertする |
@@ -117,7 +118,7 @@ Card fixtureの対応範囲は[Fixture mapping](../test/fixtures/card-definition
 
 Tooling testsはCheckを行うSoftwareを検証する。正例・負例、意図した診断、入力を変更しないこと、CLIの読み込み・出力・終了コードなどを対象にする。現在の`npm test`の成功は、これらのテストケースでCheckerの期待する振る舞いが確認できたことを示す。
 
-Markdown checkerのunit testは未実装であり、[Issue #17](https://github.com/kjun1/card-game/issues/17)で`test/tooling/markdown-validator.test.mjs`へ追加する。[Issue #20](https://github.com/kjun1/card-game/issues/20)でTooling testの配置整理は完了しているため、valid / invalid Markdown、設定不正、対象0件、診断、探索除外の確認を次のTooling testとして追加する。`check:markdown`がCIで成功することと、Checkerの失敗条件をunit testで確認していることは区別する。
+[Issue #17](https://github.com/kjun1/card-game/issues/17)のMarkdown checkerのunit testは[markdown-validator.test.mjs](../test/tooling/markdown-validator.test.mjs)へ実装済みである。一時directoryへMarkdownと共通設定のコピーを作り、valid / invalid Markdown、壊れたJSON・読み込めない設定、対象0件、file / line / column / ruleの診断、`.git` / `node_modules`の探索除外を確認する。既存CLIのrepository基準の探索・設定読み込みも確認する。`check:markdown`がrepo内Artifactの書式をCheckすることと、`npm test`でChecker自身の成功・失敗条件をassertすることは区別する。
 
 ### Domain tests
 
@@ -193,7 +194,7 @@ Requirement
 | --- | --- | --- |
 | `npm ci` | lockfileに基づく依存のインストール成功 | Artifactやゲーム動作の正しさ |
 | `npm run check:markdown` | 探索対象Markdownが共通lint規約に適合する | 日本語の意味、文書リンク、ゲームルールの整合性 |
-| `npm test` | 現行Tooling testの入力に対するCheckerの受理・拒否・診断・CLIの期待が満たされる | Markdown checkerの未実装unit test、Domain Engineの正しさ、ゲーム動作 |
+| `npm test` | Markdown / Specification / Card checkerのTooling testで受理・拒否・診断・CLIの期待が満たされる | Domain Engineの正しさ、ゲーム動作 |
 | `npm run check:spec` | 対象Gherkinと要求定義がCheckerの構造・参照・ID規約に適合する | Step実行、計算結果、自然言語の意味、全要求の網羅 |
 | `npm run check:cards` | Schema自己検証・strict compilation、構造fixtureの受理・期待診断、定義集合の静的意味と意味fixtureの期待診断の照合が成功する | 全製品Cardの適合、現在の対戦での合法性、Cost・Timing・Effect実行 |
 
@@ -221,11 +222,12 @@ CheckをTest aggregateへ混ぜず、CIでは両方を実行する。将来のsu
 
 ### Test and fixture layout
 
-[Issue #20](https://github.com/kjun1/card-game/issues/20)で、Tooling testsとCard Definition fixturesを次の責任別配置へ整理した。
+[Issue #20](https://github.com/kjun1/card-game/issues/20)でTooling testsとCard Definition fixturesを責任別配置へ整理し、[Issue #17](https://github.com/kjun1/card-game/issues/17)でMarkdown checkerのTooling testを追加した。
 
 ~~~text
 test/
 ├─ tooling/
+│  ├─ markdown-validator.test.mjs
 │  ├─ specification-validator.test.mjs
 │  ├─ card-definition-validator.test.mjs
 │  └─ card-static-semantics.test.mjs
@@ -275,10 +277,10 @@ Featureの存在だけでExecutable Verifiedとはしない。部分実装や未
 | Follow-up | Uses this strategy for |
 | --- | --- |
 | [#20 Test / Fixture structure](https://github.com/kjun1/card-game/issues/20) | 完了済み。Tooling testsとStructural / Static Semantic fixturesの責任別配置、validator・参照・CLI / CIの命名整合をfilesystemへ反映した |
-| [#17 Markdown checker tests](https://github.com/kjun1/card-game/issues/17) | #20で整理済みの`test/tooling/`へMarkdown checkerのTooling testsを追加し、書式CheckとCheckerの振る舞いの確認を区別する |
+| [#17 Markdown checker tests](https://github.com/kjun1/card-game/issues/17) | 実装済み。`test/tooling/markdown-validator.test.mjs`でCheckerの成功・失敗条件と診断・探索除外・CLIを確認し、書式CheckとTooling testの責任を維持した |
 | [#21 Decision Catalog](https://github.com/kjun1/card-game/issues/21) | Rule Evaluation / Runtime Validationで使う判断のInputs / Outputs、規範・BPMN・Acceptance参照と自動化状態を整理する |
 | [#22 Capability / Process Catalog](https://github.com/kjun1/card-game/issues/22) | ゲーム上の仕事のActor / Trigger / OutcomeをProcess・要求・Acceptanceへ対応付け、対象範囲を定める |
 | [#23 Automation Coverage](https://github.com/kjun1/card-game/issues/23) | #21 / #22を基に、Requirement → Decision / Rule → Process → Scenario → Engine → Executable Verificationを追跡し、仕様済み・未実装と実装済み・未接続を区別する |
 | [#24 First Domain Automation Slice](https://github.com/kjun1/card-game/issues/24) | #19〜#23を踏まえ、[AC-BOARD-013の非Action Unit Deploy](model/domain-engine-architecture.md#first-vertical-slice)を最初に実Engineへ接続する。Cost・Zone・配置State・Operation完了・Event / Resultを観測し、対象範囲のCoverageを更新する |
 
-検証責任の分類は#19、filesystemへの反映は#20で完了した。Engine、Runner、Step Definitions、Executable Acceptance、Markdown checkerのunit test、Catalog / Coverageは後続で実装・作成する。構造整理によってCard SchemaやStatic Semanticの判定、ゲーム仕様、Card Pool / Balance / Playtest、Rule Interferenceの詳細設計は変更していない。
+検証責任の分類は#19、filesystemへの反映は#20で完了し、#17のMarkdown checkerのunit testも実装済みである。Engine、Runner、Step Definitions、Executable Acceptance、Catalog / Coverageは後続で実装・作成する。構造整理とTooling test追加によってCard SchemaやStatic Semanticの判定、ゲーム仕様、Card Pool / Balance / Playtest、Rule Interferenceの詳細設計は変更していない。

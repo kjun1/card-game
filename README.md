@@ -51,7 +51,7 @@ npm run check:spec
 npm run check:cards
 ~~~
 
-`check:*`は静的ArtifactのCheck、現在の`npm test`は仕様・Card検証器自身のTooling testsである。各コマンドの対象とCI成功の保証範囲は[Verification Strategy](docs/verification-strategy.md#ci-responsibilities)を参照する。
+`check:*`は静的ArtifactのCheck、現在の`npm test`はMarkdown・仕様・Card検証器自身のTooling testsである。各コマンドの対象とCI成功の保証範囲は[Verification Strategy](docs/verification-strategy.md#ci-responsibilities)を参照する。
 
 Tooling testsは`test/tooling/`、Card DefinitionのStructural / Static Semantic fixturesは`test/fixtures/card-definitions/`へ配置する。[Fixture mapping](test/fixtures/card-definitions/README.md)で各入力の責任とAcceptance Specificationとの対応を確認できる。将来のDomain unit testとExecutable Acceptance用Glueの配置は[配置方針](docs/verification-strategy.md#test-and-fixture-layout)を参照する。
 
