@@ -12,6 +12,7 @@
 | acceptance | Example Mappingで要求の疑問を解消し、Gherkinで具体的な振る舞いを表す |
 | process | 主体間の処理順・制御移譲 |
 | rules | 現在有効な規範的ルール |
+| decisions | Runtime判断のID・Inputs / Outputs・責任と規範・Process・AcceptanceへのTraceability |
 | model | 概念、関係、状態、データ構造 |
 | design | 実現方式の設計空間、仮説、検証軸 |
 | schemas | 合意済み概念の機械可読な構造契約。ゲーム動作の意味論はRules / Modelを参照 |
@@ -71,6 +72,10 @@
 - [Combat rules](rules/combat-rules.md)
 - [Deck rules](rules/deck-rules.md)
 
+## Decisions
+
+- [Decision Catalog](decisions/README.md): Runtime判断の責任・Inputs / Outputs・規範とProcess / Acceptanceへの対応
+
 ## Model
 
 - [Domain model](model/domain-model.md)
@@ -110,6 +115,8 @@ docs/
 │  ├─ resource-rules.md
 │  ├─ combat-rules.md
 │  └─ deck-rules.md
+├─ decisions/
+│  └─ README.md
 ├─ model/
 │  ├─ domain-model.md
 │  ├─ domain-engine-architecture.md
