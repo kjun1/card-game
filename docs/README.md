@@ -2,6 +2,8 @@
 
 ゲームの要求・仕様・設計と受入仕様の索引。プロジェクトの概要と検証コマンドは[ルートREADME](../README.md)を参照する。
 
+開発フェーズ、Check / Test / Validation、現在と将来のCIの責任は[Verification Strategy](verification-strategy.md)を正本とする。
+
 ## Responsibility
 
 | Layer | Responsibility |
@@ -24,9 +26,9 @@
 4. 合意した具体例をGherkinにし、要求タグとScenario IDを付ける。
 5. 要求・BPMN・process Markdown・Rules・Modelへ合意内容を反映する。数値やCard Pool方式を変える場合はDesignも更新し、関連するルールと整合させる。
 6. 具体例と規範文書をレビューし、仕様CIを通す。
-7. Card Schemaで静的定義を構造化し、構造検証と静的意味検証を行う。ゲーム実装の段階で同じFeatureをStep DefinitionsによりDomain Engineへ接続する。受入テストを通してからPlaytestで検証する。
+7. Card Schemaで静的定義を構造化し、Structural / Static Semantic Checkを行う。ゲーム実装の段階でDomain testsを追加し、同じFeatureをStep DefinitionsによりDomain Engineへ接続してExecutable Acceptanceとする。対象範囲の実行検証を通してからPlaytest / Balance Validationで設計目的への適合を評価する。
 
-現在は仕様検証に加え、手順7の前段として[Card Definition Schema](model/card-definition-schema.md)による構造検証と、参照Scope・ID一意性・型互換性の静的意味検証を行う。Runtimeの状態・支払い・Timing・Visibility・勝敗を扱うDomain Engineとゲーム動作を実行する受入テストは未実装。[受入仕様の作成・検証方法](acceptance/README.md)を参照する。検討履歴・却下案・未決事項の議論は仕様本文へ混ぜず、GitHub Issuesで管理する。
+現在は手順7の静的Checkまでを行う。[現在の開発フェーズと後続Issue](verification-strategy.md#current-state-and-future-state)、[受入仕様の作成・検証方法](acceptance/README.md)を参照する。検討履歴・却下案・未決事項の議論は仕様本文へ混ぜず、GitHub Issuesで管理する。
 
 ## Process notation
 
@@ -88,6 +90,7 @@
 
 ~~~text
 docs/
+├─ verification-strategy.md
 ├─ requirements/
 │  ├─ game-requirements.md
 │  ├─ interaction-requirements.md
