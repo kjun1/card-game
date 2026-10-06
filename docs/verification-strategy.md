@@ -117,7 +117,7 @@ Card fixtureの対応範囲は[Fixture mapping](../test/fixtures/card-definition
 
 Tooling testsはCheckを行うSoftwareを検証する。正例・負例、意図した診断、入力を変更しないこと、CLIの読み込み・出力・終了コードなどを対象にする。現在の`npm test`の成功は、これらのテストケースでCheckerの期待する振る舞いが確認できたことを示す。
 
-Markdown checkerのunit testは未実装であり、[Issue #17](https://github.com/kjun1/card-game/issues/17)で`test/tooling/markdown-validator.test.mjs`へ追加する。valid / invalid Markdown、設定不正、対象0件、診断、探索除外の確認を、[Issue #20](https://github.com/kjun1/card-game/issues/20)の構造整理後に進める。`check:markdown`がCIで成功することと、Checkerの失敗条件をunit testで確認していることは区別する。
+Markdown checkerのunit testは未実装であり、[Issue #17](https://github.com/kjun1/card-game/issues/17)で`test/tooling/markdown-validator.test.mjs`へ追加する。[Issue #20](https://github.com/kjun1/card-game/issues/20)でTooling testの配置整理は完了しているため、valid / invalid Markdown、設定不正、対象0件、診断、探索除外の確認を次のTooling testとして追加する。`check:markdown`がCIで成功することと、Checkerの失敗条件をunit testで確認していることは区別する。
 
 ### Domain tests
 
@@ -221,7 +221,7 @@ CheckをTest aggregateへ混ぜず、CIでは両方を実行する。将来のsu
 
 ### Test and fixture layout
 
-[Issue #20](https://github.com/kjun1/card-game/issues/20)で、Tooling testsとCard Definition fixturesを次の責任別配置へ整理する。
+[Issue #20](https://github.com/kjun1/card-game/issues/20)で、Tooling testsとCard Definition fixturesを次の責任別配置へ整理した。
 
 ~~~text
 test/
@@ -274,11 +274,11 @@ Featureの存在だけでExecutable Verifiedとはしない。部分実装や未
 
 | Follow-up | Uses this strategy for |
 | --- | --- |
-| [#20 Test / Fixture structure](https://github.com/kjun1/card-game/issues/20) | [配置方針](#test-and-fixture-layout)に従うTooling / Domainの分離、Structural / Static Semantic fixtureの分類、validator・参照・CLI / CIの命名整合。検証意味は維持する |
-| [#17 Markdown checker tests](https://github.com/kjun1/card-game/issues/17) | #20後にMarkdown checkerのTooling testsを追加。書式CheckとCheckerの振る舞いの確認を区別する |
+| [#20 Test / Fixture structure](https://github.com/kjun1/card-game/issues/20) | 完了済み。Tooling testsとStructural / Static Semantic fixturesの責任別配置、validator・参照・CLI / CIの命名整合をfilesystemへ反映した |
+| [#17 Markdown checker tests](https://github.com/kjun1/card-game/issues/17) | #20で整理済みの`test/tooling/`へMarkdown checkerのTooling testsを追加し、書式CheckとCheckerの振る舞いの確認を区別する |
 | [#21 Decision Catalog](https://github.com/kjun1/card-game/issues/21) | Rule Evaluation / Runtime Validationで使う判断のInputs / Outputs、規範・BPMN・Acceptance参照と自動化状態を整理する |
 | [#22 Capability / Process Catalog](https://github.com/kjun1/card-game/issues/22) | ゲーム上の仕事のActor / Trigger / OutcomeをProcess・要求・Acceptanceへ対応付け、対象範囲を定める |
 | [#23 Automation Coverage](https://github.com/kjun1/card-game/issues/23) | #21 / #22を基に、Requirement → Decision / Rule → Process → Scenario → Engine → Executable Verificationを追跡し、仕様済み・未実装と実装済み・未接続を区別する |
 | [#24 First Domain Automation Slice](https://github.com/kjun1/card-game/issues/24) | #19〜#23を踏まえ、[AC-BOARD-013の非Action Unit Deploy](model/domain-engine-architecture.md#first-vertical-slice)を最初に実Engineへ接続する。Cost・Zone・配置State・Operation完了・Event / Resultを観測し、対象範囲のCoverageを更新する |
 
-検証責任の分類は#19、filesystemへの反映は#20で扱う。Engine、Runner、Step Definitions、Executable Acceptance、Markdown checkerのunit test、Catalog / Coverageは後続で実装・作成する。構造整理によってCard SchemaやStatic Semanticの判定、ゲーム仕様、Card Pool / Balance / Playtest、Rule Interferenceの詳細設計は変更しない。
+検証責任の分類は#19、filesystemへの反映は#20で完了した。Engine、Runner、Step Definitions、Executable Acceptance、Markdown checkerのunit test、Catalog / Coverageは後続で実装・作成する。構造整理によってCard SchemaやStatic Semanticの判定、ゲーム仕様、Card Pool / Balance / Playtest、Rule Interferenceの詳細設計は変更していない。
