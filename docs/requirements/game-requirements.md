@@ -45,7 +45,7 @@ Victory / Defeat
 | GR-019 | 同じEffectを複数Playerへ逐次適用する場合、対象のActive Playerから処理し、Gameが継続する場合だけOpponentへ進まなければならない。このPlayer orderはSourceの所有者によらず、明示された同時適用とは区別しなければならない。 |
 | GR-020 | 現在の情報閲覧権限とPlayerが過去の観測から得た知識を区別しなければならない。非公開領域への移動によって観測済みの事実を失わせず、未観測の内容への閲覧権限や知識も与えてはならない。 |
 | GR-021 | Zone移動に伴うCardのZone依存Runtime Stateの生成・保持・破棄を明確にしなければならない。Boardを離れたCardは以前の配置に属する状態を破棄し、通常のDeploy / Setでは初回・再配置とも新しい配置の初期状態を生成しなければならない。 |
-| GR-022 | Card固有のTarget Constraint、Effect Target Requirement、現在のRuntime EligibilityとSelected Targetを区別しなければならない。合法対象はこれらの制約の積集合から求め、広いTarget ConstraintでもEffectに適合しない対象を合法としてはならない。定義の静的適合性と、現在存在する合法対象の有無を区別し、対象の提示は現在の情報閲覧権限を超えてはならない。 |
+| GR-022 | Card固有のTarget Constraint、Effect Target Requirement、現在のRuntime EligibilityとSelected Targetを区別しなければならない。合法対象集合はTarget Constraint、Effect Target Requirement、Runtime Eligibilityの積集合から求め、その集合からSelected Targetを束縛しなければならない。広いTarget ConstraintでもEffectに適合しない対象を合法としてはならない。定義の静的適合性と、現在存在する合法対象の有無を区別し、対象の提示は現在の情報閲覧権限を超えてはならない。 |
 | GR-023 | Card固有のRule InterferenceによってCore Ruleの有効値・条件・予定処理を変更可能でなければならない。Core RuleをCard Definitionへ複製せず、通常のGame State変更EffectとRule Interferenceを区別し、Base Ruleから干渉を評価してEffective Ruleを導出できなければならない。 |
 | GR-024 | Rule Interferenceは少なくとも、値を変更するModifier、Operation / Action / Reaction等の可否・例外を変更するPermission / Prohibition、適用前の予定処理へ介入するReplacementの責任を表現可能でなければならない。この分類だけで個別Mechanicや網羅的な表現形式を確定してはならない。 |
 | GR-025 | Rule InterferenceのSubject、対象Rule、Scope、Durationを識別できなければならない。特定Card・Player・Operation・Zone等への干渉と全体のルール変更、一時的なGame中の干渉とCore Ruleの永続的な変更を区別しなければならない。 |
