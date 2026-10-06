@@ -27,6 +27,7 @@
 | 開発フェーズとCheck / Test / Validationの責任を知る | [Verification Strategy](docs/verification-strategy.md) |
 | ゲームが満たす要求を知る | [Game requirements](docs/requirements/game-requirements.md) |
 | 現在のルールを読む | [Core rules](docs/rules/core-rules.md) |
+| ゲーム上の仕事とActor / Trigger / Outcome、Process / Decisionへの対応を確認する | [Capability / Process Catalog](docs/capabilities/README.md) |
 | 処理順と制御権の移動を確認する | [BPMN processes](docs/process/bpmn/README.md) |
 | Runtime判断の入力・結果と仕様・Processへの対応を確認する | [Decision Catalog](docs/decisions/README.md) |
 | 用語と概念の関係を確認する | [Domain model](docs/model/domain-model.md) |

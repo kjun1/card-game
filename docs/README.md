@@ -10,6 +10,7 @@
 | --- | --- |
 | requirements | ゲームが何を満たす必要があるか |
 | acceptance | Example Mappingで要求の疑問を解消し、Gherkinで具体的な振る舞いを表す |
+| capabilities | ゲーム上の仕事のID・Actor / Trigger / OutcomeとProcess / Decision・要求・AcceptanceへのTraceability |
 | process | 主体間の処理順・制御移譲 |
 | rules | 現在有効な規範的ルール |
 | decisions | Runtime判断のID・Inputs / Outputs・責任と規範・Process・AcceptanceへのTraceability |
@@ -57,6 +58,10 @@
 - [Effect Resolution](acceptance/effect-resolution.feature)
 - [Target Selection](acceptance/target-selection.feature)
 
+## Capabilities
+
+- [Capability / Process Catalog](capabilities/README.md): ゲーム上の仕事の親台帳、Actor / Trigger / Inputs / OutcomeとProcess / Decision・規範・Acceptanceへの対応
+
 ## Process
 
 - [Game flow](process/game-flow.md)
@@ -100,6 +105,8 @@ docs/
 │  ├─ game-requirements.md
 │  ├─ interaction-requirements.md
 │  └─ play-experience-requirements.md
+├─ capabilities/
+│  └─ README.md
 ├─ process/
 │  ├─ bpmn/
 │  │  ├─ game-flow.bpmn
