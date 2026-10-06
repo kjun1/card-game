@@ -13,10 +13,12 @@
 ~~~text
 Specification & Formalization
   → Automation & Executable Verification
-  → Game Design / Optimization
+  → Gameplay Validation & Optimization
 ~~~
 
-5段階のDomain Definition → Domain Formalization → Domain Automation → Executable Verification → Game Design / Optimizationも、責任の細分化には有用である。ただし、このrepoでは要求・具体例・規範文書を照合して繰り返し更新し、将来のEngineもVertical Sliceごとに実装と実行検証を進める。そこで前2段階を第1フェーズ、次の2段階を第2フェーズにまとめ、内部の成果物と完了条件は区別する。
+ゲームデザインは全フェーズにまたがる活動であり、勝敗条件・Turn・Reaction・Block・Resource・Card Modelの設計は第1フェーズから行う。第3フェーズはPlaytest・測定・Balance評価・設計仮説の評価によって、ゲーム体験と設計目的への適合を確認し、最適化する。
+
+5段階のDomain Definition → Domain Formalization → Domain Automation → Executable Verification → Gameplay Validation & Optimizationも、責任の細分化には有用である。ただし、このrepoでは要求・具体例・規範文書を照合して繰り返し更新し、将来のEngineもVertical Sliceごとに実装と実行検証を進める。そこで前2段階を第1フェーズ、次の2段階を第2フェーズにまとめ、内部の成果物と完了条件は区別する。
 
 以下のExit criteriaは、選んだCapability / Sliceと合意済み仕様の範囲に適用する。全ゲームの形式化や自動化を一括で完了させる必要はない。各フェーズは一度だけ通る工程ではなく、実行検証やPlaytestで疑問が見つかれば[Change policy](README.md#change-policy)へ戻る。Tooling testは全フェーズの検証基盤を支える。
 
@@ -53,7 +55,7 @@ Specification & Formalization
 
 Engineの実装がある状態と、合意済みScenarioをEngineへ接続して確認した状態は別である。1 Sliceの成功を全ゲームのExecutable Verificationへ拡大しない。
 
-### Game Design / Optimization
+### Gameplay Validation & Optimization
 
 | Item | Responsibility |
 | --- | --- |
