@@ -112,7 +112,7 @@ State / Events / 候補 / 拒否理由をPlayerへ見せる際は[Information Mo
 | Layer | Input / responsibility | Does not guarantee |
 | --- | --- | --- |
 | Structural Validation | Card JSONの形・type・required・closed object・数値等。[Schema](../../schemas/card.schema.json)と[check-cards](../../scripts/check-cards.mjs) | 定義内参照の意味、実盤面での使用可否 |
-| Static Semantic Validation | 構造検証済み定義集合のID一意性、symbol Scope、条件の矛盾、Effect参照ごとの存在し得る互換種別。[card-semantics](../../scripts/card-semantics.mjs) | 全selector候補の適合、現在の合法集合、Step間の状態変化 |
+| Static Semantic Validation | 構造検証済み定義集合のID一意性、symbol Scope、条件の矛盾、Effect参照ごとの存在し得る互換種別。[card-static-semantics](../../scripts/card-static-semantics.mjs) | 全selector候補の適合、現在の合法集合、Step間の状態変化 |
 | Runtime Semantic Validation | Commandを現在のState / 文脈へ束縛し、actor・実Target・Zone・Timing・Resource・Visibility・Capacity・Effective Ruleを検証 | 未合意Mechanicを補完して使用可能にすること |
 
 静的保証の詳細は[Schema文書](card-definition-schema.md#structural-validation-and-semantic-validation)を正本とする。Runtime ValidationはEffect実行とは別の責任であり、合法性・全Costの支払い可能性の確認後に既存の支払い・解決へ進む。Sourceの移動や自動Revealの影響を静的検証が模擬することもない。

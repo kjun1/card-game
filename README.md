@@ -53,6 +53,8 @@ npm run check:cards
 
 `check:*`は静的ArtifactのCheck、現在の`npm test`は仕様・Card検証器自身のTooling testsである。各コマンドの対象とCI成功の保証範囲は[Verification Strategy](docs/verification-strategy.md#ci-responsibilities)を参照する。
 
+Tooling testsは`test/tooling/`、Card DefinitionのStructural / Static Semantic fixturesは`test/fixtures/card-definitions/`へ配置する。[Fixture mapping](test/fixtures/card-definitions/README.md)で各入力の責任とAcceptance Specificationとの対応を確認できる。将来のDomain unit testとExecutable Acceptance用Glueの配置は[配置方針](docs/verification-strategy.md#test-and-fixture-layout)を参照する。
+
 任意のCard定義集合は`npm run check:cards -- --cards first-card.json --cards second-card.json`で検証できる。入力ファイルは変更しない。検証範囲とfixtureの構成は[Card Definition Schema](docs/model/card-definition-schema.md#structural-validation-and-semantic-validation)を参照する。
 
 `check:markdown`は全Markdownの書式を検証する。VSCodeのmarkdownlint拡張とCLI / CIは[共通設定](.markdownlint.json)を使用する。日本語の段落・要求表を1行で記述するため固定文字数の制限だけを外し、見出し・リスト・表などの検証は行う。

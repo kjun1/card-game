@@ -97,17 +97,17 @@ Check / Testの成功は、面白さや良いBalanceの評価を代替しない�
 | `npm run check:markdown` / [check-markdown.mjs](../scripts/check-markdown.mjs) | Check: Markdown conformance | `.git` / `node_modules`を除くrepo内Markdownを共通の[設定](../.markdownlint.json)でlintする |
 | `npm run check:spec` / [check-spec.mjs](../scripts/check-spec.mjs) | Check: Acceptance Specification conformance | Gherkinの解析・例への展開、Feature / Scenario / Outline構造、要求表・要求タグ・Scenario IDの規約を確認する。ゲーム処理を実行しない |
 | `npm run check:cards` / [check-cards.mjs](../scripts/check-cards.mjs) | Check: Structural / Static Semantic | Schema自己検証・strict compilation、構造fixtureと静的意味fixtureの適合・期待診断を確認する。`--cards`では渡したCard定義集合を検証する |
-| [card-semantics.mjs](../scripts/card-semantics.mjs) | Static Semantic Checkの実装 | 構造検証後の定義集合に対してID一意性、symbol Scope、Target条件とEffect参照の静的互換性を確認する |
+| [card-static-semantics.mjs](../scripts/card-static-semantics.mjs) | Static Semantic Checkの実装 | 構造検証後の定義集合に対してID一意性、symbol Scope、Target条件とEffect参照の静的互換性を確認する |
 | `npm test` | Test: Tooling testsの現行aggregate | `node --test`で現在の3 testファイルを実行する。EngineやAcceptance Runnerは含まない |
-| [check-spec.test.mjs](../test/check-spec.test.mjs) | Tooling test | Specification checkerの正常・異常入力、診断、CLIの振る舞いをassertする |
-| [check-cards.test.mjs](../test/check-cards.test.mjs) | Tooling test | Schema checkerの自己検証、受理・拒否、入力不変、fixture manifest判定、CLIをassertする |
-| [check-card-semantics.test.mjs](../test/check-card-semantics.test.mjs) | Tooling test | Static Semantic checkerのScope・一意性・型互換性、構造検証との境界、診断・CLIをassertする |
+| [specification-validator.test.mjs](../test/tooling/specification-validator.test.mjs) | Tooling test | Specification checkerの正常・異常入力、診断、CLIの振る舞いをassertする |
+| [card-definition-validator.test.mjs](../test/tooling/card-definition-validator.test.mjs) | Tooling test | Schema checkerの自己検証、受理・拒否、入力不変、fixture manifest判定、CLIをassertする |
+| [card-static-semantics.test.mjs](../test/tooling/card-static-semantics.test.mjs) | Tooling test | Static Semantic checkerのScope・一意性・型互換性、構造検証との境界、診断・CLIをassertする |
 | `docs/acceptance/*.feature` | Acceptance Specification | 合意済みの振る舞いを具体例で記述した静的Artifact。現時点ではExecutable Acceptance Testではない |
 | [schemas/card.schema.json](../schemas/card.schema.json) | Structural contract | Card Definitionの受理する形を定義する。Schema自体はゲーム動作のTestではない |
-| `test/fixtures/cards/valid/` / `invalid/` / `invalid-expectations.json` | Structural Check用の入力と期待診断 | 代表Cardの構造、受理・拒否境界を記録する |
-| `test/fixtures/cards/semantic/` | Static Semantic Check用の入力と期待診断 | 各JSON配列を独立した定義集合として確認する。`semantic`という現行名はRuntime意味を含まない |
+| `test/fixtures/card-definitions/structural/` | Structural Check用の入力と期待診断 | `valid/` / `invalid/` / `invalid-expectations.json`に代表Cardの構造、受理・拒否境界を記録する |
+| `test/fixtures/card-definitions/static-semantic/` | Static Semantic Check用の入力と期待診断 | `valid/` / `invalid/`の各JSON配列を独立した定義集合として確認する。Runtime意味を含まない |
 
-Card fixtureの対応範囲は[Fixture mapping](../test/fixtures/cards/README.md)を参照する。fixtureとmanifestの照合はCheck基盤の回帰確認も支えるが、対戦Stateの構成やEffect実行ではない。
+Card fixtureの対応範囲は[Fixture mapping](../test/fixtures/card-definitions/README.md)を参照する。fixtureとmanifestの照合はCheck基盤の回帰確認も支えるが、対戦Stateの構成やEffect実行ではない。
 
 ### Checks
 
@@ -117,7 +117,7 @@ Card fixtureの対応範囲は[Fixture mapping](../test/fixtures/cards/README.md
 
 Tooling testsはCheckを行うSoftwareを検証する。正例・負例、意図した診断、入力を変更しないこと、CLIの読み込み・出力・終了コードなどを対象にする。現在の`npm test`の成功は、これらのテストケースでCheckerの期待する振る舞いが確認できたことを示す。
 
-Markdown checkerのunit testは未実装であり、[Issue #17](https://github.com/kjun1/card-game/issues/17)でTooling testとして追加する。valid / invalid Markdown、設定不正、対象0件、診断、探索除外の確認を、[Issue #20](https://github.com/kjun1/card-game/issues/20)の構造整理後に進める。`check:markdown`がCIで成功することと、Checkerの失敗条件をunit testで確認していることは区別する。
+Markdown checkerのunit testは未実装であり、[Issue #17](https://github.com/kjun1/card-game/issues/17)で`test/tooling/markdown-validator.test.mjs`へ追加する。valid / invalid Markdown、設定不正、対象0件、診断、探索除外の確認を、[Issue #20](https://github.com/kjun1/card-game/issues/20)の構造整理後に進める。`check:markdown`がCIで成功することと、Checkerの失敗条件をunit testで確認していることは区別する。
 
 ### Domain tests
 
@@ -197,7 +197,7 @@ Requirement
 | `npm run check:spec` | 対象Gherkinと要求定義がCheckerの構造・参照・ID規約に適合する | Step実行、計算結果、自然言語の意味、全要求の網羅 |
 | `npm run check:cards` | Schema自己検証・strict compilation、構造fixtureの受理・期待診断、定義集合の静的意味と意味fixtureの期待診断の照合が成功する | 全製品Cardの適合、現在の対戦での合法性、Cost・Timing・Effect実行 |
 
-通常の`check:cards`が対象とするのはrepoのfixtureである。構造validの集合と、`semantic/`内の各集合を検証する。任意の定義集合は`--cards`で明示的に渡す必要があり、CIがすべてのCard JSONを探索して検証するとは扱わない。
+通常の`check:cards`が対象とするのはrepoのfixtureである。`structural/valid/`の集合と、`static-semantic/`内の各集合を検証する。任意の定義集合は`--cards`で明示的に渡す必要があり、CIがすべてのCard JSONを探索して検証するとは扱わない。
 
 CI成功の保証は、実装済みCheckerの規約と実行したテストケース・入力範囲に限る。**Game behavior、Domain Engine、Acceptance ScenarioのRuntime成功、良いBalanceは現行CIの保証に含まれない。** Rules / Model / BPMN / Gherkinの意味の整合はレビューで確認する。BPMNの構文・意味や文書リンクの自動検証は現行workflowにない。
 
@@ -219,7 +219,40 @@ Domain testsの成功は対象の判断・遷移・境界、Executable Acceptanc
 
 CheckをTest aggregateへ混ぜず、CIでは両方を実行する。将来のsuite選択・runner・aggregateの具体的な配線は構造整理と実装時に決め、未実装suiteを実行成功として数えない。ゲーム設計のValidationに、実装の`test:*`成功をそのまま流用しない。
 
-Tooling / Domain / Fixtureを責任別に分け、Card fixtureはStructural / Static Semanticと明記する方針とする。配置やvalidator名の変更、`semantic` → `static-semantic`等の具体的なrenameは#20で行う。現行`card-semantics.mjs`・`check-card-semantics.test.mjs`・`fixtures/cards/semantic/`の責任はStatic Semanticに限り、本Issueではファイル名・script名・配置を変更しない。
+### Test and fixture layout
+
+[Issue #20](https://github.com/kjun1/card-game/issues/20)で、Tooling testsとCard Definition fixturesを次の責任別配置へ整理する。
+
+~~~text
+test/
+├─ tooling/
+│  ├─ specification-validator.test.mjs
+│  ├─ card-definition-validator.test.mjs
+│  └─ card-static-semantics.test.mjs
+└─ fixtures/
+   └─ card-definitions/
+      ├─ README.md
+      ├─ structural/
+      │  ├─ valid/
+      │  ├─ invalid/
+      │  └─ invalid-expectations.json
+      └─ static-semantic/
+         ├─ valid/
+         ├─ invalid/
+         └─ invalid-expectations.json
+~~~
+
+`test/tooling/`はChecker / 開発Tool自身の振る舞いをassertする。Card fixtureは静的Checkの入力であり、Structuralの受理範囲とStatic Semanticの定義集合・診断を別の階層で保持する。[card-static-semantics.mjs](../scripts/card-static-semantics.mjs)もStatic Semantic Checkだけを担う。
+
+将来のDomain testsとExecutable Acceptance用Glueは次へ配置する。
+
+| Planned path | Responsibility |
+| --- | --- |
+| `test/domain/unit/` | Domain Engineの判断・状態遷移を実行してassertするDomain unit tests |
+| `test/domain/acceptance/steps/` | 既存GherkinのGiven / When / ThenをDomain Engineの入力・観測へ翻訳するStep Definitions |
+| `test/domain/acceptance/support/` | Runnerの設定、fixture GameStateの構成、State / Events / ResultのAssertionを支える共通処理 |
+
+`docs/acceptance/*.feature`は引き続きAcceptance Specificationの正本とする。Glueへゲームルールを実装せず、検証済みCard DefinitionとRuntime GameStateを分けてEngineへ接続する。Domain tests / Runner / Step Definitionsは未実装であり、`test/domain/`の実ファイルは[#24](https://github.com/kjun1/card-game/issues/24)で必要になった時点に追加する。空Directoryの保持だけを目的とするdummy fileや未実装suite用npm scriptは追加しない。
 
 ## Current state and future state
 
@@ -241,11 +274,11 @@ Featureの存在だけでExecutable Verifiedとはしない。部分実装や未
 
 | Follow-up | Uses this strategy for |
 | --- | --- |
-| [#20 Test / Fixture structure](https://github.com/kjun1/card-game/issues/20) | Tooling / Domainの分離、Structural / Static Semantic fixtureの分類、validator・参照・CLI / CIの命名整合。検証意味は維持する |
+| [#20 Test / Fixture structure](https://github.com/kjun1/card-game/issues/20) | [配置方針](#test-and-fixture-layout)に従うTooling / Domainの分離、Structural / Static Semantic fixtureの分類、validator・参照・CLI / CIの命名整合。検証意味は維持する |
 | [#17 Markdown checker tests](https://github.com/kjun1/card-game/issues/17) | #20後にMarkdown checkerのTooling testsを追加。書式CheckとCheckerの振る舞いの確認を区別する |
 | [#21 Decision Catalog](https://github.com/kjun1/card-game/issues/21) | Rule Evaluation / Runtime Validationで使う判断のInputs / Outputs、規範・BPMN・Acceptance参照と自動化状態を整理する |
 | [#22 Capability / Process Catalog](https://github.com/kjun1/card-game/issues/22) | ゲーム上の仕事のActor / Trigger / OutcomeをProcess・要求・Acceptanceへ対応付け、対象範囲を定める |
 | [#23 Automation Coverage](https://github.com/kjun1/card-game/issues/23) | #21 / #22を基に、Requirement → Decision / Rule → Process → Scenario → Engine → Executable Verificationを追跡し、仕様済み・未実装と実装済み・未接続を区別する |
 | [#24 First Domain Automation Slice](https://github.com/kjun1/card-game/issues/24) | #19〜#23を踏まえ、[AC-BOARD-013の非Action Unit Deploy](model/domain-engine-architecture.md#first-vertical-slice)を最初に実Engineへ接続する。Cost・Zone・配置State・Operation完了・Event / Resultを観測し、対象範囲のCoverageを更新する |
 
-今回の成果物は本Strategyと既存READMEの導線・用語整合である。Engine、Runner、Step Definitions、Executable Acceptance、Markdown checkerのunit test、Catalog / Coverageは後続で実装・作成する。`test/`・`scripts/`・fixtureの移動やrename、Card Pool / Balance / Playtest、Rule Interferenceの詳細設計は行わない。
+検証責任の分類は#19、filesystemへの反映は#20で扱う。Engine、Runner、Step Definitions、Executable Acceptance、Markdown checkerのunit test、Catalog / Coverageは後続で実装・作成する。構造整理によってCard SchemaやStatic Semanticの判定、ゲーム仕様、Card Pool / Balance / Playtest、Rule Interferenceの詳細設計は変更しない。

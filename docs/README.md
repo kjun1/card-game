@@ -76,7 +76,7 @@
 - [Domain model](model/domain-model.md)
 - [Domain Engine Architecture](model/domain-engine-architecture.md)
 - [Card model](model/card-model.md)
-- [Card Definition Schema](model/card-definition-schema.md) / [JSON Schema](../schemas/card.schema.json) / [Fixture mapping](../test/fixtures/cards/README.md)
+- [Card Definition Schema](model/card-definition-schema.md) / [JSON Schema](../schemas/card.schema.json) / [Fixture mapping](../test/fixtures/card-definitions/README.md)
 - [State model](model/state-model.md)
 - [Effect Resolution model](model/effect-resolution-model.md)
 - [Information model](model/information-model.md)

@@ -90,12 +90,14 @@ npm run check:cards
 
 `npm test`はNode標準テスト機能による**仕様・Card検証器自身のTooling tests**。`npm run check:spec`はAcceptance Specificationの静的Checkとして、公式の`@cucumber/gherkin`と`@cucumber/messages`で全Featureを解析・展開し、構文、空のFeature、Thenの有無、Outlineの実例、要求タグの形式・存在・欠落、Scenario IDの形式・欠落・重複、要求定義の重複を確認する。違反はファイルと行番号付きで報告し非ゼロで終了する。
 
-`npm run check:cards`は[Card Definition Schema](../model/card-definition-schema.md)の自己検証と構造fixtureを確認した後、Card定義集合の静的意味を検証する。Scope内の参照、ID一意性、対象条件とEffectの静的な適合性を確認し、意味検証用のvalid / invalid fixtureも照合する。既存AcceptanceのCardを静的定義として表す範囲は[Fixture mapping](../../test/fixtures/cards/README.md)で追跡する。Gherkinの初期状態や結果をSchemaへ埋め込まず、Scenarioごとの指定値を保つ。
+`npm run check:cards`は[Card Definition Schema](../model/card-definition-schema.md)の自己検証と`structural/`の構造fixtureを確認した後、Card定義集合のStatic Semantic Checkを行う。Scope内の参照、ID一意性、対象条件とEffectの静的な適合性を確認し、`static-semantic/`のvalid / invalid fixtureも照合する。既存AcceptanceのCardを静的定義として表す範囲は[Fixture mapping](../../test/fixtures/card-definitions/README.md)で追跡する。Gherkinの初期状態や結果をSchemaへ埋め込まず、Scenarioごとの指定値を保つ。
 
 GitHub Actionsはpush / pull_requestで上記のインストール・Check・Tooling testsを実行する。各コマンドの保証と制限は[CI responsibilities](../verification-strategy.md#ci-responsibilities)を参照する。Example Mappingと規範文書を照合するレビューを併用する。
 
 ## Future execution
 
 ゲーム実装時に同じFeatureとScenario IDを再利用し、Cucumber RunnerとStep DefinitionsからDomain Engineへ接続してExecutable Acceptanceとする。接続条件と部分実行の扱いは[Verification Strategy](../verification-strategy.md#acceptance-specification-and-executable-acceptance)を参照する。
+
+将来のDomain unit testsは`test/domain/unit/`、Executable Acceptance用Glueは`test/domain/acceptance/steps/`と`test/domain/acceptance/support/`へ配置する。[配置方針](../verification-strategy.md#test-and-fixture-layout)に従い、Runner / Step Definitionsは#24で必要になった時点に追加する。
 
 概念上の入出力と接続責任は[Domain Engine Architecture](../model/domain-engine-architecture.md#acceptance-integration)を参照する。最初の実装は[AC-BOARD-013の非Action Unit Deploy](../model/domain-engine-architecture.md#first-vertical-slice)を入口とし、State / Event / Resultを解決直後に観測する。Rule Interferenceの例は将来の表現可能性の要求であり、未合意の競合・Replacement等に依存する期待結果をFeatureへ追加しない。
